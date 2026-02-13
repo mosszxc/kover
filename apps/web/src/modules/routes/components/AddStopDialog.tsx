@@ -17,6 +17,7 @@ interface Client {
   originalName: string
   name: string
   address: string
+  isActive: boolean
 }
 
 interface AddStopDialogProps {
@@ -50,6 +51,7 @@ export function AddStopDialog({ clients }: AddStopDialogProps) {
   const availableClients = useMemo(
     () =>
       clients.filter((c) => {
+        if (!c.isActive) return false
         if (currentClientIds.has(c.id)) return false
         if (!query) return true
         return (
