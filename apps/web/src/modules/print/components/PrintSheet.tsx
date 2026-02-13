@@ -1,7 +1,7 @@
-import type { DayOfWeek, MatSize } from '@/shared/types'
+import type { DayOfWeek, MatSizeConfig } from '@/shared/types'
 import type { RouteStop } from '@/modules/routes'
 import type { Client } from '@/modules/clients'
-import { MAT_SIZES } from '@/shared/types'
+import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 
 const DAY_LABELS_FULL: Record<DayOfWeek, string> = {
   0: 'Понедельник',
@@ -23,9 +23,9 @@ interface PrintSheetProps {
   drivers?: DriverInfo[]
 }
 
-function getMatQuantity(client: Client, size: MatSize): number {
+function getMatQuantity(client: Client, sizeId: string): number {
   return client.mats
-    .filter((m) => m.size === size)
+    .filter((m) => m.size === sizeId)
     .reduce((sum, m) => sum + m.quantity, 0)
 }
 
@@ -40,18 +40,19 @@ function formatDate(): string {
 interface PrintTableProps {
   title: string
   rows: { stop: RouteStop; client: Client | undefined }[]
+  sizes: MatSizeConfig[]
 }
 
-function PrintTable({ title, rows }: PrintTableProps) {
+function PrintTable({ title, rows, sizes }: PrintTableProps) {
   const totals = Object.fromEntries(
-    MAT_SIZES.map((size) => [
-      size,
+    sizes.map((s) => [
+      s.id,
       rows.reduce((sum, { client }) => {
         if (!client) return sum
-        return sum + getMatQuantity(client, size)
+        return sum + getMatQuantity(client, s.id)
       }, 0),
     ]),
-  ) as Record<MatSize, number>
+  ) as Record<string, number>
 
   return (
     <>
@@ -62,8 +63,8 @@ function PrintTable({ title, rows }: PrintTableProps) {
           <tr>
             <th className="num">#</th>
             <th className="col-name">Название</th>
-            {MAT_SIZES.map((size) => (
-              <th key={size} className="num">{size}</th>
+            {sizes.map((s) => (
+              <th key={s.id} className="num">{s.label}</th>
             ))}
             <th className="num">&#10003;</th>
           </tr>
@@ -73,9 +74,9 @@ function PrintTable({ title, rows }: PrintTableProps) {
             <tr key={stop.id}>
               <td className="num">{index + 1}</td>
               <td>{client?.originalName ?? '—'}</td>
-              {MAT_SIZES.map((size) => {
-                const qty = client ? getMatQuantity(client, size) : 0
-                return <td key={size} className="num">{qty > 0 ? qty : ''}</td>
+              {sizes.map((s) => {
+                const qty = client ? getMatQuantity(client, s.id) : 0
+                return <td key={s.id} className="num">{qty > 0 ? qty : ''}</td>
               })}
               <td className="num">
                 <span className="print-checkbox" />
@@ -87,9 +88,9 @@ function PrintTable({ title, rows }: PrintTableProps) {
           <tr>
             <td className="num" />
             <td>Итого: {rows.length} точек</td>
-            {MAT_SIZES.map((size) => (
-              <td key={size} className="num">
-                {(totals[size] ?? 0) > 0 ? totals[size] : ''}
+            {sizes.map((s) => (
+              <td key={s.id} className="num">
+                {(totals[s.id] ?? 0) > 0 ? totals[s.id] : ''}
               </td>
             ))}
             <td />
@@ -101,6 +102,7 @@ function PrintTable({ title, rows }: PrintTableProps) {
 }
 
 export function PrintSheet({ stops, clients, selectedDay, drivers = [] }: PrintSheetProps) {
+  const sizes = useMatSizeStore((s) => s.sizes)
   const clientMap = new Map(clients.map((c) => [c.id, c]))
   const sortedStops = [...stops].sort((a, b) => a.position - b.position)
   const dateStr = formatDate()
@@ -116,6 +118,7 @@ export function PrintSheet({ stops, clients, selectedDay, drivers = [] }: PrintS
         <PrintTable
           title={`${dayLabel}, ${dateStr}`}
           rows={toRows(sortedStops)}
+          sizes={sizes}
         />
       </div>
     )
@@ -146,6 +149,7 @@ export function PrintSheet({ stops, clients, selectedDay, drivers = [] }: PrintS
           <PrintTable
             title={`${group.label} — ${dayLabel}, ${dateStr}`}
             rows={toRows(group.stops)}
+            sizes={sizes}
           />
         </div>
       ))}

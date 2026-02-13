@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/shared/ui/select'
-import { MAT_SIZE_OPTIONS } from '@/shared/constants'
+import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 import type { MatRow } from '../lib/formHelpers'
 
 interface MatRowCardProps {
@@ -32,6 +32,8 @@ export function MatRowCard({
   onColorChange,
   onRemove,
 }: MatRowCardProps) {
+  const sizes = useMatSizeStore((s) => s.sizes)
+
   return (
     <div className="rounded-lg border border-slate-700 bg-slate-900/50 p-3 space-y-2">
       <div className="flex items-center gap-2">
@@ -43,8 +45,8 @@ export function MatRowCard({
             <SelectValue placeholder="Размер" />
           </SelectTrigger>
           <SelectContent>
-            {MAT_SIZE_OPTIONS.map((s) => (
-              <SelectItem key={s.value} value={s.value}>
+            {sizes.map((s) => (
+              <SelectItem key={s.id} value={s.id}>
                 {s.label}
               </SelectItem>
             ))}

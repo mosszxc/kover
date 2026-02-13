@@ -1,12 +1,11 @@
 import { useMemo } from 'react'
 import { useRouteStore } from '../store'
 import { useClientStore } from '@/modules/clients'
-import type { MatSize } from '@/shared/types'
-import { MAT_AREA } from '@/shared/types'
+import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 
 export interface RouteSummary {
   stopCount: number
-  matsBySize: Partial<Record<MatSize, number>>
+  matsBySize: Partial<Record<string, number>>
   totalArea: number
 }
 
@@ -14,6 +13,7 @@ export function useRouteSummary(): RouteSummary {
   const selectedDay = useRouteStore((s) => s.selectedDay)
   const routes = useRouteStore((s) => s.routes)
   const clients = useClientStore((s) => s.clients)
+  const sizes = useMatSizeStore((s) => s.sizes)
 
   return useMemo(() => {
     const dayRoute = routes.find((r) => r.day === selectedDay)
@@ -22,8 +22,9 @@ export function useRouteSummary(): RouteSummary {
     }
 
     const clientMap = new Map(clients.map((c) => [c.id, c]))
+    const areaMap = Object.fromEntries(sizes.map((s) => [s.id, s.area]))
 
-    const matsBySize: Partial<Record<MatSize, number>> = {}
+    const matsBySize: Partial<Record<string, number>> = {}
     let totalArea = 0
     let activeStopCount = 0
 
@@ -34,7 +35,7 @@ export function useRouteSummary(): RouteSummary {
       activeStopCount++
       for (const mat of client.mats) {
         matsBySize[mat.size] = (matsBySize[mat.size] ?? 0) + mat.quantity
-        totalArea += mat.quantity * (MAT_AREA[mat.size] ?? 0)
+        totalArea += mat.quantity * (areaMap[mat.size] ?? 0)
       }
     }
 
@@ -43,5 +44,5 @@ export function useRouteSummary(): RouteSummary {
       matsBySize,
       totalArea: Math.round(totalArea * 100) / 100,
     }
-  }, [selectedDay, routes, clients])
+  }, [selectedDay, routes, clients, sizes])
 }

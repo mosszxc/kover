@@ -1,4 +1,4 @@
-import type { DayOfWeek, MatSize } from '@/shared/types'
+import type { DayOfWeek } from '@/shared/types'
 
 export interface ParsedExcel {
   masterRows: string[][]
@@ -6,7 +6,7 @@ export interface ParsedExcel {
 }
 
 export interface ParsedMatSpec {
-  size: MatSize
+  size: string
   quantity: number
   color?: string
 }

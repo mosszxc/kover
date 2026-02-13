@@ -1,15 +1,16 @@
 import { useMemo } from 'react'
 import { useClientStore } from '@/modules/clients'
-import { MAT_AREA } from '@/shared/types'
-
-function getClientArea(mats: { size: string; quantity: number }[]): number {
-  return mats.reduce((sum, m) => sum + m.quantity * (MAT_AREA[m.size as keyof typeof MAT_AREA] ?? 0), 0)
-}
+import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 
 export function ClientStats() {
   const clients = useClientStore((s) => s.clients)
+  const sizes = useMatSizeStore((s) => s.sizes)
 
   const { topClients, frequencyDist } = useMemo(() => {
+    const areaMap = Object.fromEntries(sizes.map((s) => [s.id, s.area]))
+    const getClientArea = (mats: { size: string; quantity: number }[]) =>
+      mats.reduce((sum, m) => sum + m.quantity * (areaMap[m.size] ?? 0), 0)
+
     const active = clients.filter((c) => c.isActive)
 
     const sorted = active
@@ -23,7 +24,7 @@ export function ClientStats() {
     }
 
     return { topClients: sorted, frequencyDist: freq }
-  }, [clients])
+  }, [clients, sizes])
 
   const maxArea = topClients[0]?.area ?? 1
 
