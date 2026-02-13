@@ -109,13 +109,13 @@ export function AddStopDialog({ clients }: AddStopDialogProps) {
 
         <div className="space-y-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Поиск по имени или адресу..."
-              className="h-11 w-full rounded-md border border-slate-700 bg-slate-900 pl-9 pr-3 text-sm text-slate-50 placeholder:text-slate-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-colors"
+              className="h-11 w-full rounded-md border border-border bg-card pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-colors"
             />
           </div>
 
@@ -124,7 +124,7 @@ export function AddStopDialog({ clients }: AddStopDialogProps) {
               value={String(position)}
               onValueChange={(value) => setPosition(Number(value))}
             >
-              <SelectTrigger className="h-11 w-full border-slate-700 bg-slate-900 text-sm text-slate-50">
+              <SelectTrigger className="h-11 w-full border-border bg-card text-sm text-foreground">
                 <SelectValue placeholder="Позиция" />
               </SelectTrigger>
               <SelectContent>
@@ -140,7 +140,7 @@ export function AddStopDialog({ clients }: AddStopDialogProps) {
 
           <div className="-mx-6 max-h-[300px] overflow-y-auto">
             {availableClients.length === 0 ? (
-              <div className="py-8 text-center text-sm text-slate-500">
+              <div className="py-8 text-center text-sm text-muted-foreground">
                 {query ? 'Ничего не найдено' : 'Все клиенты уже в маршруте'}
               </div>
             ) : (
@@ -149,10 +149,10 @@ export function AddStopDialog({ clients }: AddStopDialogProps) {
                   key={client.id}
                   type="button"
                   onClick={() => handleSelect(client)}
-                  className="flex min-h-11 w-full flex-col gap-0.5 px-6 py-2.5 text-left transition-colors hover:bg-slate-800"
+                  className="flex min-h-11 w-full flex-col gap-0.5 px-6 py-2.5 text-left transition-colors hover:bg-accent"
                 >
-                  <span className="text-sm text-slate-50">{client.originalName}</span>
-                  <span className="text-xs text-slate-500">{client.address}</span>
+                  <span className="text-sm text-foreground">{client.originalName}</span>
+                  <span className="text-xs text-muted-foreground">{client.address}</span>
                 </button>
               ))
             )}

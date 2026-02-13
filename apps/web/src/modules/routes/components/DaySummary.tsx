@@ -8,7 +8,7 @@ export function DaySummary() {
 
   if (summary.stopCount === 0) {
     return (
-      <div className="rounded-lg border border-slate-800 bg-slate-900/50 p-4 text-center text-sm text-slate-500">
+      <div className="rounded-lg border border-border bg-card/50 p-4 text-center text-sm text-muted-foreground">
         Нет точек на этот день
       </div>
     )
@@ -54,16 +54,16 @@ function SummaryCard({
 }) {
   return (
     <div
-      className={`flex items-center gap-3 rounded-lg border border-slate-800 bg-slate-900/50 p-3 ${wide ? 'col-span-1' : ''}`}
+      className={`flex items-center gap-3 rounded-lg border border-border bg-card/50 p-3 ${wide ? 'col-span-1' : ''}`}
     >
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-slate-800">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted">
         {icon}
       </div>
       <div className="min-w-0">
-        <p className="truncate text-2xl font-bold tabular-nums text-slate-100">
+        <p className="truncate text-2xl font-bold tabular-nums text-foreground">
           {value}
         </p>
-        <p className="text-xs text-slate-500">{label}</p>
+        <p className="text-xs text-muted-foreground">{label}</p>
       </div>
     </div>
   )

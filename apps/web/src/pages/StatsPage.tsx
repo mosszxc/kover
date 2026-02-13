@@ -5,7 +5,7 @@ import { BackupManager } from '@/shared/components/BackupManager'
 export function StatsPage() {
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-slate-50">Статистика</h1>
+      <h1 className="text-2xl font-bold text-foreground">Статистика</h1>
       <WeeklySummary />
       <DayLoadChart />
       <ClientStats />

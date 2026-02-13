@@ -69,7 +69,7 @@ export function ClientsFilters({
     <div className="flex flex-wrap items-center gap-3">
       {/* Day filter */}
       <div className="flex items-center gap-1.5">
-        <span className="text-xs font-medium text-slate-500">День:</span>
+        <span className="text-xs font-medium text-muted-foreground">День:</span>
         {ALL_WORK_DAYS.map((day) => (
           <button
             key={day}
@@ -79,7 +79,7 @@ export function ClientsFilters({
               'min-h-[44px] min-w-[44px] rounded-full px-3 py-1.5 text-sm font-medium transition-colors',
               selectedDays.includes(day)
                 ? 'bg-blue-600 text-white'
-                : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-300',
+                : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground',
             )}
           >
             {DAY_LABELS[day]}
@@ -89,7 +89,7 @@ export function ClientsFilters({
 
       {/* Frequency filter */}
       <div className="flex items-center gap-1.5">
-        <span className="text-xs font-medium text-slate-500">Частота:</span>
+        <span className="text-xs font-medium text-muted-foreground">Частота:</span>
         {FREQUENCY_OPTIONS.map((freq) => (
           <button
             key={freq}
@@ -99,7 +99,7 @@ export function ClientsFilters({
               'min-h-[44px] min-w-[44px] rounded-full px-3 py-1.5 text-sm font-medium tabular-nums transition-colors',
               selectedFrequency === freq
                 ? 'bg-blue-600 text-white'
-                : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-300',
+                : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground',
             )}
           >
             {freq}
@@ -109,7 +109,7 @@ export function ClientsFilters({
 
       {/* Mat size filter */}
       <div className="flex items-center gap-1.5">
-        <span className="text-xs font-medium text-slate-500">Коврик:</span>
+        <span className="text-xs font-medium text-muted-foreground">Коврик:</span>
         {matSizes.map((s) => (
           <button
             key={s.id}
@@ -119,7 +119,7 @@ export function ClientsFilters({
               'min-h-[44px] rounded-full px-3 py-1.5 text-sm font-medium tabular-nums transition-colors',
               selectedMatSize === s.id
                 ? 'bg-blue-600 text-white'
-                : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-300',
+                : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground',
             )}
           >
             {s.label}
@@ -129,7 +129,7 @@ export function ClientsFilters({
 
       {/* Status filter */}
       <div className="flex items-center gap-1.5">
-        <span className="text-xs font-medium text-slate-500">Статус:</span>
+        <span className="text-xs font-medium text-muted-foreground">Статус:</span>
         {STATUS_OPTIONS.map((opt) => (
           <button
             key={opt.value}
@@ -139,7 +139,7 @@ export function ClientsFilters({
               'min-h-[44px] rounded-full px-3 py-1.5 text-sm font-medium transition-colors',
               selectedStatus === opt.value
                 ? 'bg-blue-600 text-white'
-                : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-300',
+                : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground',
             )}
           >
             {opt.label}
@@ -152,7 +152,7 @@ export function ClientsFilters({
         <button
           type="button"
           onClick={resetAll}
-          className="flex min-h-[44px] items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-300"
+          className="flex min-h-[44px] items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
         >
           <X className="size-3.5" />
           Сбросить

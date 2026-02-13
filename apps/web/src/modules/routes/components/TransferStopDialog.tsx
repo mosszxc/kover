@@ -58,7 +58,7 @@ export function TransferStopDialog({ stopId, clientName, day }: TransferStopDial
         type="button"
         aria-label="Перенести в другой день"
         onClick={() => setOpen(true)}
-        className="flex size-6 min-h-[44px] min-w-[44px] items-center justify-center rounded text-slate-400 transition-colors hover:text-blue-500 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 print:hidden"
+        className="flex size-6 min-h-[44px] min-w-[44px] items-center justify-center rounded text-muted-foreground transition-colors hover:text-blue-500 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 print:hidden"
       >
         <ArrowRightLeft className="size-4" />
       </button>
@@ -70,7 +70,7 @@ export function TransferStopDialog({ stopId, clientName, day }: TransferStopDial
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <p className="text-sm text-slate-400">Выберите день</p>
+            <p className="text-sm text-muted-foreground">Выберите день</p>
             <div className="grid grid-cols-4 gap-2">
               {DAYS.filter((d) => d !== day).map((d) => (
                 <button
@@ -80,7 +80,7 @@ export function TransferStopDialog({ stopId, clientName, day }: TransferStopDial
                   className={`rounded-md border px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
                     targetDay === d
                       ? 'border-blue-500 bg-blue-500/20 text-blue-400'
-                      : 'border-slate-700 text-slate-300 hover:border-slate-500'
+                      : 'border-border text-foreground hover:border-ring'
                   }`}
                 >
                   {DAY_LABELS[d]}
@@ -91,12 +91,12 @@ export function TransferStopDialog({ stopId, clientName, day }: TransferStopDial
 
           {targetDay !== null && targetStops.length > 0 && (
             <div className="space-y-2">
-              <p className="text-sm text-slate-400">Позиция</p>
+              <p className="text-sm text-muted-foreground">Позиция</p>
               <Select
                 value={String(position)}
                 onValueChange={(value) => setPosition(Number(value))}
               >
-                <SelectTrigger className="h-11 w-full border-slate-700 bg-slate-900 text-sm text-slate-50">
+                <SelectTrigger className="h-11 w-full border-border bg-card text-sm text-foreground">
                   <SelectValue placeholder="Позиция" />
                 </SelectTrigger>
                 <SelectContent>

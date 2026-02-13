@@ -37,7 +37,7 @@ export function DaySwitcher() {
               'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors min-w-[44px] min-h-[44px] justify-center',
               isActive
                 ? 'bg-blue-600 text-white'
-                : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-300',
+                : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground',
             )}
             aria-current={isActive ? 'true' : undefined}
           >
@@ -46,7 +46,7 @@ export function DaySwitcher() {
               <span
                 className={cn(
                   'text-xs font-semibold',
-                  isActive ? 'text-blue-200' : 'text-slate-500',
+                  isActive ? 'text-blue-200' : 'text-muted-foreground',
                 )}
               >
                 {count}

@@ -61,14 +61,14 @@ export function RouteMap({ stops }: RouteMapProps) {
 
   if (stops.length === 0) {
     return (
-      <div className="flex h-[500px] items-center justify-center rounded-lg border border-slate-700 bg-slate-900">
-        <p className="text-slate-500">Нет клиентов с координатами для этого дня</p>
+      <div className="flex h-[500px] items-center justify-center rounded-lg border border-border bg-card">
+        <p className="text-muted-foreground">Нет клиентов с координатами для этого дня</p>
       </div>
     )
   }
 
   return (
-    <div className="isolate overflow-hidden rounded-lg border border-slate-700">
+    <div className="isolate overflow-hidden rounded-lg border border-border">
       <MapContainer
         center={DEFAULT_CENTER}
         zoom={12}

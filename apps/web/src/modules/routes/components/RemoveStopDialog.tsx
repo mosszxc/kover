@@ -29,7 +29,7 @@ export function RemoveStopDialog({ stopId, clientName, day }: RemoveStopDialogPr
         <button
           type="button"
           aria-label={`Убрать ${clientName} из маршрута`}
-          className="flex size-6 min-h-[44px] min-w-[44px] items-center justify-center rounded text-slate-400 transition-colors hover:text-red-500 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 print:hidden"
+          className="flex size-6 min-h-[44px] min-w-[44px] items-center justify-center rounded text-muted-foreground transition-colors hover:text-red-500 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 print:hidden"
         >
           <X className="size-4" />
         </button>

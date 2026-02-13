@@ -82,7 +82,7 @@ export function StopList({ searchQuery = '', drivers = [], driverFilter = null, 
 
   if (!dayRoute || activeStops.length === 0) {
     return (
-      <div className="py-12 text-center text-sm text-slate-500">
+      <div className="py-12 text-center text-sm text-muted-foreground">
         Нет точек на этот день
       </div>
     )
@@ -109,7 +109,7 @@ export function StopList({ searchQuery = '', drivers = [], driverFilter = null, 
 
   if (stops.length === 0) {
     return (
-      <div className="py-12 text-center text-sm text-slate-500">
+      <div className="py-12 text-center text-sm text-muted-foreground">
         Ничего не найдено
       </div>
     )

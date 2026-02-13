@@ -16,7 +16,7 @@ export function AppLayout() {
   useFileSync()
 
   return (
-    <div className="print-root min-h-screen bg-slate-950">
+    <div className="print-root min-h-screen bg-background">
       <Sidebar />
 
       <div className="print-content md:pl-60 flex flex-col min-h-screen">

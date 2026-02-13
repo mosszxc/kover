@@ -110,7 +110,7 @@ export function ImportPage() {
   if (parsed) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold text-slate-50">Сверка импорта</h1>
+        <h1 className="text-2xl font-bold text-foreground">Сверка импорта</h1>
         <ImportPreview
           clients={parsed.clients}
           onConfirm={handleConfirm}
@@ -122,12 +122,12 @@ export function ImportPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-slate-50">Импорт</h1>
+      <h1 className="text-2xl font-bold text-foreground">Импорт</h1>
       <ExcelUpload onParsed={setParsed} />
       <JsonBackup data={{ clients, routes }} onRestore={handleRestore} />
 
-      <div className="rounded-lg border border-slate-700 bg-slate-900 p-4 space-y-2">
-        <h2 className="text-lg font-semibold text-slate-50">Автосохранение на диск</h2>
+      <div className="rounded-lg border border-border bg-card p-4 space-y-2">
+        <h2 className="text-lg font-semibold text-foreground">Автосохранение на диск</h2>
         <FileSyncStatus />
       </div>
     </div>
