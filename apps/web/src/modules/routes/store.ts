@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { temporal } from 'zundo'
 import type { DayOfWeek } from '@/shared/types'
 import type { DayRoute, RouteStop } from './types'
 
@@ -28,6 +29,7 @@ const initialRoutes: DayRoute[] = [
 
 export const useRouteStore = create<RouteState>()(
   persist(
+    temporal(
     (set) => ({
       routes: initialRoutes,
       selectedDay: 0 as DayOfWeek,
@@ -170,6 +172,14 @@ export const useRouteStore = create<RouteState>()(
 
       seedRoutes: (routes) => set({ routes }),
     }),
+    {
+      limit: 20,
+      partialize: (state) => {
+        const { routes } = state
+        return { routes } as RouteState
+      },
+    },
+    ),
     {
       name: 'kover-routes',
       version: 2,
