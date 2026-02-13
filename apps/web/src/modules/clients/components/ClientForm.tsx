@@ -1,0 +1,297 @@
+import { useState } from 'react'
+import { Plus, X } from 'lucide-react'
+import { toast } from 'sonner'
+import { Button } from '@/shared/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/shared/ui/dialog'
+import type { DayOfWeek, MatSize } from '@/shared/types'
+import { DAY_LABELS } from '@/shared/types'
+import { useClientStore } from '../store'
+import type { Client, MatSpec } from '../types'
+
+const MAT_SIZES: MatSize[] = ['180', '150', '60x80', '400', '250']
+const FREQUENCIES = [1, 2, 3, 4, 5] as const
+const ALL_DAYS: DayOfWeek[] = [0, 1, 2, 3, 4]
+
+interface MatRow {
+  size: MatSize
+  quantity: number
+  color: string
+}
+
+interface FormErrors {
+  name?: string
+  mats?: string
+}
+
+const emptyMat = (): MatRow => ({ size: '180', quantity: 1, color: '' })
+
+export function ClientForm() {
+  const [open, setOpen] = useState(false)
+  const addClient = useClientStore((s) => s.addClient)
+
+  // form state
+  const [name, setName] = useState('')
+  const [address, setAddress] = useState('')
+  const [mats, setMats] = useState<MatRow[]>([emptyMat()])
+  const [frequency, setFrequency] = useState(1)
+  const [days, setDays] = useState<DayOfWeek[]>([])
+  const [notes, setNotes] = useState('')
+  const [errors, setErrors] = useState<FormErrors>({})
+
+  function resetForm() {
+    setName('')
+    setAddress('')
+    setMats([emptyMat()])
+    setFrequency(1)
+    setDays([])
+    setNotes('')
+    setErrors({})
+  }
+
+  function validate(): FormErrors {
+    const e: FormErrors = {}
+    if (!name.trim()) e.name = 'Название обязательно'
+    if (mats.length === 0) e.mats = 'Добавьте хотя бы 1 коврик'
+    return e
+  }
+
+  function buildOriginalName(): string {
+    const parts = [name.trim()]
+    if (address.trim()) parts.push(address.trim())
+    const matsSummary = mats
+      .map((m) => `${m.quantity}×${m.size}`)
+      .join(', ')
+    if (matsSummary) parts.push(matsSummary)
+    return parts.join(' ')
+  }
+
+  function handleSave() {
+    const validationErrors = validate()
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors)
+      return
+    }
+
+    const client: Client = {
+      id: crypto.randomUUID(),
+      originalName: buildOriginalName(),
+      name: name.trim(),
+      address: address.trim(),
+      mats: mats.map<MatSpec>((m) => ({
+        size: m.size,
+        quantity: m.quantity,
+        ...(m.color.trim() ? { color: m.color.trim() } : {}),
+      })),
+      frequency,
+      days: [...days].sort(),
+      notes: notes.trim(),
+      isActive: true,
+      createdAt: new Date().toISOString(),
+    }
+
+    addClient(client)
+    toast.success('Сохранено', { duration: 2000 })
+    setOpen(false)
+    resetForm()
+  }
+
+  function addMat() {
+    setMats([...mats, emptyMat()])
+    setErrors((prev) => ({ ...prev, mats: undefined }))
+  }
+
+  function removeMat(index: number) {
+    setMats(mats.filter((_, i) => i !== index))
+  }
+
+  function updateMat(index: number, field: keyof MatRow, value: string | number) {
+    setMats(mats.map((m, i) => (i === index ? { ...m, [field]: value } : m)))
+  }
+
+  function toggleDay(day: DayOfWeek) {
+    setDays((prev) =>
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day],
+    )
+  }
+
+  const inputClass =
+    'h-11 w-full rounded-md border border-slate-700 bg-slate-900 px-3 text-sm text-slate-50 placeholder:text-slate-500 focus:border-slate-500 focus:outline-none'
+  const labelClass = 'text-sm font-medium text-slate-300'
+  const errorClass = 'text-xs text-red-400 mt-1'
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        setOpen(v)
+        if (!v) resetForm()
+      }}
+    >
+      <DialogTrigger asChild>
+        <Button variant="outline" className="border-dashed">
+          <Plus className="h-4 w-4" />
+          Добавить клиента
+        </Button>
+      </DialogTrigger>
+
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Новый клиент</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          {/* Название */}
+          <div>
+            <label className={labelClass}>
+              Название <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => {
+                setName(e.target.value)
+                setErrors((prev) => ({ ...prev, name: undefined }))
+              }}
+              placeholder="Например: Велес"
+              className={`${inputClass} mt-1 ${errors.name ? 'ring-1 ring-red-500' : ''}`}
+            />
+            {errors.name && <p className={errorClass}>{errors.name}</p>}
+          </div>
+
+          {/* Адрес */}
+          <div>
+            <label className={labelClass}>Адрес</label>
+            <input
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="Например: Гоголя 180"
+              className={`${inputClass} mt-1`}
+            />
+          </div>
+
+          {/* Коврики */}
+          <div>
+            <label className={labelClass}>
+              Коврики <span className="text-red-400">*</span>
+            </label>
+            <div className="mt-1 space-y-2">
+              {mats.map((mat, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <select
+                    value={mat.size}
+                    onChange={(e) => updateMat(i, 'size', e.target.value)}
+                    className={`${inputClass} w-28 shrink-0`}
+                  >
+                    {MAT_SIZES.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+
+                  <input
+                    type="number"
+                    min={1}
+                    value={mat.quantity}
+                    onChange={(e) =>
+                      updateMat(i, 'quantity', Math.max(1, Number(e.target.value)))
+                    }
+                    className={`${inputClass} w-16 shrink-0 text-center`}
+                  />
+
+                  <input
+                    type="text"
+                    value={mat.color}
+                    onChange={(e) => updateMat(i, 'color', e.target.value)}
+                    placeholder="Цвет"
+                    className={`${inputClass} min-w-0 flex-1`}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => removeMat(i)}
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-slate-800 hover:text-slate-300"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+            {errors.mats && <p className={errorClass}>{errors.mats}</p>}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="mt-2"
+              onClick={addMat}
+            >
+              <Plus className="h-3 w-3" />
+              Коврик
+            </Button>
+          </div>
+
+          {/* Частота */}
+          <div>
+            <label className={labelClass}>Частота (раз/нед)</label>
+            <select
+              value={frequency}
+              onChange={(e) => setFrequency(Number(e.target.value))}
+              className={`${inputClass} mt-1`}
+            >
+              {FREQUENCIES.map((f) => (
+                <option key={f} value={f}>
+                  {f}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Дни */}
+          <div>
+            <label className={labelClass}>Дни</label>
+            <div className="mt-1 flex gap-2">
+              {ALL_DAYS.map((day) => (
+                <button
+                  key={day}
+                  type="button"
+                  onClick={() => toggleDay(day)}
+                  className={`flex h-11 w-11 items-center justify-center rounded-md border text-sm font-medium transition-colors ${
+                    days.includes(day)
+                      ? 'border-blue-600 bg-blue-600 text-white'
+                      : 'border-slate-700 bg-slate-900 text-slate-400 hover:border-slate-500'
+                  }`}
+                >
+                  {DAY_LABELS[day]}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Примечания */}
+          <div>
+            <label className={labelClass}>Примечания</label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Дополнительная информация..."
+              rows={3}
+              className={`${inputClass} mt-1 resize-none py-2`}
+            />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button onClick={handleSave}>Сохранить</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
