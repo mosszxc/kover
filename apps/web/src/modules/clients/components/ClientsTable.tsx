@@ -33,9 +33,10 @@ function getClientArea(client: Client): number {
 interface ClientsTableProps {
   onRowClick?: (client: Client) => void
   isClientInRoute?: (clientId: string, day: DayOfWeek) => boolean
+  onToggleActive?: (client: Client) => void
 }
 
-export function ClientsTable({ onRowClick, isClientInRoute }: ClientsTableProps) {
+export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive }: ClientsTableProps) {
   const clients = useClientStore((s) => s.clients)
   const updateClient = useClientStore((s) => s.updateClient)
   const [sorting, setSorting] = useState<SortingState>([])
@@ -120,7 +121,11 @@ export function ClientsTable({ onRowClick, isClientInRoute }: ClientsTableProps)
             type="button"
             onClick={(e) => {
               e.stopPropagation()
-              updateClient(client.id, { isActive: !isActive })
+              if (onToggleActive) {
+                onToggleActive(client)
+              } else {
+                updateClient(client.id, { isActive: !isActive })
+              }
               toast.success(isActive ? 'Клиент на паузе' : 'Клиент активирован', { duration: 2000 })
             }}
             className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold transition-colors ${
@@ -145,7 +150,7 @@ export function ClientsTable({ onRowClick, isClientInRoute }: ClientsTableProps)
         )
       },
     },
-  ], [isClientInRoute, updateClient])
+  ], [isClientInRoute, updateClient, onToggleActive])
   const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>([])
   const [selectedFrequency, setSelectedFrequency] = useState<number | null>(null)
   const [selectedMatSize, setSelectedMatSize] = useState<MatSize | null>(null)
