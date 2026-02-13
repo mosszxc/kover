@@ -3,6 +3,7 @@ import { cn } from '@/shared/lib/utils'
 import type { Client, MatSpec } from '@/modules/clients'
 import { MAT_AREA } from '@/shared/types'
 import { useRouteStore } from '../store'
+import { RemoveStopDialog } from './RemoveStopDialog'
 
 interface StopCardProps {
   number: number
@@ -100,6 +101,12 @@ export function StopCard({ number, client, stopId, isCompleted, stopIndex, isFir
       <span className="w-16 shrink-0 text-right text-sm font-semibold tabular-nums text-slate-300">
         {area.toFixed(1)} м²
       </span>
+
+      <RemoveStopDialog
+        stopId={stopId}
+        clientName={client.originalName}
+        day={selectedDay}
+      />
     </div>
   )
 }
