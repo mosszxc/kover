@@ -1,0 +1,8 @@
+{
+  "name": "kover",
+  "private": true,
+  "scripts": {
+    "build": "echo 'no build configured'",
+    "lint": "echo 'no lint configured'"
+  }
+}
