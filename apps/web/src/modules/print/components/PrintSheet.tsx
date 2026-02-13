@@ -1,7 +1,7 @@
 import type { DayOfWeek, MatSize } from '@/shared/types'
 import type { RouteStop } from '@/modules/routes'
 import type { Client } from '@/modules/clients'
-import { MAT_AREA, MAT_SIZES } from '@/shared/types'
+import { MAT_SIZES } from '@/shared/types'
 
 const DAY_LABELS_FULL: Record<DayOfWeek, string> = {
   0: 'Понедельник',
@@ -24,10 +24,6 @@ function getMatQuantity(client: Client, size: MatSize): number {
     .reduce((sum, m) => sum + m.quantity, 0)
 }
 
-function getClientArea(client: Client): number {
-  return client.mats.reduce((sum, m) => m.quantity * MAT_AREA[m.size] + sum, 0)
-}
-
 function formatDate(): string {
   return new Date().toLocaleDateString('ru-RU', {
     day: 'numeric',
@@ -46,21 +42,15 @@ export function PrintSheet({ stops, clients, selectedDay }: PrintSheetProps) {
     return { stop, client }
   })
 
-  const totals = {
-    mats: Object.fromEntries(
-      MAT_SIZES.map((size) => [
-        size,
-        rows.reduce((sum, { client }) => {
-          if (!client) return sum
-          return sum + getMatQuantity(client, size)
-        }, 0),
-      ]),
-    ) as Record<MatSize, number>,
-    area: rows.reduce((sum, { client }) => {
-      if (!client) return sum
-      return sum + getClientArea(client)
-    }, 0),
-  }
+  const totals = Object.fromEntries(
+    MAT_SIZES.map((size) => [
+      size,
+      rows.reduce((sum, { client }) => {
+        if (!client) return sum
+        return sum + getMatQuantity(client, size)
+      }, 0),
+    ]),
+  ) as Record<MatSize, number>
 
   return (
     <div className="hidden print:block">
@@ -76,7 +66,6 @@ export function PrintSheet({ stops, clients, selectedDay }: PrintSheetProps) {
             <th>60x80</th>
             <th>400</th>
             <th>250</th>
-            <th>Кв.м</th>
             <th>✓</th>
           </tr>
         </thead>
@@ -89,7 +78,6 @@ export function PrintSheet({ stops, clients, selectedDay }: PrintSheetProps) {
                 const qty = client ? getMatQuantity(client, size) : 0
                 return <td key={size}>{qty > 0 ? qty : ''}</td>
               })}
-              <td>{client ? getClientArea(client).toFixed(1) : ''}</td>
               <td>
                 <span className="print-checkbox" />
               </td>
@@ -102,10 +90,9 @@ export function PrintSheet({ stops, clients, selectedDay }: PrintSheetProps) {
             <td>Итого: {rows.length} точек</td>
             {MAT_SIZES.map((size) => (
               <td key={size}>
-                {(totals.mats[size] ?? 0) > 0 ? totals.mats[size] : ''}
+                {(totals[size] ?? 0) > 0 ? totals[size] : ''}
               </td>
             ))}
-            <td>{totals.area.toFixed(1)}</td>
             <td />
           </tr>
         </tfoot>

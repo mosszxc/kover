@@ -19,15 +19,17 @@ export function RoutesPage() {
   )
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-2">
-        <DaySwitcher />
-        <PrintButton />
+    <div>
+      <div className="space-y-4 print:hidden">
+        <div className="flex items-center justify-between gap-2">
+          <DaySwitcher />
+          <PrintButton />
+        </div>
+        <DaySummary />
+        <RouteSearch value={searchQuery} onChange={setSearchQuery} />
+        <StopList searchQuery={searchQuery} />
+        <AddStopDialog clients={clients} />
       </div>
-      <DaySummary />
-      <RouteSearch value={searchQuery} onChange={setSearchQuery} />
-      <StopList searchQuery={searchQuery} />
-      <AddStopDialog clients={clients} />
       <PrintSheet stops={activeStops} clients={clients} selectedDay={selectedDay} />
     </div>
   )
