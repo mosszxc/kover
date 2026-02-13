@@ -5,7 +5,11 @@ import type { Client, MatSpec } from '@/modules/clients'
 import { StopCard } from './StopCard'
 import { BlockDivider } from './BlockDivider'
 
-export function StopList() {
+interface StopListProps {
+  searchQuery?: string
+}
+
+export function StopList({ searchQuery = '' }: StopListProps) {
   const routes = useRouteStore((s) => s.routes)
   const selectedDay = useRouteStore((s) => s.selectedDay)
   const clients = useClientStore((s) => s.clients)
@@ -19,6 +23,7 @@ export function StopList() {
   }, [clients])
 
   const dayRoute = routes.find((r) => r.day === selectedDay)
+  const query = searchQuery.toLowerCase()
 
   if (!dayRoute || dayRoute.blocks.every((b) => b.stops.length === 0)) {
     return (
@@ -36,14 +41,24 @@ export function StopList() {
         if (block.stops.length === 0) return null
 
         const blockMats: MatSpec[] = []
-        const blockStops = block.stops.map((stop) => {
-          globalNumber++
-          const client = clientMap.get(stop.clientId)
-          if (client) {
-            blockMats.push(...client.mats)
-          }
-          return { stop, client, number: globalNumber }
-        })
+        const blockStops = block.stops
+          .map((stop) => {
+            globalNumber++
+            const client = clientMap.get(stop.clientId)
+            if (client) {
+              blockMats.push(...client.mats)
+            }
+            return { stop, client, number: globalNumber }
+          })
+          .filter(({ client }) => {
+            if (!query || !client) return true
+            return (
+              client.originalName.toLowerCase().includes(query) ||
+              client.address.toLowerCase().includes(query)
+            )
+          })
+
+        if (blockStops.length === 0) return null
 
         return (
           <div key={block.id} className="space-y-px">
@@ -67,6 +82,20 @@ export function StopList() {
           </div>
         )
       })}
+      {query && dayRoute.blocks.every((block) =>
+        block.stops.every((stop) => {
+          const client = clientMap.get(stop.clientId)
+          if (!client) return true
+          return (
+            !client.originalName.toLowerCase().includes(query) &&
+            !client.address.toLowerCase().includes(query)
+          )
+        })
+      ) && (
+        <div className="py-12 text-center text-sm text-slate-500">
+          Ничего не найдено
+        </div>
+      )}
     </div>
   )
 }
