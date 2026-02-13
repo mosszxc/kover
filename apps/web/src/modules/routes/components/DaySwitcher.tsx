@@ -23,7 +23,7 @@ export function DaySwitcher() {
   }, [selectDay])
 
   return (
-    <nav className="flex gap-1" aria-label="Дни недели">
+    <nav className="flex gap-1 print:hidden" aria-label="Дни недели">
       {DAYS.map((day) => {
         const isActive = selectedDay === day
         const count = clients.filter((c) => c.isActive && c.days.includes(day)).length

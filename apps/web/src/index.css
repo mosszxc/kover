@@ -113,3 +113,15 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
+
+@media print {
+  * {
+    color: black !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  body {
+    background: white !important;
+  }
+}
