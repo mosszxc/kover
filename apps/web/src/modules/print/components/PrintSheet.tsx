@@ -100,15 +100,13 @@ export function PrintSheet({ stops, clients, selectedDay }: PrintSheetProps) {
         <tfoot>
           <tr>
             <td />
-            <td><strong>Итого</strong></td>
+            <td>Итого: {rows.length} точек</td>
             {MAT_SIZES.map((size) => (
               <td key={size}>
-                <strong>{totals.mats[size] > 0 ? totals.mats[size] : ''}</strong>
+                {totals.mats[size] > 0 ? totals.mats[size] : ''}
               </td>
             ))}
-            <td>
-              <strong>{totals.area.toFixed(1)}</strong>
-            </td>
+            <td>{totals.area.toFixed(1)}</td>
             <td />
           </tr>
         </tfoot>

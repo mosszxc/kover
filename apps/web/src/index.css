@@ -182,6 +182,12 @@
     background: #f0f0f0;
   }
 
+  .print-table tfoot td {
+    border-top: 2px solid black;
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+  }
+
   /* Print checkbox — 15x15mm square */
   .print-checkbox {
     width: 15mm;
