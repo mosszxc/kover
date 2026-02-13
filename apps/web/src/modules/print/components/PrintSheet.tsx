@@ -54,31 +54,29 @@ export function PrintSheet({ stops, clients, selectedDay }: PrintSheetProps) {
 
   return (
     <div className="hidden print:block">
-      <h1>{DAY_LABELS_FULL[selectedDay]}, {formatDate()}</h1>
+      <h1 className="print-header">{DAY_LABELS_FULL[selectedDay]}, {formatDate()}</h1>
 
       <table className="print-table">
         <thead>
           <tr>
-            <th>#</th>
-            <th>Название</th>
-            <th>180</th>
-            <th>150</th>
-            <th>60x80</th>
-            <th>400</th>
-            <th>250</th>
-            <th>✓</th>
+            <th className="num">#</th>
+            <th className="col-name">Название</th>
+            {MAT_SIZES.map((size) => (
+              <th key={size} className="num">{size}</th>
+            ))}
+            <th className="num">✓</th>
           </tr>
         </thead>
         <tbody>
           {rows.map(({ stop, client }, index) => (
             <tr key={stop.id}>
-              <td>{index + 1}</td>
+              <td className="num">{index + 1}</td>
               <td>{client?.originalName ?? '—'}</td>
               {MAT_SIZES.map((size) => {
                 const qty = client ? getMatQuantity(client, size) : 0
-                return <td key={size}>{qty > 0 ? qty : ''}</td>
+                return <td key={size} className="num">{qty > 0 ? qty : ''}</td>
               })}
-              <td>
+              <td className="num">
                 <span className="print-checkbox" />
               </td>
             </tr>
@@ -86,10 +84,10 @@ export function PrintSheet({ stops, clients, selectedDay }: PrintSheetProps) {
         </tbody>
         <tfoot>
           <tr>
-            <td />
+            <td className="num" />
             <td>Итого: {rows.length} точек</td>
             {MAT_SIZES.map((size) => (
-              <td key={size}>
+              <td key={size} className="num">
                 {(totals[size] ?? 0) > 0 ? totals[size] : ''}
               </td>
             ))}

@@ -118,7 +118,7 @@
 
 @page {
   size: A4 portrait;
-  margin: 15mm;
+  margin: 12mm 10mm;
 }
 
 @media print {
@@ -126,72 +126,118 @@
     display: none !important;
   }
 
-  /* Reset app layout */
+  /* Reset ALL app containers — kill overflow/flex/grid that break pagination */
+  * {
+    overflow: visible !important;
+    float: none !important;
+  }
+
+  html, body {
+    font-family: "Times New Roman", serif !important;
+    font-size: 12pt !important;
+    line-height: 1.3 !important;
+    color: black !important;
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
   .print-root {
     background: white !important;
     min-height: auto !important;
+    display: block !important;
+    height: auto !important;
   }
 
   .print-content {
     padding-left: 0 !important;
     min-height: auto !important;
+    display: block !important;
+    height: auto !important;
   }
 
   .print-content main {
     padding: 0 !important;
+    flex: none !important;
   }
 
-  html,
-  body {
-    font-family: "Times New Roman", serif !important;
-    font-size: 14pt !important;
-    line-height: 1.4 !important;
-    color: black !important;
-    background: white !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  h1, h2, h3 {
-    font-size: 18pt !important;
+  /* ── Print header ── */
+  .print-header {
+    font-size: 16pt !important;
     font-weight: bold !important;
     color: black !important;
+    margin: 0 0 6pt 0 !important;
+    break-after: avoid;
   }
 
-  /* Print table */
+  /* ── Print table — page break control ── */
   .print-table {
     width: 100%;
     border-collapse: collapse;
   }
 
+  /* Repeat header on every page */
+  .print-table thead {
+    display: table-header-group;
+  }
+
+  /* Footer only at the end */
+  .print-table tfoot {
+    display: table-footer-group;
+  }
+
   .print-table th,
   .print-table td {
     border: 1px solid black;
-    padding: 4pt 6pt;
+    padding: 3pt 4pt;
     text-align: left;
-    font-size: 14pt;
+    font-size: 11pt;
     color: black;
   }
 
   .print-table th {
     font-weight: bold;
-    background: white;
+    background: #e8e8e8 !important;
+    border-bottom: 2px solid black;
   }
 
-  .print-table tr:nth-child(even) {
-    background: #f0f0f0;
+  /* Never split a row across pages */
+  .print-table tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .print-table tbody tr:nth-child(even) {
+    background: #f4f4f4;
   }
 
   .print-table tfoot td {
     border-top: 2px solid black;
     font-weight: bold;
     font-variant-numeric: tabular-nums;
+    background: white !important;
   }
 
-  /* Print checkbox — 15x15mm square */
+  /* Numeric columns — right-align for readability */
+  .print-table td.num,
+  .print-table th.num {
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Name column — wider */
+  .print-table .col-name {
+    width: 45%;
+  }
+
+  /* Print checkbox — 12x12mm square */
   .print-checkbox {
-    width: 15mm;
-    height: 15mm;
+    width: 12mm;
+    height: 12mm;
     border: 1.5px solid black;
     display: inline-block;
   }
