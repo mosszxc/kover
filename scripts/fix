@@ -1,0 +1,133 @@
+#!/bin/bash
+# Начать работу над issue
+# Usage: ./scripts/fix 123
+#        ./scripts/fix --stale   (check stale in-progress issues)
+
+set -e
+
+WIP_LIMIT=3
+
+# --stale mode: show in-progress issues older than 7 days
+if [ "$1" = "--stale" ]; then
+    echo "Checking stale in-progress issues (>7 days)..."
+    echo ""
+    ME=$(gh api user -q '.login' 2>/dev/null || echo "")
+    STALE=$(gh issue list --label "status:in-progress" --state open --json number,title,updatedAt,assignees -q '
+        .[] | select(
+            (now - (.updatedAt | fromdateiso8601)) > (7 * 24 * 3600)
+        ) | "#\(.number) \(.title) (updated: \(.updatedAt[:10]), assignees: \([.assignees[].login] | join(", ") // "none"))"
+    ' 2>/dev/null)
+    if [ -z "$STALE" ]; then
+        echo "No stale issues found."
+    else
+        echo "Stale in-progress issues:"
+        echo "$STALE" | while read -r line; do echo "  $line"; done
+    fi
+    exit 0
+fi
+
+ISSUE=${1#\#}
+WORKTREES_DIR=".worktrees"
+BRANCH="feat/issue-$ISSUE"
+WORKTREE_PATH="$WORKTREES_DIR/issue-$ISSUE"
+
+[ -z "$ISSUE" ] && { echo "Usage: ./scripts/fix <issue_number>"; echo "       ./scripts/fix --stale"; exit 1; }
+
+# Проверить issue
+TITLE=$(gh issue view "$ISSUE" --json title -q '.title') || exit 1
+
+echo "═══════════════════════════════════════════"
+echo "  Starting #$ISSUE: $TITLE"
+echo "═══════════════════════════════════════════"
+
+# WIP limit check
+ME=$(gh api user -q '.login' 2>/dev/null || echo "")
+if [ -n "$ME" ]; then
+    WIP_COUNT=$(gh issue list --label "status:in-progress" --assignee "$ME" --state open --json number -q 'length' 2>/dev/null || echo "0")
+    if [ "$WIP_COUNT" -ge "$WIP_LIMIT" ]; then
+        echo ""
+        echo "WIP limit reached ($WIP_COUNT/$WIP_LIMIT in-progress)."
+        echo "Finish existing issues first:"
+        gh issue list --label "status:in-progress" --assignee "$ME" --state open --json number,title -q '.[] | "  #\(.number) \(.title)"' 2>/dev/null
+        echo ""
+        echo "Use --force to override: ./scripts/fix $ISSUE --force"
+        [ "$2" != "--force" ] && exit 1
+        echo "Overriding WIP limit..."
+    else
+        echo "WIP: $WIP_COUNT/$WIP_LIMIT"
+    fi
+fi
+
+mkdir -p "$WORKTREES_DIR"
+
+if [ -d "$WORKTREE_PATH" ]; then
+    echo "Worktree exists: $WORKTREE_PATH"
+else
+    git fetch origin develop --quiet
+    if git show-ref --verify --quiet "refs/heads/$BRANCH"; then
+        git worktree add "$WORKTREE_PATH" "$BRANCH"
+    else
+        git worktree add -b "$BRANCH" "$WORKTREE_PATH" origin/develop
+    fi
+fi
+
+# Install dependencies
+echo ""
+echo "[SETUP] Installing dependencies..."
+(cd "$WORKTREE_PATH" && pnpm install --prefer-offline --silent) && \
+    echo "[SETUP] pnpm install ✓" || \
+    echo "[SETUP] pnpm install failed (run manually)"
+
+# Get issue labels (for analysis gate)
+LABELS_RAW=$(gh issue view "$ISSUE" --json labels -q '[.labels[].name] | join(",")' 2>/dev/null || echo "")
+
+# Label + auto-assign
+gh issue edit "$ISSUE" --add-label "status:in-progress" 2>/dev/null || true
+gh issue edit "$ISSUE" --add-assignee "@me" 2>/dev/null || true
+
+# Stale check (non-blocking warning)
+if [ -n "$ME" ]; then
+    STALE_COUNT=$(gh issue list --label "status:in-progress" --assignee "$ME" --state open --json number,updatedAt -q '
+        [.[] | select((now - (.updatedAt | fromdateiso8601)) > (7 * 24 * 3600))] | length
+    ' 2>/dev/null || echo "0")
+    if [ "$STALE_COUNT" -gt 0 ]; then
+        echo ""
+        echo "You have $STALE_COUNT stale in-progress issue(s) (>7 days)."
+        echo "Run ./scripts/fix --stale for details."
+    fi
+fi
+
+echo ""
+echo "═══════════════════════════════════════════"
+echo "  Ready!"
+echo "═══════════════════════════════════════════"
+echo ""
+echo "Worktree: $WORKTREE_PATH"
+echo "Branch:   $BRANCH"
+echo ""
+
+# Check if analysis is needed (skip for docs/polish)
+SKIP_ANALYSIS=false
+case "$LABELS_RAW" in
+    *docs*|*polish*) SKIP_ANALYSIS=true ;;
+esac
+
+if [ "$SKIP_ANALYSIS" = false ]; then
+    echo "────────────────────────────────────────────"
+    echo "  ⚠️  PHASE 2.5: PRE-CODE ANALYSIS REQUIRED"
+    echo "────────────────────────────────────────────"
+    echo ""
+    echo "  ПЕРЕД кодом создай .analysis.md:"
+    echo ""
+    echo "  1. WALKTHROUGH: Нажал → увидел → ожидает"
+    echo "  2. ПАТТЕРНЫ: найди аналог в коде, проверь его"
+    echo "  3. ВАЛИДАЦИЯ: issue просит правильную вещь?"
+    echo ""
+    echo "  ship заблокирует без .analysis.md"
+    echo ""
+fi
+
+echo "To start:"
+echo "  cd $WORKTREE_PATH"
+echo ""
+echo "When done: ./scripts/ship"

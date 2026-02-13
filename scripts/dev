@@ -1,0 +1,14 @@
+#!/bin/bash
+# Запуск dev серверов с автоматической настройкой сети для WSL
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+
+cd "$ROOT_DIR"
+
+# Настраиваем port forwarding
+"$SCRIPT_DIR/dev-network"
+
+# Запускаем серверы
+echo "🚀 Запуск серверов..."
+pnpm dev

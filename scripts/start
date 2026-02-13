@@ -1,0 +1,147 @@
+#!/bin/bash
+# Запуск полного dev-окружения: Temporal + API + Web
+# Usage: ./scripts/start [--check] [--stop]
+
+set -e
+
+PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$PROJECT_ROOT"
+
+# Цвета
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[0;33m'
+NC='\033[0m'
+
+ok() { echo -e "  ${GREEN}OK${NC}  $1"; }
+fail() { echo -e "  ${RED}FAIL${NC}  $1"; }
+
+# --- Проверка статуса ---
+check_docker() {
+    docker info &>/dev/null
+}
+
+check_temporal() {
+    curl -s http://localhost:8233 &>/dev/null
+}
+
+check_api() {
+    curl -s http://localhost:10000/health &>/dev/null
+}
+
+check_web() {
+    curl -s http://localhost:5173 &>/dev/null
+}
+
+show_status() {
+    echo "=== Rubick Local Environment ==="
+    echo ""
+    echo "Status:"
+
+    check_docker && ok "Docker" || fail "Docker"
+    check_temporal && ok "Temporal    http://localhost:8233" || fail "Temporal"
+    check_api && ok "API         http://localhost:10000" || fail "API"
+    check_web && ok "Web         http://localhost:5173" || fail "Web"
+    echo ""
+}
+
+# --- Только проверка ---
+if [ "$1" = "--check" ]; then
+    show_status
+
+    check_docker && check_temporal && check_api && check_web && {
+        echo -e "${GREEN}All services running!${NC}"
+        exit 0
+    } || {
+        echo -e "${RED}Some services are down${NC}"
+        exit 1
+    }
+fi
+
+# --- Остановка ---
+if [ "$1" = "--stop" ]; then
+    echo "=== Stopping Rubick Dev Environment ==="
+
+    # Остановка pnpm dev процессов
+    pkill -f "pnpm.*dev" 2>/dev/null || true
+    pkill -f "vite" 2>/dev/null || true
+    pkill -f "uvicorn" 2>/dev/null || true
+
+    # Остановка Temporal
+    docker stop temporal-dev 2>/dev/null || true
+
+    echo -e "${GREEN}All services stopped${NC}"
+    exit 0
+fi
+
+# --- Запуск сервисов ---
+echo "=== Starting Rubick Dev Environment ==="
+echo ""
+
+# 1. Docker
+echo -n "Checking Docker... "
+if check_docker; then
+    echo "OK"
+else
+    echo "FAILED - Please start Docker Desktop"
+    exit 1
+fi
+
+# 2. Temporal
+echo -n "Checking Temporal... "
+if check_temporal; then
+    echo "already running"
+else
+    echo "starting..."
+
+    # Проверяем существует ли контейнер
+    if docker ps -a --format '{{.Names}}' | grep -q '^temporal-dev$'; then
+        docker start temporal-dev >/dev/null
+    else
+        # Создаём новый контейнер
+        docker run -d --name temporal-dev \
+            -p 7233:7233 -p 8233:8233 \
+            temporalio/temporal:latest \
+            server start-dev --ip 0.0.0.0 >/dev/null
+    fi
+
+    # Ждём Temporal UI
+    for i in {1..30}; do
+        check_temporal && break
+        sleep 1
+    done
+    check_temporal && echo "  Temporal ready" || { echo "  Temporal failed to start"; exit 1; }
+fi
+
+# 3. API + Web
+echo -n "Checking API... "
+if check_api; then
+    echo "already running"
+else
+    echo "starting API + Web..."
+    cd "$PROJECT_ROOT"
+    nohup pnpm dev > /tmp/rubick-dev.log 2>&1 &
+
+    # Ждём API
+    for i in {1..30}; do
+        check_api && break
+        sleep 1
+    done
+    check_api && echo "  API ready" || { echo "  API failed. Check /tmp/rubick-dev.log"; exit 1; }
+fi
+
+# 4. Web (проверяем отдельно, т.к. может стартовать позже)
+echo -n "Checking Web... "
+if check_web; then
+    echo "already running"
+else
+    for i in {1..15}; do
+        check_web && break
+        sleep 1
+    done
+    check_web && echo "ready" || echo "still starting (check /tmp/rubick-dev.log)"
+fi
+
+echo ""
+show_status
+echo -e "${GREEN}All services running!${NC}"

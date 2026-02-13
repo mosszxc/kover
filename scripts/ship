@@ -1,0 +1,444 @@
+#!/bin/bash
+# Завершить работу: commit, push, PR, merge, отчёт
+# Usage: ./scripts/ship [--continue]
+#
+# Exit codes:
+#   0 - success
+#   1 - general error
+#   2 - conflict needs AI-assisted merge (agent should resolve and run --continue)
+
+set -e
+
+# Parse arguments
+CONTINUE_MODE=false
+if [ "$1" = "--continue" ]; then
+    CONTINUE_MODE=true
+fi
+
+# Get branch name (works both on branch and during rebase)
+GIT_DIR=$(git rev-parse --git-dir 2>/dev/null)
+if [ -f "$GIT_DIR/rebase-merge/head-name" ]; then
+    # During rebase: get original branch name from rebase state
+    BRANCH=$(cat "$GIT_DIR/rebase-merge/head-name" | sed 's|refs/heads/||')
+elif [ -f "$GIT_DIR/rebase-apply/head-name" ]; then
+    # During rebase-apply: alternative rebase state location
+    BRANCH=$(cat "$GIT_DIR/rebase-apply/head-name" | sed 's|refs/heads/||')
+else
+    # Normal state: get current branch
+    BRANCH=$(git rev-parse --abbrev-ref HEAD)
+fi
+
+ISSUE=$(echo "$BRANCH" | grep -oE '[0-9]+' || echo "")
+[ -z "$ISSUE" ] && { echo "Not on issue branch (branch: $BRANCH)"; exit 1; }
+TITLE=$(gh issue view "$ISSUE" --json title -q '.title')
+BODY=$(gh issue view "$ISSUE" --json body -q '.body')
+LABELS=$(gh issue view "$ISSUE" --json labels -q '[.labels[].name] | join(",")' 2>/dev/null || echo "")
+
+# Temp directory for conflict files (unique per issue)
+CONFLICT_DIR="/tmp/ship_conflict_${ISSUE}"
+
+echo ""
+echo "[PHASE 4] Ship #$ISSUE: $TITLE"
+echo ""
+
+# Helper function to handle conflicts (used by both main flow and --continue)
+handle_conflicts() {
+    local CONFLICTS=$(git diff --name-only --diff-filter=U 2>/dev/null)
+    [ -z "$CONFLICTS" ] && return 1  # No conflicts
+
+    echo "Конфликтные файлы:"
+    echo "$CONFLICTS" | sed 's/^/  /'
+
+    # Separate lock files from code files
+    local LOCK_FILES=""
+    local CODE_FILES=""
+    for file in $CONFLICTS; do
+        case "$file" in
+            package-lock.json|pnpm-lock.yaml|yarn.lock|*.lock)
+                LOCK_FILES="$LOCK_FILES $file"
+                ;;
+            *)
+                CODE_FILES="$CODE_FILES $file"
+                ;;
+        esac
+    done
+
+    # Auto-resolve lock files (safe)
+    for file in $LOCK_FILES; do
+        echo "  → $file: принимаю develop + переустановка"
+        git checkout --theirs "$file" 2>/dev/null
+        git add "$file"
+    done
+
+    # Code files need AI-assisted merge
+    if [ -n "$CODE_FILES" ]; then
+        echo ""
+        echo "════════════════════════════════════════════════════════════"
+        echo "⚠️  CONFLICT_DETECTED — нужен AI-assisted merge"
+        echo "════════════════════════════════════════════════════════════"
+        echo ""
+
+        # Create conflict directory
+        mkdir -p "$CONFLICT_DIR"
+
+        # Save versions for each conflicting code file
+        for file in $CODE_FILES; do
+            # Sanitize filename for temp storage
+            SAFE_NAME=$(echo "$file" | tr '/' '_')
+
+            echo "Файл: $file"
+            echo "  base:   ${CONFLICT_DIR}/${SAFE_NAME}.base"
+            echo "  ours:   ${CONFLICT_DIR}/${SAFE_NAME}.ours   (твои изменения)"
+            echo "  theirs: ${CONFLICT_DIR}/${SAFE_NAME}.theirs (develop)"
+            echo ""
+
+            # Extract three versions
+            git show :1:"$file" > "${CONFLICT_DIR}/${SAFE_NAME}.base" 2>/dev/null || touch "${CONFLICT_DIR}/${SAFE_NAME}.base"
+            git show :2:"$file" > "${CONFLICT_DIR}/${SAFE_NAME}.ours" 2>/dev/null
+            git show :3:"$file" > "${CONFLICT_DIR}/${SAFE_NAME}.theirs" 2>/dev/null
+
+            echo "  working: $file (с маркерами конфликта)"
+        done
+
+        echo ""
+        echo "────────────────────────────────────────────────────────────"
+        echo "ИНСТРУКЦИЯ ДЛЯ АГЕНТА:"
+        echo ""
+        echo "1. Прочитай файлы .ours и .theirs чтобы понять intent обеих сторон"
+        echo "2. Отредактируй конфликтный файл ($CODE_FILES) — объедини изменения"
+        echo "3. Запусти: ./scripts/ship --continue"
+        echo ""
+        echo "Пример:"
+        echo "  Read ${CONFLICT_DIR}/<file>.ours"
+        echo "  Read ${CONFLICT_DIR}/<file>.theirs"
+        echo "  Edit <конфликтный файл> — объединить логику"
+        echo "  Bash: ./scripts/ship --continue"
+        echo "────────────────────────────────────────────────────────────"
+
+        exit 2
+    fi
+
+    # Only lock files — continue rebase and regenerate
+    GIT_EDITOR=true git rebase --continue 2>/dev/null || true
+
+    if [ -n "$LOCK_FILES" ]; then
+        echo "Переустанавливаю зависимости..."
+        pnpm install --reporter silent 2>/dev/null || true
+        git add package-lock.json pnpm-lock.yaml 2>/dev/null || true
+        git commit --amend --no-edit 2>/dev/null || git commit -m "chore: regenerate lockfile" 2>/dev/null || true
+    fi
+
+    return 0
+}
+
+# --continue mode: skip to rebase continuation
+if [ "$CONTINUE_MODE" = true ]; then
+    echo "[PHASE 4] Continuing after conflict resolution..."
+
+    # Check if we're in rebase state (works in worktrees)
+    if [ ! -d "$GIT_DIR/rebase-merge" ] && [ ! -d "$GIT_DIR/rebase-apply" ]; then
+        echo "❌ No rebase in progress. Run ./scripts/ship without --continue"
+        exit 1
+    fi
+
+    # Stage resolved files
+    git add -A
+
+    # Continue rebase (may have more conflicts in multi-commit rebase)
+    if ! GIT_EDITOR=true git rebase --continue 2>/dev/null; then
+        # Check if there are more conflicts
+        if handle_conflicts; then
+            : # Conflicts handled (either resolved or exit 2)
+        else
+            echo "❌ Rebase continue failed."
+            exit 1
+        fi
+    fi
+    echo "[PHASE 4] Rebase continued ✓"
+
+    # Push and jump to merge loop
+    echo "[PHASE 4] Pushing resolved changes..."
+    git push origin "$BRANCH" --force-with-lease
+    sleep 2
+
+    # Clean up conflict files
+    rm -rf "$CONFLICT_DIR"
+
+    # Jump to merge section (will be handled by the merge loop below)
+fi
+
+# Stage all changes for build verification
+if [ "$CONTINUE_MODE" = false ]; then
+    git add -A
+fi
+
+# Skip build/lint/commit/push/PR creation in continue mode (already done)
+if [ "$CONTINUE_MODE" = false ]; then
+    # ============================================================
+    # PHASE 2.5 GATE: require .analysis.md (skip for docs/polish)
+    # ============================================================
+    SKIP_ANALYSIS=false
+    case "$LABELS" in
+        *docs*|*polish*) SKIP_ANALYSIS=true ;;
+    esac
+
+    if [ "$SKIP_ANALYSIS" = false ] && [ ! -f ".analysis.md" ]; then
+        echo ""
+        echo "════════════════════════════════════════════════════════════"
+        echo "❌ BLOCKED: .analysis.md не найден"
+        echo ""
+        echo "PHASE 2.5 обязателен перед ship."
+        echo "Создай .analysis.md с анализом:"
+        echo ""
+        echo "  1. WALKTHROUGH: Нажал → увидел → ожидает"
+        echo "  2. ПАТТЕРНЫ: аналог в коде + проверка корректности"
+        echo "  3. ВАЛИДАЦИЯ: issue просит правильную вещь?"
+        echo ""
+        echo "Пропуск допустим только для issues с labels: docs, polish"
+        echo "════════════════════════════════════════════════════════════"
+        git reset HEAD -- . >/dev/null 2>&1
+        exit 1
+    fi
+
+    if [ -f ".analysis.md" ]; then
+        echo "[PHASE 4] Pre-code analysis found ✓"
+    fi
+
+    # Check for missing files in exports (common mistake: add export but forget file)
+    echo "[PHASE 4] Checking exports..."
+    MISSING_EXPORTS=""
+    for index_file in $(git diff --cached --name-only | grep 'index\.ts$'); do
+        dir=$(dirname "$index_file")
+        # Extract imported paths from index.ts
+        for import_path in $(git show ":$index_file" 2>/dev/null | grep -oE "from '\./[^']+'" | sed "s/from '\.\/\([^']*\)'/\1/"); do
+            # Check if file exists (with .ts or .tsx extension)
+            if [ ! -f "$dir/$import_path.ts" ] && [ ! -f "$dir/$import_path.tsx" ] && [ ! -f "$dir/$import_path/index.ts" ]; then
+                MISSING_EXPORTS="$MISSING_EXPORTS\n  $dir/$import_path"
+            fi
+        done
+    done
+    if [ -n "$MISSING_EXPORTS" ]; then
+        echo "❌ Missing files for exports:$MISSING_EXPORTS"
+        echo ""
+        echo "Добавь файлы в git или убери экспорты из index.ts"
+        git reset HEAD -- . >/dev/null 2>&1
+        exit 1
+    fi
+    echo "[PHASE 4] Checking exports... ✓"
+
+    # Local CI (BEFORE commit to catch errors early)
+    echo "[PHASE 4] Build..."
+    pnpm -s run build || { echo "❌ Build failed"; git reset HEAD -- . >/dev/null 2>&1; exit 1; }
+    echo "[PHASE 4] Build... ✓"
+
+    echo "[PHASE 4] Lint..."
+    pnpm -s run lint || { echo "❌ Lint failed"; git reset HEAD -- . >/dev/null 2>&1; exit 1; }
+    echo "[PHASE 4] Lint... ✓"
+
+    # Schema validation (if snapshot exists)
+    VALIDATE_SCRIPT="$(git rev-parse --show-toplevel 2>/dev/null || echo ".")/scripts/validate_schema.py"
+    if [ -f "$VALIDATE_SCRIPT" ]; then
+        echo "[PHASE 4] Schema validation..."
+        python3 "$VALIDATE_SCRIPT" --summary || { echo "❌ Schema validation failed"; git reset HEAD -- . >/dev/null 2>&1; exit 1; }
+        echo "[PHASE 4] Schema validation... ✓"
+    fi
+
+    # Resolve commit prefix from issue labels (LABELS fetched at top)
+    case "$LABELS" in
+        *bug*)       PREFIX="fix" ;;
+        *polish*|*refactor*) PREFIX="refactor" ;;
+        *docs*)      PREFIX="docs" ;;
+        *spike*)     PREFIX="docs" ;;
+        *)           PREFIX="feat" ;;
+    esac
+
+    # Commit only after successful build/lint/validation
+    if ! git diff --cached --quiet; then
+        echo "[PHASE 4] Committing changes..."
+        git commit -m "$PREFIX: $TITLE (#$ISSUE)"
+    fi
+
+    # Push
+    echo "[PHASE 4] Pushing..."
+    git push -u origin "$BRANCH" 2>/dev/null || git push origin "$BRANCH"
+
+    # PR (в develop)
+    echo "[PHASE 4] Creating PR..."
+    PR_URL=$(gh pr create --base develop --title "$TITLE (#$ISSUE)" --body "Closes #$ISSUE" 2>&1) || \
+        PR_URL=$(gh pr view "$BRANCH" --json url -q '.url')
+fi
+
+# Get PR info (needed for both modes)
+PR_URL=$(gh pr view "$BRANCH" --json url -q '.url' 2>/dev/null || echo "")
+PR_NUM=$(echo "$PR_URL" | grep -oE '[0-9]+$')
+
+echo "[PHASE 4] PR создан: $PR_URL"
+
+# Merge PR directly (CI проверки уже сделаны локально)
+echo "[PHASE 4] Merging PR..."
+REBASE_ATTEMPTS=0
+MAX_REBASE_ATTEMPTS=5
+
+while true; do
+    # Check PR state first
+    PR_INFO=$(gh pr view "$BRANCH" --json state,mergeable -q '.state + " " + .mergeable' 2>/dev/null)
+    PR_STATE=$(echo "$PR_INFO" | awk '{print $1}')
+    MERGEABLE=$(echo "$PR_INFO" | awk '{print $2}')
+
+    [ "$PR_STATE" = "MERGED" ] && { echo "[PHASE 4] PR already merged ✓"; break; }
+
+    # If mergeable, try to merge
+    if [ "$MERGEABLE" = "MERGEABLE" ]; then
+        # Use --delete-branch only for remote; local branch in worktree can't be deleted
+        # Capture both stdout and stderr to check for "used by worktree" error
+        MERGE_OUTPUT=$(gh pr merge "$BRANCH" --squash --delete-branch 2>&1) && {
+            echo "[PHASE 4] PR merged ✓"
+            break
+        }
+        # Check if merge succeeded but branch deletion failed (worktree case)
+        if echo "$MERGE_OUTPUT" | grep -q "used by worktree"; then
+            # PR was merged, just branch deletion failed - that's OK
+            echo "[PHASE 4] PR merged ✓ (local branch kept - used by worktree)"
+            break
+        fi
+        # Other error - continue to rebase logic
+    fi
+
+    # Need rebase (either CONFLICTING, UNKNOWN, or merge failed)
+    REBASE_ATTEMPTS=$((REBASE_ATTEMPTS + 1))
+
+    if [ "$REBASE_ATTEMPTS" -gt "$MAX_REBASE_ATTEMPTS" ]; then
+        echo ""
+        echo "❌ Не удалось смержить после $MAX_REBASE_ATTEMPTS попыток"
+        echo "Разреши вручную: gh pr view $BRANCH --web"
+        exit 1
+    fi
+
+    echo ""
+    echo "⚠️  Rebase needed (попытка $REBASE_ATTEMPTS/$MAX_REBASE_ATTEMPTS)..."
+    echo "    PR state: $PR_STATE, mergeable: $MERGEABLE"
+
+    # Fetch latest develop
+    git fetch origin develop 2>/dev/null
+
+    # Try rebase
+    if git rebase origin/develop 2>/dev/null; then
+        echo "✓ Rebase успешен (no conflicts)"
+        git push origin "$BRANCH" --force-with-lease 2>/dev/null
+        sleep 2  # Give GitHub time to update PR state
+        continue
+    fi
+
+    # Rebase has conflicts — use helper function
+    handle_conflicts || true
+
+    # Push rebased branch
+    echo "Пушу rebase (force)..."
+    git push origin "$BRANCH" --force-with-lease
+    sleep 2  # Give GitHub time to update PR state
+done
+
+# Clean up conflict files (if any remain from previous runs)
+rm -rf "$CONFLICT_DIR" 2>/dev/null || true
+
+# ============================================================
+# PHASE 5: FINALIZATION (guaranteed merge + close)
+# ============================================================
+
+echo ""
+echo "[PHASE 5] Finalizing..."
+
+# 5.1 Verify PR is merged (retry if not)
+PR_STATE=$(gh pr view "$BRANCH" --json state -q '.state' 2>/dev/null || echo "UNKNOWN")
+if [ "$PR_STATE" != "MERGED" ]; then
+    echo "[PHASE 5] PR not merged (state: $PR_STATE), retrying..."
+    if gh pr merge "$BRANCH" --squash 2>/dev/null; then
+        echo "[PHASE 5] PR merged ✓"
+        PR_STATE="MERGED"
+    else
+        echo "⚠️  Failed to merge PR"
+    fi
+fi
+
+# 5.2 Close issue (regardless of sync status)
+echo "[PHASE 5] Ensuring issue #$ISSUE is closed..."
+ISSUE_STATE=$(gh issue view "$ISSUE" --json state -q '.state' 2>/dev/null || echo "UNKNOWN")
+ISSUE_CLOSED="closed"
+if [ "$ISSUE_STATE" != "CLOSED" ]; then
+    if gh issue close "$ISSUE" --comment "Fixed in #$PR_NUM" 2>/dev/null; then
+        echo "[PHASE 5] Issue closed ✓"
+    elif gh issue close "$ISSUE" 2>/dev/null; then
+        echo "[PHASE 5] Issue closed ✓"
+    else
+        ISSUE_CLOSED="FAILED (state: $ISSUE_STATE)"
+        echo "⚠️  Failed to close issue"
+    fi
+else
+    echo "[PHASE 5] Issue already closed ✓"
+fi
+
+# 5.3 Sync local develop (non-blocking)
+echo "[PHASE 5] Syncing local develop..."
+MAIN_REPO=$(git worktree list | head -1 | awk '{print $1}')
+cd "$MAIN_REPO"
+git fetch origin develop 2>/dev/null
+STASHED=false
+if ! git diff --quiet 2>/dev/null || ! git diff --cached --quiet 2>/dev/null; then
+    git stash push -q -m "ship: auto-stash for develop sync" 2>/dev/null && STASHED=true
+fi
+if git checkout develop 2>/dev/null && git pull origin develop 2>/dev/null; then
+    SYNC_STATUS="synced"
+    echo "[PHASE 5] Local develop synced ✓"
+else
+    SYNC_STATUS="FAILED (run: git checkout develop && git pull)"
+    echo "⚠️  Local develop sync failed (non-blocking)"
+fi
+if [ "$STASHED" = true ]; then
+    git stash pop -q 2>/dev/null || echo "⚠️  git stash pop failed — run: git stash pop"
+fi
+
+# 5.4 Final verification
+FINAL_PR_STATE=$(gh pr view "$BRANCH" --json state -q '.state' 2>/dev/null || echo "UNKNOWN")
+FINAL_ISSUE_STATE=$(gh issue view "$ISSUE" --json state -q '.state' 2>/dev/null || echo "UNKNOWN")
+
+if [ "$FINAL_PR_STATE" != "MERGED" ] || [ "$FINAL_ISSUE_STATE" != "CLOSED" ]; then
+    echo ""
+    echo "════════════════════════════════════════════════════════════"
+    echo "⚠️  FINALIZATION INCOMPLETE"
+    echo ""
+    echo "PR state: $FINAL_PR_STATE (expected: MERGED)"
+    echo "Issue state: $FINAL_ISSUE_STATE (expected: CLOSED)"
+    echo ""
+    echo "Manual fix:"
+    [ "$FINAL_PR_STATE" != "MERGED" ] && echo "  gh pr merge $BRANCH --squash"
+    [ "$FINAL_ISSUE_STATE" != "CLOSED" ] && echo "  gh issue close $ISSUE"
+    echo "════════════════════════════════════════════════════════════"
+    exit 1
+fi
+
+# Extract Acceptance Criteria from issue body
+AC=$(echo "$BODY" | sed -n '/## Acceptance Criteria/,/##/p' | grep -E '^\s*-\s*\[.\]' | sed 's/\[.\]/✓/' | sed 's/^[[:space:]]*/  /')
+if [ -z "$AC" ]; then
+    # Try alternative format (checkboxes anywhere)
+    AC=$(echo "$BODY" | grep -E '^\s*-\s*\[.\]' | sed 's/\[.\]/✓/' | sed 's/^[[:space:]]*/  /')
+fi
+
+# Final report
+echo ""
+echo "════════════════════════════════════════════════════════════"
+echo ""
+echo "✅ #$ISSUE completed"
+echo ""
+echo "PR: $PR_URL"
+echo "PR state: MERGED ✓"
+echo "Issue #$ISSUE: CLOSED ✓"
+echo "Local develop: $SYNC_STATUS"
+echo ""
+
+if [ -n "$AC" ]; then
+    echo "Acceptance Criteria:"
+    echo "$AC"
+    echo ""
+fi
+
+echo "════════════════════════════════════════════════════════════"

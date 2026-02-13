@@ -1,0 +1,36 @@
+name: Lint SQL Migrations
+
+on:
+  pull_request:
+    paths:
+      - '**/*.sql'
+
+jobs:
+  lint:
+    name: SQL Migration Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed SQL files
+        id: changed
+        run: |
+          FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD --diff-filter=ACM | grep '\.sql$' || true)
+          if [ -z "$FILES" ]; then
+            echo "files=" >> $GITHUB_OUTPUT
+            echo "No SQL files changed."
+          else
+            # Newline-delimited → space-delimited for passing as args
+            FILES_ONELINE=$(echo "$FILES" | tr '\n' ' ')
+            echo "files=$FILES_ONELINE" >> $GITHUB_OUTPUT
+            echo "SQL files to lint: $FILES_ONELINE"
+          fi
+
+      - name: Run migration linter
+        if: steps.changed.outputs.files != ''
+        run: |
+          chmod +x ./scripts/lint-migrations.sh
+          ./scripts/lint-migrations.sh ${{ steps.changed.outputs.files }}

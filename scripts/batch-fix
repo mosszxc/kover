@@ -1,0 +1,294 @@
+#!/bin/bash
+# Batch processing of GitHub issues with throughput guard
+# Usage: ./scripts/batch-fix [--limit N] [--label LABEL] [--dry-run] [--force] [ISSUE_NUMBERS...]
+#
+# Limits:
+#   - Max 15 issues per session (hard cap)
+#   - Throughput check: closed/created >= 0.7 over last 7 days
+#   - Use --force to bypass throughput check
+
+set -e
+
+# ═══════════════════════════════════════════════════════════
+# Configuration
+# ═══════════════════════════════════════════════════════════
+
+SESSION_LIMIT=15
+THROUGHPUT_THRESHOLD="0.7"
+THROUGHPUT_WINDOW_DAYS=7
+
+# ═══════════════════════════════════════════════════════════
+# Parse arguments
+# ═══════════════════════════════════════════════════════════
+
+LIMIT=5
+LABEL=""
+DRY_RUN=false
+FORCE=false
+ISSUE_NUMBERS=()
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --limit)
+            LIMIT="$2"
+            shift 2
+            ;;
+        --label)
+            LABEL="$2"
+            shift 2
+            ;;
+        --dry-run)
+            DRY_RUN=true
+            shift
+            ;;
+        --force)
+            FORCE=true
+            shift
+            ;;
+        [0-9]*)
+            if [ "$1" -ge 100 ] 2>/dev/null; then
+                ISSUE_NUMBERS+=("$1")
+            else
+                LIMIT="$1"
+            fi
+            shift
+            ;;
+        *)
+            echo "Unknown argument: $1"
+            echo "Usage: ./scripts/batch-fix [--limit N] [--label LABEL] [--dry-run] [--force] [ISSUE_NUMBERS...]"
+            exit 1
+            ;;
+    esac
+done
+
+# Enforce session limit
+if [ ${#ISSUE_NUMBERS[@]} -gt 0 ]; then
+    EFFECTIVE_COUNT=${#ISSUE_NUMBERS[@]}
+else
+    EFFECTIVE_COUNT=$LIMIT
+fi
+
+if [ "$EFFECTIVE_COUNT" -gt "$SESSION_LIMIT" ]; then
+    echo "════════════════════════════════════════════════════════════"
+    echo "  SESSION LIMIT: max $SESSION_LIMIT issues per batch"
+    echo "  Requested: $EFFECTIVE_COUNT"
+    echo "════════════════════════════════════════════════════════════"
+    echo ""
+    echo "Reduce the number of issues or split into multiple batches."
+    echo "Close existing issues first to improve throughput."
+    exit 1
+fi
+
+# ═══════════════════════════════════════════════════════════
+# Throughput check
+# ═══════════════════════════════════════════════════════════
+
+check_throughput() {
+    local SINCE_DATE
+    SINCE_DATE=$(date -d "-${THROUGHPUT_WINDOW_DAYS} days" +%Y-%m-%d 2>/dev/null || \
+                 date -v-${THROUGHPUT_WINDOW_DAYS}d +%Y-%m-%d 2>/dev/null)
+
+    # Count issues created in the window
+    local CREATED
+    CREATED=$(gh issue list --state all --json createdAt -q \
+        "[.[] | select(.createdAt >= \"${SINCE_DATE}\")] | length" \
+        --limit 500 2>/dev/null || echo "0")
+
+    # Count issues closed in the window
+    local CLOSED
+    CLOSED=$(gh issue list --state closed --json closedAt -q \
+        "[.[] | select(.closedAt >= \"${SINCE_DATE}\")] | length" \
+        --limit 500 2>/dev/null || echo "0")
+
+    # Calculate throughput
+    local THROUGHPUT
+    if [ "$CREATED" -eq 0 ]; then
+        THROUGHPUT="1.0"
+    else
+        THROUGHPUT=$(awk "BEGIN { printf \"%.2f\", $CLOSED / $CREATED }")
+    fi
+
+    echo "  Created (${THROUGHPUT_WINDOW_DAYS}d): $CREATED"
+    echo "  Closed  (${THROUGHPUT_WINDOW_DAYS}d): $CLOSED"
+    echo "  Throughput: $THROUGHPUT (threshold: >= $THROUGHPUT_THRESHOLD)"
+
+    # Compare using awk (bash can't do float comparison)
+    local PASS
+    PASS=$(awk "BEGIN { print ($THROUGHPUT >= $THROUGHPUT_THRESHOLD) ? 1 : 0 }")
+
+    if [ "$PASS" -eq 0 ]; then
+        return 1
+    fi
+    return 0
+}
+
+echo ""
+echo "════════════════════════════════════════════════════════════"
+echo "  Batch Fix — Throughput Guard"
+echo "════════════════════════════════════════════════════════════"
+echo ""
+
+if ! check_throughput; then
+    echo ""
+    if [ "$FORCE" = true ]; then
+        echo "  Throughput below threshold — overriding with --force"
+    else
+        echo "  Throughput below threshold!"
+        echo ""
+        echo "  Close more issues before starting a new batch."
+        echo "  Issue Throughput must be >= $THROUGHPUT_THRESHOLD"
+        echo ""
+        echo "  Tips:"
+        echo "    gh issue list --state open --limit 20"
+        echo "    gh issue close <N>"
+        echo ""
+        echo "  Use --force to bypass this check."
+        exit 1
+    fi
+else
+    echo ""
+    echo "  Throughput OK"
+fi
+
+echo ""
+
+# ═══════════════════════════════════════════════════════════
+# Resolve issues to process
+# ═══════════════════════════════════════════════════════════
+
+if [ ${#ISSUE_NUMBERS[@]} -gt 0 ]; then
+    ISSUES=("${ISSUE_NUMBERS[@]}")
+    echo "Processing specific issues: ${ISSUES[*]}"
+else
+    echo "Fetching oldest $LIMIT open issues..."
+    QUERY_ARGS=(--state open --json number --limit "$LIMIT" -q '.[].number')
+    if [ -n "$LABEL" ]; then
+        QUERY_ARGS+=(--label "$LABEL")
+        echo "  Filter: label=$LABEL"
+    fi
+    mapfile -t ISSUES < <(gh issue list "${QUERY_ARGS[@]}" 2>/dev/null | sort -n)
+
+    if [ ${#ISSUES[@]} -eq 0 ]; then
+        echo "No open issues found."
+        exit 0
+    fi
+fi
+
+echo ""
+echo "Issues to process (${#ISSUES[@]}):"
+for i in "${ISSUES[@]}"; do
+    TITLE=$(gh issue view "$i" --json title -q '.title' 2>/dev/null || echo "???")
+    echo "  #$i — $TITLE"
+done
+echo ""
+
+# ═══════════════════════════════════════════════════════════
+# Dry run — stop here
+# ═══════════════════════════════════════════════════════════
+
+if [ "$DRY_RUN" = true ]; then
+    echo "[DRY RUN] Would process ${#ISSUES[@]} issues. Exiting."
+    exit 0
+fi
+
+# ═══════════════════════════════════════════════════════════
+# Process each issue
+# ═══════════════════════════════════════════════════════════
+
+SUCCEEDED=()
+FAILED=()
+SKIPPED=()
+
+process_issue() {
+    local ISSUE_NUM="$1"
+    local ATTEMPT="$2"
+
+    echo ""
+    echo "────────────────────────────────────────────────────────────"
+    echo "  Processing #$ISSUE_NUM (attempt $ATTEMPT)"
+    echo "────────────────────────────────────────────────────────────"
+
+    # Create worktree
+    if ! ./scripts/fix "$ISSUE_NUM" --force 2>&1; then
+        echo "  Failed to create worktree for #$ISSUE_NUM"
+        return 1
+    fi
+
+    local WORKTREE=".worktrees/issue-$ISSUE_NUM"
+
+    # Run Claude in headless mode
+    if ! (cd "$WORKTREE" && claude -p "fix #$ISSUE_NUM" --dangerously-skip-permissions 2>&1); then
+        echo "  Claude failed for #$ISSUE_NUM"
+        return 1
+    fi
+
+    # Ship
+    if ! (cd "$WORKTREE" && ./scripts/ship 2>&1); then
+        echo "  Ship failed for #$ISSUE_NUM"
+        return 1
+    fi
+
+    return 0
+}
+
+for ISSUE_NUM in "${ISSUES[@]}"; do
+    # Check if already closed
+    STATE=$(gh issue view "$ISSUE_NUM" --json state -q '.state' 2>/dev/null || echo "UNKNOWN")
+    if [ "$STATE" = "CLOSED" ]; then
+        echo "  #$ISSUE_NUM already closed — skipping"
+        SKIPPED+=("$ISSUE_NUM")
+        continue
+    fi
+
+    # Attempt 1
+    if process_issue "$ISSUE_NUM" 1; then
+        SUCCEEDED+=("$ISSUE_NUM")
+        continue
+    fi
+
+    # Retry (attempt 2)
+    echo "  Retrying #$ISSUE_NUM..."
+    if process_issue "$ISSUE_NUM" 2; then
+        SUCCEEDED+=("$ISSUE_NUM")
+        continue
+    fi
+
+    # Failed after retry — label as needs-human
+    echo "  #$ISSUE_NUM failed after retry — labeling needs-human"
+    gh issue edit "$ISSUE_NUM" --add-label "needs-human" 2>/dev/null || true
+    FAILED+=("$ISSUE_NUM")
+done
+
+# ═══════════════════════════════════════════════════════════
+# Report
+# ═══════════════════════════════════════════════════════════
+
+echo ""
+echo "════════════════════════════════════════════════════════════"
+echo "  Batch Fix Report"
+echo "════════════════════════════════════════════════════════════"
+echo ""
+echo "  Total:     ${#ISSUES[@]}"
+echo "  Succeeded: ${#SUCCEEDED[@]}  ${SUCCEEDED[*]:+(${SUCCEEDED[*]})}"
+echo "  Failed:    ${#FAILED[@]}  ${FAILED[*]:+(${FAILED[*]})}"
+echo "  Skipped:   ${#SKIPPED[@]}  ${SKIPPED[*]:+(${SKIPPED[*]})}"
+echo ""
+
+# Show updated throughput
+echo "Updated throughput:"
+check_throughput
+echo ""
+
+if [ ${#FAILED[@]} -gt 0 ]; then
+    echo "Failed issues (labeled needs-human):"
+    for i in "${FAILED[@]}"; do
+        echo "  gh issue view $i"
+    done
+    echo ""
+fi
+
+echo "════════════════════════════════════════════════════════════"
+
+# Exit with error if any failures
+[ ${#FAILED[@]} -gt 0 ] && exit 1
+exit 0

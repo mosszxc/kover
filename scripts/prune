@@ -1,0 +1,59 @@
+#!/bin/bash
+# Remove worktrees for merged/closed issues
+# Usage: ./scripts/prune [--dry-run]
+
+set -e
+
+DRY_RUN=false
+[ "$1" = "--dry-run" ] && DRY_RUN=true
+
+WORKTREES_DIR=".worktrees"
+REMOVED=0
+KEPT=0
+FREED_BYTES=0
+
+if [ ! -d "$WORKTREES_DIR" ]; then
+    echo "No worktrees directory found."
+    exit 0
+fi
+
+echo "Scanning worktrees..."
+echo ""
+
+for dir in "$WORKTREES_DIR"/issue-*; do
+    [ -d "$dir" ] || continue
+    ISSUE=$(basename "$dir" | grep -oE '[0-9]+')
+    [ -z "$ISSUE" ] && continue
+
+    # Check issue state
+    STATE=$(gh issue view "$ISSUE" --json state -q '.state' 2>/dev/null || echo "UNKNOWN")
+
+    if [ "$STATE" = "CLOSED" ]; then
+        SIZE=$(du -sh "$dir" 2>/dev/null | awk '{print $1}')
+        BRANCH="feat/issue-$ISSUE"
+
+        if [ "$DRY_RUN" = true ]; then
+            echo "  [DRY] Would remove: $dir ($SIZE)"
+        else
+            git worktree remove "$dir" --force 2>/dev/null || rm -rf "$dir"
+            git branch -d "$BRANCH" 2>/dev/null || git branch -D "$BRANCH" 2>/dev/null || true
+            echo "  Removed: issue-$ISSUE ($SIZE)"
+        fi
+        REMOVED=$((REMOVED + 1))
+    else
+        echo "  Kept: issue-$ISSUE (state: $STATE)"
+        KEPT=$((KEPT + 1))
+    fi
+done
+
+# Clean up stale git worktree references
+if [ "$DRY_RUN" = false ]; then
+    git worktree prune 2>/dev/null || true
+fi
+
+echo ""
+echo "════════════════════════════════════════"
+echo "  Removed: $REMOVED"
+echo "  Kept:    $KEPT"
+[ "$DRY_RUN" = true ] && echo "  (dry run — nothing was deleted)"
+echo "════════════════════════════════════════"
