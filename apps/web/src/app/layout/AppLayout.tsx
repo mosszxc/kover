@@ -2,6 +2,7 @@ import { Outlet } from "react-router"
 import { Sidebar } from "./Sidebar"
 import { TopBar } from "./TopBar"
 import { BottomTabs } from "./BottomTabs"
+import { Toaster } from "@/shared/ui/sonner"
 
 export function AppLayout() {
   return (
@@ -17,6 +18,7 @@ export function AppLayout() {
       </div>
 
       <BottomTabs />
+      <Toaster />
     </div>
   )
 }
