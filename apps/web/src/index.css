@@ -114,14 +114,79 @@
   }
 }
 
+/* ── Print styles ── */
+
+@page {
+  size: A4 portrait;
+  margin: 15mm;
+}
+
 @media print {
-  * {
-    color: black !important;
-    background: transparent !important;
-    box-shadow: none !important;
+  .no-print {
+    display: none !important;
   }
 
-  body {
+  /* Reset app layout */
+  .print-root {
     background: white !important;
+    min-height: auto !important;
+  }
+
+  .print-content {
+    padding-left: 0 !important;
+    min-height: auto !important;
+  }
+
+  .print-content main {
+    padding: 0 !important;
+  }
+
+  html,
+  body {
+    font-family: "Times New Roman", serif !important;
+    font-size: 14pt !important;
+    line-height: 1.4 !important;
+    color: black !important;
+    background: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  h1, h2, h3 {
+    font-size: 18pt !important;
+    font-weight: bold !important;
+    color: black !important;
+  }
+
+  /* Print table */
+  .print-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .print-table th,
+  .print-table td {
+    border: 1px solid black;
+    padding: 4pt 6pt;
+    text-align: left;
+    font-size: 14pt;
+    color: black;
+  }
+
+  .print-table th {
+    font-weight: bold;
+    background: white;
+  }
+
+  .print-table tr:nth-child(even) {
+    background: #f0f0f0;
+  }
+
+  /* Print checkbox — 15x15mm square */
+  .print-checkbox {
+    width: 15mm;
+    height: 15mm;
+    border: 1.5px solid black;
+    display: inline-block;
   }
 }
