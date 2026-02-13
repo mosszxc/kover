@@ -26,35 +26,22 @@ const NOTE_PATTERNS = [
   /стелим на себя/gi,
 ]
 
-/**
- * Regex for mat specs: captures quantity and size in various formats.
- *
- * Supported formats:
- * - `2x180`, `2х180`, `2X180`, `2Х180`, `2×180` — qty × size
- * - `180*2`, `180х2`, `180x2` — size × qty (reversed)
- * - `180 2шт`, `180 2 шт`, `180 3шт.` — size + qty with "шт"
- * - `150+150` — addition (handled separately)
- * - `60x80`, `60х80`, `80x80`, `80х80` — small mat dimensions
- * - bare `180`, `150`, `400`, `250`, `200`, `240` — single mat
- */
-
 // Small mat pattern: 60x80, 60х80, 80x80, 80х80 (with optional qty prefix)
 const SMALL_MAT_RE = /(?:(\d+)[- ]?)?(\d{2,3})[xхXХ×](\d{2,3})(?!\d)/g
 
-// Qty × Size: 2x180, 3х150
-const QTY_SIZE_RE = /(\d+)\s*[xхXХ×]\s*(180|150|400|250|200|240)(?!\d)/g
-
-// Size × Qty (reversed): 180*2, 180х3
-const SIZE_QTY_RE = /(180|150|400|250|200|240)\s*\*\s*(\d+)/g
-
-// Size + "шт": 180 2шт, 150 3 шт.
-const SIZE_SHT_RE = /(180|150|400|250|200|240)\s+(\d+)\s*шт\.?/gi
-
-// Size + Size (addition): 150+150
-const SIZE_PLUS_RE = /(180|150|400|250|200|240)\s*\+\s*(180|150|400|250|200|240)/g
-
-// Bare size (no quantity prefix) — matched last as fallback
-const BARE_SIZE_RE = /(?<!\d)(180|150|400|250|200|240)(?!\s*[xхXХ×*]\s*\d)(?!\d)/g
+/**
+ * Build a regex alternation pattern from store sizes + aliases.
+ * Only includes numeric IDs (e.g. '180', '400') — WxH sizes handled by SMALL_MAT_RE.
+ */
+function getNumericSizePattern(): string {
+  const sizeIds = useMatSizeStore.getState().sizes.map((s) => s.id)
+  const aliasKeys = Object.keys(SIZE_ALIASES)
+  const allIds = [...new Set([...sizeIds, ...aliasKeys])]
+  const numeric = allIds.filter((id) => /^\d+$/.test(id))
+  // Sort by length desc so longer patterns match first (e.g. '400' before '40')
+  numeric.sort((a, b) => b.length - a.length || b.localeCompare(a))
+  return numeric.length > 0 ? numeric.join('|') : '(?!)'
+}
 
 function normalizeSize(raw: string): string | null {
   if (SIZE_ALIASES[raw]) return SIZE_ALIASES[raw]
@@ -80,6 +67,8 @@ function extractMats(text: string): { mats: ParsedMatSpec[]; matRanges: [number,
   const ranges: [number, number][] = []
   let m: RegExpExecArray | null
 
+  const sizeAlt = getNumericSizePattern()
+
   // 1. Small mats: 60x80, 2-60х80, etc.
   const smallMatRe = new RegExp(SMALL_MAT_RE.source, SMALL_MAT_RE.flags)
   while ((m = smallMatRe.exec(text)) !== null) {
@@ -92,8 +81,8 @@ function extractMats(text: string): { mats: ParsedMatSpec[]; matRanges: [number,
     }
   }
 
-  // 2. Qty × Size: 2x180
-  const qtySizeRe = new RegExp(QTY_SIZE_RE.source, QTY_SIZE_RE.flags)
+  // 2. Qty × Size: 2x180, 3х150
+  const qtySizeRe = new RegExp(`(\\d+)\\s*[xхXХ×]\\s*(${sizeAlt})(?!\\d)`, 'g')
   while ((m = qtySizeRe.exec(text)) !== null) {
     if (isOverlapping(m.index, m.index + m[0].length, ranges)) continue
     const sizeRaw = m[2] ?? ''
@@ -106,7 +95,7 @@ function extractMats(text: string): { mats: ParsedMatSpec[]; matRanges: [number,
   }
 
   // 3. Size × Qty: 180*2
-  const sizeQtyRe = new RegExp(SIZE_QTY_RE.source, SIZE_QTY_RE.flags)
+  const sizeQtyRe = new RegExp(`(${sizeAlt})\\s*\\*\\s*(\\d+)`, 'g')
   while ((m = sizeQtyRe.exec(text)) !== null) {
     if (isOverlapping(m.index, m.index + m[0].length, ranges)) continue
     const sizeRaw = m[1] ?? ''
@@ -119,7 +108,7 @@ function extractMats(text: string): { mats: ParsedMatSpec[]; matRanges: [number,
   }
 
   // 4. Size + шт: 180 2шт
-  const sizeShtRe = new RegExp(SIZE_SHT_RE.source, SIZE_SHT_RE.flags)
+  const sizeShtRe = new RegExp(`(${sizeAlt})\\s+(\\d+)\\s*шт\\.?`, 'gi')
   while ((m = sizeShtRe.exec(text)) !== null) {
     if (isOverlapping(m.index, m.index + m[0].length, ranges)) continue
     const sizeRaw = m[1] ?? ''
@@ -132,7 +121,7 @@ function extractMats(text: string): { mats: ParsedMatSpec[]; matRanges: [number,
   }
 
   // 5. Size + Size: 150+150
-  const sizePlusRe = new RegExp(SIZE_PLUS_RE.source, SIZE_PLUS_RE.flags)
+  const sizePlusRe = new RegExp(`(${sizeAlt})\\s*\\+\\s*(${sizeAlt})`, 'g')
   while ((m = sizePlusRe.exec(text)) !== null) {
     if (isOverlapping(m.index, m.index + m[0].length, ranges)) continue
     const s1 = normalizeSize(m[1] ?? '')
@@ -149,7 +138,7 @@ function extractMats(text: string): { mats: ParsedMatSpec[]; matRanges: [number,
   }
 
   // 6. Bare size: standalone 180, 150, etc.
-  const bareSizeRe = new RegExp(BARE_SIZE_RE.source, BARE_SIZE_RE.flags)
+  const bareSizeRe = new RegExp(`(?<!\\d)(${sizeAlt})(?!\\s*[xхXХ×*]\\s*\\d)(?!\\d)`, 'g')
   while ((m = bareSizeRe.exec(text)) !== null) {
     if (isOverlapping(m.index, m.index + m[0].length, ranges)) continue
     const size = normalizeSize(m[1] ?? '')
