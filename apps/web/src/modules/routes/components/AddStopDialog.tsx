@@ -85,7 +85,7 @@ export function AddStopDialog({ clients }: AddStopDialogProps) {
       <DialogTrigger asChild>
         <Button
           variant="outline"
-          className="w-full border-dashed print:hidden"
+          className="no-print w-full border-dashed"
         >
           <Plus className="h-4 w-4" />
           Добавить точку
