@@ -32,7 +32,7 @@ export function StopCard({ number, client, stopId, isCompleted }: StopCardProps)
         aria-label={isCompleted ? 'Отметить как невыполненное' : 'Отметить как выполненное'}
         onClick={() => toggleStopCompleted(selectedDay, stopId)}
         className={cn(
-          'flex size-6 shrink-0 items-center justify-center rounded border transition-colors',
+          'flex size-6 shrink-0 items-center justify-center rounded border transition-colors print:hidden',
           isCompleted
             ? 'border-green-500 bg-green-500 text-white'
             : 'border-slate-600 bg-transparent hover:border-slate-400',

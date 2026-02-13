@@ -9,7 +9,7 @@ const navItems = [
 
 export function BottomTabs() {
   return (
-    <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-slate-900 border-t border-slate-700 flex">
+    <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-slate-900 border-t border-slate-700 flex print:!hidden">
       {navItems.map(({ to, label, icon: Icon }) => (
         <NavLink
           key={to}
