@@ -55,7 +55,7 @@ export function TransferStopDialog({ stopId, clientName, day }: TransferStopDial
         type="button"
         aria-label="Перенести в другой день"
         onClick={() => setOpen(true)}
-        className="flex size-6 min-h-[44px] min-w-[44px] items-center justify-center rounded text-slate-400 transition-colors hover:text-blue-500 print:hidden"
+        className="flex size-6 min-h-[44px] min-w-[44px] items-center justify-center rounded text-slate-400 transition-colors hover:text-blue-500 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 print:hidden"
       >
         <ArrowRightLeft className="size-4" />
       </button>
@@ -74,7 +74,7 @@ export function TransferStopDialog({ stopId, clientName, day }: TransferStopDial
                   key={d}
                   type="button"
                   onClick={() => { setTargetDay(d); setPosition(-1) }}
-                  className={`rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
+                  className={`rounded-md border px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
                     targetDay === d
                       ? 'border-blue-500 bg-blue-500/20 text-blue-400'
                       : 'border-slate-700 text-slate-300 hover:border-slate-500'

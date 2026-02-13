@@ -88,7 +88,7 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
           ref={setActivatorNodeRef}
           {...listeners}
           aria-label="Перетащить для изменения порядка"
-          className="flex size-6 shrink-0 cursor-grab items-center justify-center rounded transition-colors hover:bg-slate-700 active:cursor-grabbing print:hidden"
+          className="flex size-6 shrink-0 cursor-grab items-center justify-center rounded transition-colors hover:bg-slate-700 active:cursor-grabbing focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 print:hidden"
         >
           <GripVertical className="size-5 text-slate-400" />
         </button>
@@ -99,7 +99,7 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
         aria-label={isCompleted ? 'Отметить как невыполненное' : 'Отметить как выполненное'}
         onClick={() => toggleStopCompleted(selectedDay, stopId)}
         className={cn(
-          'flex size-6 shrink-0 items-center justify-center rounded border transition-colors print:hidden',
+          'flex size-6 shrink-0 items-center justify-center rounded border transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 print:hidden',
           isCompleted
             ? 'border-green-500 bg-green-500 text-white'
             : 'border-slate-600 bg-transparent hover:border-slate-400',
@@ -114,7 +114,7 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
             type="button"
             aria-label="Переместить вверх"
             onClick={() => moveStop(selectedDay, stopId, stopIndex - 1)}
-            className="flex size-6 items-center justify-center rounded transition-colors hover:bg-slate-700"
+            className="flex size-6 items-center justify-center rounded transition-colors hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
             <ChevronUp className="size-5 text-slate-400" />
           </button>
@@ -126,7 +126,7 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
             type="button"
             aria-label="Переместить вниз"
             onClick={() => moveStop(selectedDay, stopId, stopIndex + 1)}
-            className="flex size-6 items-center justify-center rounded transition-colors hover:bg-slate-700"
+            className="flex size-6 items-center justify-center rounded transition-colors hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
             <ChevronDown className="size-5 text-slate-400" />
           </button>
