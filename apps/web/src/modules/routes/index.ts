@@ -1,2 +1,1 @@
-// modules/routes — Public API
-// Route day view & management (Iterations 1-2)
+export type { DayRoute, RouteBlock, RouteStop } from './types'
