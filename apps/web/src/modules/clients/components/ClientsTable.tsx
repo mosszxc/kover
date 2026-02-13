@@ -8,7 +8,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { ChevronDown, ChevronUp, ChevronsUpDown, Search } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, ChevronsUpDown, Search, AlertTriangle } from 'lucide-react'
 import { useClientStore } from '../store'
 import type { Client } from '../types'
 import { DAY_LABELS, MAT_AREA } from '@/shared/types'
@@ -29,87 +29,99 @@ function getClientArea(client: Client): number {
   return client.mats.reduce((sum, m) => m.quantity * MAT_AREA[m.size] + sum, 0)
 }
 
-const columns: ColumnDef<Client>[] = [
-  {
-    accessorKey: 'name',
-    header: 'Название',
-    cell: (info) => info.getValue(),
-  },
-  {
-    accessorKey: 'address',
-    header: 'Адрес',
-    cell: (info) => info.getValue(),
-  },
-  {
-    id: 'mats',
-    header: 'Коврики',
-    accessorFn: (row) => row.mats.reduce((sum, m) => sum + m.quantity, 0),
-    cell: ({ row }) => (
-      <span className="tabular-nums">{formatMats(row.original)}</span>
-    ),
-  },
-  {
-    id: 'area',
-    header: 'Метраж',
-    accessorFn: (row) => getClientArea(row),
-    cell: ({ row }) => (
-      <span className="tabular-nums">
-        {getClientArea(row.original).toFixed(1)}
-      </span>
-    ),
-  },
-  {
-    accessorKey: 'frequency',
-    header: 'Частота',
-    cell: (info) => (
-      <span className="tabular-nums">{info.getValue() as number}</span>
-    ),
-  },
-  {
-    id: 'days',
-    header: 'Дни',
-    accessorFn: (row) => row.days.length,
-    cell: ({ row }) => (
-      <div className="flex gap-1">
-        {([0, 1, 2, 3, 4] as DayOfWeek[]).map((d) => (
-          <span
-            key={d}
-            className={`rounded px-1.5 py-0.5 text-xs font-semibold ${
-              row.original.days.includes(d)
-                ? 'bg-blue-600/20 text-blue-400'
-                : 'bg-slate-800 text-slate-600'
-            }`}
-          >
-            {DAY_LABELS[d]}
-          </span>
-        ))}
-      </div>
-    ),
-  },
-  {
-    accessorKey: 'isActive',
-    header: 'Статус',
-    cell: (info) =>
-      info.getValue() ? (
-        <span className="rounded-full bg-emerald-600/20 px-2 py-0.5 text-xs font-semibold text-emerald-400">
-          Активен
-        </span>
-      ) : (
-        <span className="rounded-full bg-amber-600/20 px-2 py-0.5 text-xs font-semibold text-amber-400">
-          На паузе
-        </span>
-      ),
-  },
-]
-
 interface ClientsTableProps {
   onRowClick?: (client: Client) => void
+  isClientInRoute?: (clientId: string, day: DayOfWeek) => boolean
 }
 
-export function ClientsTable({ onRowClick }: ClientsTableProps) {
+export function ClientsTable({ onRowClick, isClientInRoute }: ClientsTableProps) {
   const clients = useClientStore((s) => s.clients)
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState('')
+
+  const columns = useMemo<ColumnDef<Client>[]>(() => [
+    {
+      accessorKey: 'name',
+      header: 'Название',
+      cell: (info) => info.getValue(),
+    },
+    {
+      accessorKey: 'address',
+      header: 'Адрес',
+      cell: (info) => info.getValue(),
+    },
+    {
+      id: 'mats',
+      header: 'Коврики',
+      accessorFn: (row) => row.mats.reduce((sum, m) => sum + m.quantity, 0),
+      cell: ({ row }) => (
+        <span className="tabular-nums">{formatMats(row.original)}</span>
+      ),
+    },
+    {
+      id: 'area',
+      header: 'Метраж',
+      accessorFn: (row) => getClientArea(row),
+      cell: ({ row }) => (
+        <span className="tabular-nums">
+          {getClientArea(row.original).toFixed(1)}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'frequency',
+      header: 'Частота',
+      cell: (info) => (
+        <span className="tabular-nums">{info.getValue() as number}</span>
+      ),
+    },
+    {
+      id: 'days',
+      header: 'Дни',
+      accessorFn: (row) => row.days.length,
+      cell: ({ row }) => (
+        <div className="flex gap-1">
+          {row.original.days
+            .slice()
+            .sort((a, b) => a - b)
+            .map((d) => {
+              const inRoute = isClientInRoute?.(row.original.id, d) ?? false
+              return (
+                <span
+                  key={d}
+                  className={`inline-flex items-center gap-0.5 rounded border px-1.5 py-0.5 text-xs font-semibold ${
+                    inRoute
+                      ? 'border-green-500/30 bg-green-500/20 text-green-400'
+                      : 'border-orange-500/30 bg-orange-500/20 text-orange-400'
+                  }`}
+                >
+                  {inRoute ? (
+                    <Check className="h-3 w-3" />
+                  ) : (
+                    <AlertTriangle className="h-3 w-3" />
+                  )}
+                  {DAY_LABELS[d]}
+                </span>
+              )
+            })}
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'isActive',
+      header: 'Статус',
+      cell: (info) =>
+        info.getValue() ? (
+          <span className="rounded-full bg-emerald-600/20 px-2 py-0.5 text-xs font-semibold text-emerald-400">
+            Активен
+          </span>
+        ) : (
+          <span className="rounded-full bg-amber-600/20 px-2 py-0.5 text-xs font-semibold text-amber-400">
+            На паузе
+          </span>
+        ),
+    },
+  ], [isClientInRoute])
   const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>([])
   const [selectedFrequency, setSelectedFrequency] = useState<number | null>(null)
   const [selectedMatSize, setSelectedMatSize] = useState<MatSize | null>(null)
