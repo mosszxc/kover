@@ -9,6 +9,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { Check, ChevronDown, ChevronUp, ChevronsUpDown, Search, AlertTriangle, Pause, Play, MapPin, TriangleAlert } from 'lucide-react'
+import { cn } from '@/shared/lib/utils'
 import { toast } from 'sonner'
 import { useClientStore } from '../store'
 import type { Client } from '../types'
@@ -96,6 +97,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, anom
           {getClientArea(row.original).toFixed(1)}
         </span>
       ),
+      meta: { hideBelow: 'lg' },
     },
     {
       accessorKey: 'frequency',
@@ -103,6 +105,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, anom
       cell: (info) => (
         <span className="tabular-nums">{info.getValue() as number}</span>
       ),
+      meta: { hideBelow: 'lg' },
     },
     {
       id: 'days',
@@ -266,7 +269,10 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, anom
                   <th
                     key={header.id}
                     onClick={header.column.getToggleSortingHandler()}
-                    className="cursor-pointer select-none border-b border-border px-4 py-3 text-left text-sm font-medium text-muted-foreground hover:text-accent-foreground"
+                    className={cn(
+                      'cursor-pointer select-none border-b border-border px-4 py-3 text-left text-sm font-medium text-muted-foreground hover:text-accent-foreground',
+                      (header.column.columnDef.meta as { hideBelow?: string })?.hideBelow === 'lg' && 'hidden lg:table-cell',
+                    )}
                   >
                     <div className="flex items-center gap-1">
                       {flexRender(
@@ -290,7 +296,10 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, anom
                 {row.getVisibleCells().map((cell) => (
                   <td
                     key={cell.id}
-                    className="min-h-12 px-4 py-3 text-sm text-foreground"
+                    className={cn(
+                      'min-h-12 px-4 py-3 text-sm text-foreground',
+                      (cell.column.columnDef.meta as { hideBelow?: string })?.hideBelow === 'lg' && 'hidden lg:table-cell',
+                    )}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>

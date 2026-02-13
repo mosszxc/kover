@@ -145,7 +145,7 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
             </span>
           )}
           <p className={cn(
-            'truncate text-base text-foreground',
+            'truncate lg:whitespace-normal text-base text-foreground',
             isCompleted && 'line-through',
           )}>
             {client.originalName}

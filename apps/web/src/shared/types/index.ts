@@ -27,3 +27,11 @@ export const DAY_LABELS: Record<DayOfWeek, string> = {
   3: 'ЧТ',
   4: 'ПТ',
 }
+
+export const DAY_LABELS_FULL: Record<DayOfWeek, string> = {
+  0: 'Понедельник',
+  1: 'Вторник',
+  2: 'Среда',
+  3: 'Четверг',
+  4: 'Пятница',
+}
