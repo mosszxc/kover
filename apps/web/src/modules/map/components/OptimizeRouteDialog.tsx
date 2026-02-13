@@ -61,17 +61,28 @@ export function OptimizeRouteDialog() {
 
   const clientMap = new Map(clients.map((c) => [c.id, c]))
   const dayRoute = routes.find((r) => r.day === selectedDay)
+  const stopCount = dayRoute?.stops.filter((s) => {
+    const c = clientMap.get(s.clientId)
+    return c?.isActive
+  }).length ?? 0
   const geocodedCount = dayRoute?.stops.filter((s) => {
     const c = clientMap.get(s.clientId)
     return c?.isActive && c.lat != null
   }).length ?? 0
 
-  if (geocodedCount < 3) return null
+  const canOptimize = geocodedCount >= 3
+
+  if (stopCount === 0) return null
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={canOptimize ? setOpen : undefined}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={!canOptimize}
+          title={!canOptimize ? 'Нужны координаты минимум у 3 точек' : undefined}
+        >
           <Route className="h-4 w-4" />
           Оптимизировать
         </Button>
