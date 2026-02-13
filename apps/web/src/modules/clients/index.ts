@@ -1,7 +1,7 @@
 export type { Client, MatSpec } from './types'
 export { useClientStore } from './store'
 export { ClientsTable } from './components/ClientsTable'
-export { ClientForm } from './components/ClientForm'
 export { AddClientDialog } from './components/AddClientDialog'
+export { EditClientDialog } from './components/EditClientDialog'
 export { BatchGeocode } from './components/BatchGeocode'
 export { GeocodeSettings } from './components/GeocodeSettings'
