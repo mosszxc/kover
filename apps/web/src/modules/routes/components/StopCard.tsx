@@ -1,4 +1,5 @@
 import { Check, ChevronUp, ChevronDown, GripVertical, Pencil, TriangleAlert } from 'lucide-react'
+import { Button } from '@/shared/ui/button'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { cn } from '@/shared/lib/utils'
@@ -151,20 +152,21 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
           )}>
             {client.originalName}
           </p>
-          {isAnomaly && onEditClient && (
-            <button
-              type="button"
-              title="Исправить адрес"
-              onClick={(e) => {
-                e.stopPropagation()
-                onEditClient(client)
-              }}
-              className="shrink-0 rounded p-0.5 text-amber-400 transition-colors hover:bg-amber-500/20 hover:text-amber-300 print:hidden"
-            >
-              <Pencil className="size-3.5" />
-            </button>
-          )}
         </div>
+        {isAnomaly && onEditClient && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation()
+              onEditClient(client)
+            }}
+            className="mt-1 h-auto gap-1 px-1.5 py-0.5 text-xs text-amber-400 hover:bg-amber-500/20 hover:text-amber-300 print:hidden"
+          >
+            <Pencil className="size-3" />
+            Исправить адрес
+          </Button>
+        )}
       </div>
 
       {drivers.length > 0 && (
