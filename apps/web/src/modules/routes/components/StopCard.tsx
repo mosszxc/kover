@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import { Check, ChevronUp, ChevronDown, GripVertical, Pencil, TriangleAlert } from 'lucide-react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -61,14 +60,9 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
     disabled: !isDndEnabled,
   })
 
-  const prefersReducedMotion = useMemo(
-    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-    [],
-  )
-
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
-    transition: prefersReducedMotion ? 'none' : transition,
+    transition: transition ?? undefined,
   }
 
   return (
