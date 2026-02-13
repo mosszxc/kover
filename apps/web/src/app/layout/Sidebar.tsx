@@ -1,10 +1,11 @@
 import { NavLink } from "react-router"
-import { MapPin, Users } from "lucide-react"
+import { MapPin, Users, BarChart3 } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
 
 const navItems = [
   { to: "/", label: "Маршрут", icon: MapPin },
   { to: "/clients", label: "Клиенты", icon: Users },
+  { to: "/stats", label: "Статистика", icon: BarChart3 },
 ] as const
 
 export function Sidebar() {
