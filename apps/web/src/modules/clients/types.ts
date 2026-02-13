@@ -17,4 +17,6 @@ export interface Client {
   notes: string
   isActive: boolean
   createdAt: string
+  lat?: number
+  lng?: number
 }

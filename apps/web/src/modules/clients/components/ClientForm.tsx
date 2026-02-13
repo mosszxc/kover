@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Plus, X, Trash2 } from 'lucide-react'
+import { Plus, X, Trash2, MapPin, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { generateId } from '@/shared/lib/generateId'
+import { geocodeAddress } from '@/shared/lib/geocode'
 import { Button } from '@/shared/ui/button'
 import {
   Dialog,
@@ -83,6 +84,7 @@ export function ClientForm({ client, open: controlledOpen, onOpenChange, onDelet
   const [days, setDays] = useState<DayOfWeek[]>([])
   const [notes, setNotes] = useState('')
   const [errors, setErrors] = useState<FormErrors>({})
+  const [geocoding, setGeocoding] = useState(false)
 
   // Populate form when client changes (edit mode)
   useEffect(() => {
@@ -263,6 +265,52 @@ export function ClientForm({ client, open: controlledOpen, onOpenChange, onDelet
             className={`${inputClass} mt-1`}
           />
         </div>
+
+        {/* Координаты (только edit mode) */}
+        {isEdit && client && (
+          <div>
+            <label className={labelClass}>Координаты</label>
+            <div className="mt-1 flex items-center gap-2">
+              {client.lat != null && client.lng != null ? (
+                <span className="flex items-center gap-1.5 text-sm text-green-400">
+                  <MapPin className="h-3.5 w-3.5" />
+                  {client.lat.toFixed(5)}, {client.lng.toFixed(5)}
+                </span>
+              ) : (
+                <span className="text-sm text-slate-500">Не определены</span>
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={geocoding || !address.trim()}
+                onClick={async () => {
+                  setGeocoding(true)
+                  try {
+                    const result = await geocodeAddress(address.trim())
+                    if (result) {
+                      updateClient(client.id, { lat: result.lat, lng: result.lng })
+                      toast.success(`Координаты определены: ${result.displayName}`, { duration: 3000 })
+                    } else {
+                      toast.error('Адрес не найден')
+                    }
+                  } catch {
+                    toast.error('Ошибка геокодирования')
+                  } finally {
+                    setGeocoding(false)
+                  }
+                }}
+              >
+                {geocoding ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <MapPin className="h-3.5 w-3.5" />
+                )}
+                {geocoding ? 'Поиск...' : 'Определить'}
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Коврики */}
         <div>
