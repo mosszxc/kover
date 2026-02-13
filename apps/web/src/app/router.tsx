@@ -4,6 +4,7 @@ import { RoutesPage } from "@/pages/RoutesPage"
 import { ClientsPage } from "@/pages/ClientsPage"
 import { ImportPage } from "@/pages/ImportPage"
 import { StatsPage } from "@/pages/StatsPage"
+import { MapPage } from "@/pages/MapPage"
 
 export const router = createBrowserRouter([
   {
@@ -24,6 +25,10 @@ export const router = createBrowserRouter([
       {
         path: "/stats",
         element: <StatsPage />,
+      },
+      {
+        path: "/map",
+        element: <MapPage />,
       },
       {
         path: "*",
