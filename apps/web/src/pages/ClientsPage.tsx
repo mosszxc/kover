@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import { ClientsTable, ClientForm, AddClientDialog, useClientStore, BatchGeocode, GeocodeSettings } from '@/modules/clients'
+import { ClientsTable, EditClientDialog, AddClientDialog, useClientStore, BatchGeocode, GeocodeSettings } from '@/modules/clients'
 import { useRouteStore } from '@/modules/routes'
 import type { Client } from '@/modules/clients'
 import type { DayOfWeek } from '@/shared/types'
@@ -63,7 +63,7 @@ export function ClientsPage() {
       </div>
       <ClientsTable onRowClick={setSelectedClient} isClientInRoute={isClientInRoute} onToggleActive={handleToggleActive} />
       {selectedClient && (
-        <ClientForm
+        <EditClientDialog
           client={selectedClient}
           open={!!selectedClient}
           onOpenChange={(open) => { if (!open) setSelectedClient(null) }}
