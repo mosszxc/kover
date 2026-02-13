@@ -10,6 +10,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/shared/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/shared/ui/alert-dialog'
 import type { DayOfWeek, MatSize } from '@/shared/types'
 import { DAY_LABELS } from '@/shared/types'
 import { useClientStore } from '../store'
@@ -366,10 +377,28 @@ export function ClientForm({ client, open: controlledOpen, onOpenChange, onDelet
       <DialogFooter className={isEdit ? 'flex-row justify-between sm:justify-between' : ''}>
         {isEdit ? (
           <>
-            <Button variant="destructive" onClick={handleDelete}>
-              <Trash2 className="h-4 w-4" />
-              Удалить
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive">
+                  <Trash2 className="h-4 w-4" />
+                  Удалить
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Удалить клиента {client.name}?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Клиент будет убран из всех маршрутов.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Отмена</AlertDialogCancel>
+                  <AlertDialogAction variant="destructive" onClick={handleDelete}>
+                    Удалить
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             <Button variant="outline" onClick={() => setOpen(false)}>
               Закрыть
             </Button>
