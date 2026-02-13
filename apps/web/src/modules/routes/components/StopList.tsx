@@ -16,13 +16,14 @@ import {
 import { useRouteStore } from '../store'
 import { useClientStore } from '@/modules/clients'
 import type { Client } from '@/modules/clients'
-import { StopCard } from './StopCard'
+import { StopCard, type DriverOption } from './StopCard'
 
 interface StopListProps {
   searchQuery?: string
+  drivers?: DriverOption[]
 }
 
-export function StopList({ searchQuery = '' }: StopListProps) {
+export function StopList({ searchQuery = '', drivers = [] }: StopListProps) {
   const routes = useRouteStore((s) => s.routes)
   const selectedDay = useRouteStore((s) => s.selectedDay)
   const reorderStop = useRouteStore((s) => s.reorderStop)
@@ -120,6 +121,8 @@ export function StopList({ searchQuery = '' }: StopListProps) {
                 client={client}
                 stopId={stop.id}
                 isCompleted={stop.isCompleted}
+                driverId={stop.driverId}
+                drivers={drivers}
                 stopIndex={stopIndex}
                 isFirst={activeIndex === 0}
                 isLast={activeIndex === activeStops.length - 1}
