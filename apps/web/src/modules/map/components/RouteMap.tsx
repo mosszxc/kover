@@ -68,7 +68,7 @@ export function RouteMap({ stops }: RouteMapProps) {
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-slate-700">
+    <div className="isolate overflow-hidden rounded-lg border border-slate-700">
       <MapContainer
         center={DEFAULT_CENTER}
         zoom={12}
