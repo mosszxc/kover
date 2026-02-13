@@ -1,8 +1,13 @@
 {
   "name": "kover",
   "private": true,
+  "packageManager": "pnpm@9.15.4",
   "scripts": {
-    "build": "echo 'no build configured'",
-    "lint": "echo 'no lint configured'"
+    "dev:web": "turbo run dev --filter=@kover/web",
+    "build": "turbo run build",
+    "lint": "turbo run lint"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.0"
   }
 }
