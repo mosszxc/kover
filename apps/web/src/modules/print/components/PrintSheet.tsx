@@ -11,11 +11,16 @@ const DAY_LABELS_FULL: Record<DayOfWeek, string> = {
   4: 'Пятница',
 }
 
+interface DriverInfo {
+  id: string
+  name: string
+}
 
 interface PrintSheetProps {
   stops: RouteStop[]
   clients: Client[]
   selectedDay: DayOfWeek
+  drivers?: DriverInfo[]
 }
 
 function getMatQuantity(client: Client, size: MatSize): number {
@@ -32,16 +37,12 @@ function formatDate(): string {
   })
 }
 
-export function PrintSheet({ stops, clients, selectedDay }: PrintSheetProps) {
-  const clientMap = new Map(clients.map((c) => [c.id, c]))
+interface PrintTableProps {
+  title: string
+  rows: { stop: RouteStop; client: Client | undefined }[]
+}
 
-  const sortedStops = [...stops].sort((a, b) => a.position - b.position)
-
-  const rows = sortedStops.map((stop) => {
-    const client = clientMap.get(stop.clientId)
-    return { stop, client }
-  })
-
+function PrintTable({ title, rows }: PrintTableProps) {
   const totals = Object.fromEntries(
     MAT_SIZES.map((size) => [
       size,
@@ -53,8 +54,8 @@ export function PrintSheet({ stops, clients, selectedDay }: PrintSheetProps) {
   ) as Record<MatSize, number>
 
   return (
-    <div className="hidden print:block">
-      <h1 className="print-header">{DAY_LABELS_FULL[selectedDay]}, {formatDate()}</h1>
+    <>
+      <h1 className="print-header">{title}</h1>
 
       <table className="print-table">
         <thead>
@@ -64,7 +65,7 @@ export function PrintSheet({ stops, clients, selectedDay }: PrintSheetProps) {
             {MAT_SIZES.map((size) => (
               <th key={size} className="num">{size}</th>
             ))}
-            <th className="num">✓</th>
+            <th className="num">&#10003;</th>
           </tr>
         </thead>
         <tbody>
@@ -95,6 +96,59 @@ export function PrintSheet({ stops, clients, selectedDay }: PrintSheetProps) {
           </tr>
         </tfoot>
       </table>
+    </>
+  )
+}
+
+export function PrintSheet({ stops, clients, selectedDay, drivers = [] }: PrintSheetProps) {
+  const clientMap = new Map(clients.map((c) => [c.id, c]))
+  const sortedStops = [...stops].sort((a, b) => a.position - b.position)
+  const dateStr = formatDate()
+  const dayLabel = DAY_LABELS_FULL[selectedDay]
+
+  const toRows = (filtered: RouteStop[]) =>
+    filtered.map((stop) => ({ stop, client: clientMap.get(stop.clientId) }))
+
+  // No drivers — single sheet (legacy behavior)
+  if (drivers.length === 0) {
+    return (
+      <div className="hidden print:block">
+        <PrintTable
+          title={`${dayLabel}, ${dateStr}`}
+          rows={toRows(sortedStops)}
+        />
+      </div>
+    )
+  }
+
+  // Group stops by driver
+  const driverMap = new Map(drivers.map((d) => [d.id, d.name]))
+  const groups: { key: string; label: string; stops: RouteStop[] }[] = []
+
+  // Per-driver groups
+  for (const driver of drivers) {
+    const driverStops = sortedStops.filter((s) => s.driverId === driver.id)
+    if (driverStops.length > 0) {
+      groups.push({ key: driver.id, label: driver.name, stops: driverStops })
+    }
+  }
+
+  // Unassigned group
+  const unassigned = sortedStops.filter((s) => !s.driverId || !driverMap.has(s.driverId))
+  if (unassigned.length > 0) {
+    groups.push({ key: '__unassigned', label: 'Нераспределённые', stops: unassigned })
+  }
+
+  return (
+    <div className="hidden print:block">
+      {groups.map((group, i) => (
+        <div key={group.key} className={i > 0 ? 'print-page-break' : undefined}>
+          <PrintTable
+            title={`${group.label} — ${dayLabel}, ${dateStr}`}
+            rows={toRows(group.stops)}
+          />
+        </div>
+      ))}
     </div>
   )
 }
