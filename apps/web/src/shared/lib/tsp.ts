@@ -1,10 +1,12 @@
-interface Point {
+export interface GeoPoint {
   id: string
   lat: number
   lng: number
 }
 
-function haversine(a: Point, b: Point): number {
+type Point = GeoPoint
+
+export function haversine(a: Point, b: Point): number {
   const R = 6371 // km
   const dLat = ((b.lat - a.lat) * Math.PI) / 180
   const dLng = ((b.lng - a.lng) * Math.PI) / 180
