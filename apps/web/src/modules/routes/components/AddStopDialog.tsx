@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { Plus, Search } from 'lucide-react'
+import { generateId } from '@/shared/lib/generateId'
 import { Button } from '@/shared/ui/button'
 import {
   Dialog,
@@ -61,7 +62,7 @@ export function AddStopDialog({ clients }: AddStopDialogProps) {
   )
 
   function handleSelect(client: Client) {
-    const stopId = crypto.randomUUID()
+    const stopId = generateId()
     const newStop: RouteStop = {
       id: stopId,
       clientId: client.id,

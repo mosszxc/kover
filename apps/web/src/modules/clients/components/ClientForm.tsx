@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Plus, X, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { generateId } from '@/shared/lib/generateId'
 import { Button } from '@/shared/ui/button'
 import {
   Dialog,
@@ -176,7 +177,7 @@ export function ClientForm({ client, open: controlledOpen, onOpenChange, onDelet
     }
 
     const newClient: Client = {
-      id: crypto.randomUUID(),
+      id: generateId(),
       originalName: buildOriginalName(),
       name: name.trim(),
       address: address.trim(),
