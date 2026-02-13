@@ -3,6 +3,7 @@ import { Plus, X, Trash2, MapPin, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { generateId } from '@/shared/lib/generateId'
 import { geocodeAddress } from '@/shared/lib/geocode'
+import { useSettingsStore } from '@/shared/stores/settingsStore'
 import { Button } from '@/shared/ui/button'
 import {
   Dialog,
@@ -68,6 +69,7 @@ export function ClientForm({ client, open: controlledOpen, onOpenChange, onDelet
   const isEdit = !!client
   const addClient = useClientStore((s) => s.addClient)
   const updateClient = useClientStore((s) => s.updateClient)
+  const geocodeCity = useSettingsStore((s) => s.geocodeCity)
 
   // Dialog state: controlled externally for edit, internal for add
   const [internalOpen, setInternalOpen] = useState(false)
@@ -287,7 +289,7 @@ export function ClientForm({ client, open: controlledOpen, onOpenChange, onDelet
                 onClick={async () => {
                   setGeocoding(true)
                   try {
-                    const result = await geocodeAddress(address.trim())
+                    const result = await geocodeAddress(address.trim(), geocodeCity || undefined)
                     if (result) {
                       updateClient(client.id, { lat: result.lat, lng: result.lng })
                       toast.success(`Координаты определены: ${result.displayName}`, { duration: 3000 })
