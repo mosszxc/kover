@@ -111,7 +111,7 @@ export function BackupManager() {
               <div className="flex items-center gap-1">
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label="Восстановить бекап">
                       <RotateCcw className="h-4 w-4" />
                     </Button>
                   </AlertDialogTrigger>
@@ -136,6 +136,7 @@ export function BackupManager() {
                   size="sm"
                   className="h-8 w-8 p-0 text-slate-500 hover:text-red-400"
                   onClick={() => handleDelete(backup.key)}
+                  aria-label="Удалить бекап"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
