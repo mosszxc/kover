@@ -1,4 +1,5 @@
-import { Minus, Plus, X } from 'lucide-react'
+import { useState, useRef } from 'react'
+import { Minus, Plus, X, Check } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import {
   Select,
@@ -9,6 +10,8 @@ import {
 } from '@/shared/ui/select'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 import type { MatRow } from '../lib/formHelpers'
+
+const CUSTOM_VALUE = '__custom__'
 
 interface MatRowCardProps {
   mat: MatRow
@@ -33,25 +36,97 @@ export function MatRowCard({
   onRemove,
 }: MatRowCardProps) {
   const sizes = useMatSizeStore((s) => s.sizes)
+  const addSize = useMatSizeStore((s) => s.addSize)
+  const [isCustom, setIsCustom] = useState(false)
+  const [customValue, setCustomValue] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  function handleSelectChange(value: string) {
+    if (value === CUSTOM_VALUE) {
+      setIsCustom(true)
+      setCustomValue('')
+      requestAnimationFrame(() => inputRef.current?.focus())
+    } else {
+      onSizeChange(value)
+    }
+  }
+
+  function confirmCustomSize() {
+    const trimmed = customValue.trim()
+    if (!trimmed) {
+      setIsCustom(false)
+      return
+    }
+
+    const id = trimmed.toLowerCase().replace(/\s+/g, '')
+    const exists = sizes.some((s) => s.id === id)
+
+    if (!exists) {
+      addSize(id, trimmed, 0)
+    }
+
+    onSizeChange(id)
+    setIsCustom(false)
+    setCustomValue('')
+  }
+
+  function handleCustomKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      confirmCustomSize()
+    } else if (e.key === 'Escape') {
+      setIsCustom(false)
+    }
+  }
 
   return (
     <div className="rounded-lg border border-slate-700 bg-slate-900/50 p-3 space-y-2">
       <div className="flex items-center gap-2">
-        <Select value={mat.size} onValueChange={onSizeChange}>
-          <SelectTrigger
-            aria-label={`Размер коврика ${index + 1}`}
-            className={`${baseInput} w-24 shrink-0 cursor-pointer`}
-          >
-            <SelectValue placeholder="Размер" />
-          </SelectTrigger>
-          <SelectContent>
-            {sizes.map((s) => (
-              <SelectItem key={s.id} value={s.id}>
-                {s.label}
+        {isCustom ? (
+          <div className="flex w-36 shrink-0 items-center gap-1">
+            <input
+              ref={inputRef}
+              type="text"
+              value={customValue}
+              onChange={(e) => setCustomValue(e.target.value)}
+              onKeyDown={handleCustomKeyDown}
+              onBlur={confirmCustomSize}
+              placeholder="Новый размер"
+              aria-label={`Новый размер коврика ${index + 1}`}
+              className={`${baseInput} w-full`}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 shrink-0"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={confirmCustomSize}
+              aria-label="Подтвердить размер"
+            >
+              <Check className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <Select value={mat.size} onValueChange={handleSelectChange}>
+            <SelectTrigger
+              aria-label={`Размер коврика ${index + 1}`}
+              className={`${baseInput} w-24 shrink-0 cursor-pointer`}
+            >
+              <SelectValue placeholder="Размер" />
+            </SelectTrigger>
+            <SelectContent>
+              {sizes.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  {s.label}
+                </SelectItem>
+              ))}
+              <SelectItem value={CUSTOM_VALUE}>
+                <span className="text-slate-400">Другой…</span>
               </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+            </SelectContent>
+          </Select>
+        )}
 
         <div className="flex shrink-0 items-center">
           <Button
