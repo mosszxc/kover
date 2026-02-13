@@ -3,11 +3,13 @@ import { MapPin, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/shared/ui/button'
 import { geocodeAddress, delay } from '@/shared/lib/geocode'
+import { useSettingsStore } from '@/shared/stores/settingsStore'
 import { useClientStore } from '../store'
 
 export function BatchGeocode() {
   const clients = useClientStore((s) => s.clients)
   const updateClient = useClientStore((s) => s.updateClient)
+  const geocodeCity = useSettingsStore((s) => s.geocodeCity)
   const [running, setRunning] = useState(false)
   const [progress, setProgress] = useState({ done: 0, total: 0 })
 
@@ -26,7 +28,7 @@ export function BatchGeocode() {
     for (let i = 0; i < clientsWithoutCoords.length; i++) {
       const client = clientsWithoutCoords[i]!
       try {
-        const result = await geocodeAddress(client.address.trim())
+        const result = await geocodeAddress(client.address.trim(), geocodeCity || undefined)
         if (result) {
           updateClient(client.id, { lat: result.lat, lng: result.lng })
           success++
