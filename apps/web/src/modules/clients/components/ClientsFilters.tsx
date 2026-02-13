@@ -2,9 +2,7 @@ import { X } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { DAY_LABELS, MAT_SIZES } from '@/shared/types'
 import type { DayOfWeek, MatSize } from '@/shared/types'
-
-const DAYS: DayOfWeek[] = [0, 1, 2, 3, 4]
-const FREQUENCIES = [1, 2, 3, 4, 5] as const
+import { FREQUENCY_OPTIONS, ALL_WORK_DAYS } from '@/shared/constants'
 
 export type StatusFilter = 'all' | 'active' | 'paused'
 
@@ -69,7 +67,7 @@ export function ClientsFilters({
       {/* Day filter */}
       <div className="flex items-center gap-1.5">
         <span className="text-xs font-medium text-slate-500">День:</span>
-        {DAYS.map((day) => (
+        {ALL_WORK_DAYS.map((day) => (
           <button
             key={day}
             type="button"
@@ -89,7 +87,7 @@ export function ClientsFilters({
       {/* Frequency filter */}
       <div className="flex items-center gap-1.5">
         <span className="text-xs font-medium text-slate-500">Частота:</span>
-        {FREQUENCIES.map((freq) => (
+        {FREQUENCY_OPTIONS.map((freq) => (
           <button
             key={freq}
             type="button"
