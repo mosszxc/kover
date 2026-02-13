@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { DaySwitcher, DaySummary, RouteSearch, StopList, AddStopDialog, useRouteStore, PrintButton } from '@/modules/routes'
 import { useClientStore } from '@/modules/clients'
 import { PrintSheet } from '@/modules/print'
+import { OptimizeRouteDialog } from '@/modules/map'
 
 export function RoutesPage() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -23,6 +24,7 @@ export function RoutesPage() {
       <div className="space-y-4 print:hidden">
         <div className="flex items-center justify-between gap-2">
           <DaySwitcher />
+          <OptimizeRouteDialog />
           <PrintButton />
         </div>
         <DaySummary />
