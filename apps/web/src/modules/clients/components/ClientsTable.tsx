@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   type ColumnDef,
   type SortingState,
@@ -12,7 +12,8 @@ import { ChevronDown, ChevronUp, ChevronsUpDown, Search } from 'lucide-react'
 import { useClientStore } from '../store'
 import type { Client } from '../types'
 import { DAY_LABELS, MAT_AREA } from '@/shared/types'
-import type { DayOfWeek } from '@/shared/types'
+import type { DayOfWeek, MatSize } from '@/shared/types'
+import { ClientsFilters } from './ClientsFilters'
 
 function formatMats(client: Client): string {
   const grouped = new Map<string, number>()
@@ -105,9 +106,30 @@ export function ClientsTable() {
   const clients = useClientStore((s) => s.clients)
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState('')
+  const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>([])
+  const [selectedFrequency, setSelectedFrequency] = useState<number | null>(null)
+  const [selectedMatSize, setSelectedMatSize] = useState<MatSize | null>(null)
+
+  const filteredClients = useMemo(() => {
+    let result = clients
+    if (selectedDays.length > 0) {
+      result = result.filter((c) =>
+        selectedDays.some((d) => c.days.includes(d)),
+      )
+    }
+    if (selectedFrequency !== null) {
+      result = result.filter((c) => c.frequency === selectedFrequency)
+    }
+    if (selectedMatSize !== null) {
+      result = result.filter((c) =>
+        c.mats.some((m) => m.size === selectedMatSize),
+      )
+    }
+    return result
+  }, [clients, selectedDays, selectedFrequency, selectedMatSize])
 
   const table = useReactTable({
-    data: clients,
+    data: filteredClients,
     columns,
     state: { sorting, globalFilter },
     onSortingChange: setSorting,
@@ -146,6 +168,15 @@ export function ClientsTable() {
           className="w-full rounded-lg border border-slate-700 bg-slate-900 py-2.5 pl-10 pr-4 text-sm text-slate-50 placeholder:text-slate-500 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/50"
         />
       </div>
+
+      <ClientsFilters
+        selectedDays={selectedDays}
+        onDaysChange={setSelectedDays}
+        selectedFrequency={selectedFrequency}
+        onFrequencyChange={setSelectedFrequency}
+        selectedMatSize={selectedMatSize}
+        onMatSizeChange={setSelectedMatSize}
+      />
 
       <div className="overflow-x-auto rounded-lg border border-slate-700">
         <table className="w-full">
@@ -191,7 +222,7 @@ export function ClientsTable() {
       </div>
 
       <p className="text-sm text-slate-500">
-        {table.getFilteredRowModel().rows.length} из {clients.length} клиентов
+        Показано {table.getFilteredRowModel().rows.length} из {clients.length} клиентов
       </p>
     </div>
   )
