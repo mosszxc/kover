@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowRightLeft } from 'lucide-react'
+import { ArrowRightLeft, Loader2 } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import {
   Select,
@@ -30,6 +30,7 @@ export function TransferStopDialog({ stopId, clientName, day }: TransferStopDial
   const [open, setOpen] = useState(false)
   const [targetDay, setTargetDay] = useState<DayOfWeek | null>(null)
   const [position, setPosition] = useState<number>(-1)
+  const [isTransferring, setIsTransferring] = useState(false)
 
   const routes = useRouteStore((s) => s.routes)
   const transferStop = useRouteStore((s) => s.transferStop)
@@ -38,8 +39,10 @@ export function TransferStopDialog({ stopId, clientName, day }: TransferStopDial
   const targetStops = targetRoute?.stops ?? []
 
   function handleTransfer() {
-    if (targetDay === null) return
+    if (targetDay === null || isTransferring) return
+    setIsTransferring(true)
     transferStop(day, targetDay, stopId, position === -1 ? undefined : position)
+    setIsTransferring(false)
     setOpen(false)
     reset()
   }
@@ -109,11 +112,18 @@ export function TransferStopDialog({ stopId, clientName, day }: TransferStopDial
           )}
 
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => { setOpen(false); reset() }}>
+            <Button variant="outline" onClick={() => { setOpen(false); reset() }} disabled={isTransferring}>
               Отмена
             </Button>
-            <Button disabled={targetDay === null} onClick={handleTransfer}>
-              Перенести
+            <Button disabled={targetDay === null || isTransferring} onClick={handleTransfer}>
+              {isTransferring ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Перенос...
+                </>
+              ) : (
+                'Перенести'
+              )}
             </Button>
           </div>
         </div>

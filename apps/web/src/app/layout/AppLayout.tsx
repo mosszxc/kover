@@ -1,9 +1,11 @@
+import { Suspense } from "react"
 import { Outlet } from "react-router"
 import { Sidebar } from "./Sidebar"
 import { TopBar } from "./TopBar"
 import { BottomTabs } from "./BottomTabs"
 import { Toaster } from "@/shared/ui/sonner"
 import { ErrorBoundary } from "@/shared/components/ErrorBoundary"
+import { LoadingFallback } from "@/shared/components/LoadingFallback"
 import { useChangeLogger } from "@/shared/hooks/useChangeLogger"
 import { useAutoBackup } from "@/shared/hooks/useAutoBackup"
 
@@ -20,7 +22,9 @@ export function AppLayout() {
 
         <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6">
           <ErrorBoundary>
-            <Outlet />
+            <Suspense fallback={<LoadingFallback />}>
+              <Outlet />
+            </Suspense>
           </ErrorBoundary>
         </main>
       </div>
