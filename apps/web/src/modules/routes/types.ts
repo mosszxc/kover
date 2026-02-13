@@ -7,13 +7,7 @@ export interface RouteStop {
   isCompleted: boolean
 }
 
-export interface RouteBlock {
-  id: string
-  name?: string
-  stops: RouteStop[]
-}
-
 export interface DayRoute {
   day: DayOfWeek
-  blocks: RouteBlock[]
+  stops: RouteStop[]
 }

@@ -4,16 +4,9 @@ import type { Client, MatSpec } from '@/modules/clients'
 import { MAT_AREA } from '@/shared/types'
 import { useRouteStore } from '../store'
 
-const BLOCK_BORDER_COLORS = [
-  'border-l-blue-500',
-  'border-l-amber-500',
-  'border-l-emerald-500',
-] as const
-
 interface StopCardProps {
   number: number
   client: Client
-  blockIndex: number
   stopId: string
   isCompleted: boolean
 }
@@ -22,8 +15,7 @@ function matArea(mats: MatSpec[]): number {
   return mats.reduce((sum, m) => sum + m.quantity * (MAT_AREA[m.size] ?? 0), 0)
 }
 
-export function StopCard({ number, client, blockIndex, stopId, isCompleted }: StopCardProps) {
-  const borderColor = BLOCK_BORDER_COLORS[blockIndex % BLOCK_BORDER_COLORS.length]
+export function StopCard({ number, client, stopId, isCompleted }: StopCardProps) {
   const area = matArea(client.mats)
   const selectedDay = useRouteStore((s) => s.selectedDay)
   const toggleStopCompleted = useRouteStore((s) => s.toggleStopCompleted)
@@ -31,8 +23,7 @@ export function StopCard({ number, client, blockIndex, stopId, isCompleted }: St
   return (
     <div
       className={cn(
-        'flex items-center gap-3 border-l-3 p-3 transition-colors hover:bg-slate-800',
-        borderColor,
+        'flex items-center gap-3 border-l-3 border-l-slate-700 p-3 transition-colors hover:bg-slate-800',
         isCompleted && 'opacity-60',
       )}
     >
