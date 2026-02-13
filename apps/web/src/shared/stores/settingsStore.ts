@@ -4,6 +4,13 @@ import { persist } from 'zustand/middleware'
 interface SettingsState {
   geocodeCity: string
   setGeocodeCity: (city: string) => void
+
+  fileSyncEnabled: boolean
+  fileSyncFileName: string
+  lastFileSyncAt: string | null
+  setFileSyncEnabled: (enabled: boolean) => void
+  setFileSyncFileName: (name: string) => void
+  setLastFileSyncAt: (timestamp: string | null) => void
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -11,6 +18,13 @@ export const useSettingsStore = create<SettingsState>()(
     (set) => ({
       geocodeCity: '',
       setGeocodeCity: (city) => set({ geocodeCity: city.trim() }),
+
+      fileSyncEnabled: false,
+      fileSyncFileName: '',
+      lastFileSyncAt: null,
+      setFileSyncEnabled: (enabled) => set({ fileSyncEnabled: enabled }),
+      setFileSyncFileName: (name) => set({ fileSyncFileName: name }),
+      setLastFileSyncAt: (timestamp) => set({ lastFileSyncAt: timestamp }),
     }),
     { name: 'kover-settings' },
   ),

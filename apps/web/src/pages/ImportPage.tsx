@@ -8,6 +8,7 @@ import type { ParsedClient } from '@/modules/import'
 import type { Client } from '@/modules/clients'
 import type { DayRoute, RouteStop } from '@/modules/routes'
 import type { DayOfWeek } from '@/shared/types'
+import { FileSyncStatus } from '@/shared/components/FileSyncStatus'
 
 interface ParsedData {
   clients: ParsedClient[]
@@ -124,6 +125,11 @@ export function ImportPage() {
       <h1 className="text-2xl font-bold text-slate-50">Импорт</h1>
       <ExcelUpload onParsed={setParsed} />
       <JsonBackup data={{ clients, routes }} onRestore={handleRestore} />
+
+      <div className="rounded-lg border border-slate-700 bg-slate-900 p-4 space-y-2">
+        <h2 className="text-lg font-semibold text-slate-50">Автосохранение на диск</h2>
+        <FileSyncStatus />
+      </div>
     </div>
   )
 }
