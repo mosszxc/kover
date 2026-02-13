@@ -1,0 +1,1839 @@
+[
+  {
+    "day": 0,
+    "blocks": [
+      {
+        "id": "mon-1",
+        "name": "Основной",
+        "stops": [
+          {
+            "id": "s-0-1-1",
+            "clientId": "c11",
+            "position": 0,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-1-2",
+            "clientId": "c30",
+            "position": 1,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-1-3",
+            "clientId": "c31",
+            "position": 2,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-1-4",
+            "clientId": "c15",
+            "position": 3,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-1-5",
+            "clientId": "c28",
+            "position": 4,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-1-6",
+            "clientId": "c4",
+            "position": 5,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-1-7",
+            "clientId": "c25",
+            "position": 6,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-1-8",
+            "clientId": "c67",
+            "position": 7,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-1-9",
+            "clientId": "c68",
+            "position": 8,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-1-10",
+            "clientId": "c78",
+            "position": 9,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-1-11",
+            "clientId": "c3",
+            "position": 10,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-1-12",
+            "clientId": "c29",
+            "position": 11,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-1-13",
+            "clientId": "c7",
+            "position": 12,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-1-14",
+            "clientId": "c44",
+            "position": 13,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-1-15",
+            "clientId": "c32",
+            "position": 14,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-1-16",
+            "clientId": "c45",
+            "position": 15,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-1-17",
+            "clientId": "c2",
+            "position": 16,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-1-18",
+            "clientId": "c8",
+            "position": 17,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-1-19",
+            "clientId": "c71",
+            "position": 18,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-1-20",
+            "clientId": "c22",
+            "position": 19,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-1-21",
+            "clientId": "c27",
+            "position": 20,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-1-22",
+            "clientId": "c14",
+            "position": 21,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-1-23",
+            "clientId": "c5",
+            "position": 22,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-1-24",
+            "clientId": "c33",
+            "position": 23,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-1-25",
+            "clientId": "c21",
+            "position": 24,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-1-26",
+            "clientId": "c10",
+            "position": 25,
+            "isCompleted": false
+          }
+        ]
+      },
+      {
+        "id": "mon-2",
+        "name": "Центр",
+        "stops": [
+          {
+            "id": "s-0-2-1",
+            "clientId": "c53",
+            "position": 0,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-2",
+            "clientId": "c80",
+            "position": 1,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-3",
+            "clientId": "c75",
+            "position": 2,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-4",
+            "clientId": "c19",
+            "position": 3,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-5",
+            "clientId": "c12",
+            "position": 4,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-6",
+            "clientId": "c70",
+            "position": 5,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-7",
+            "clientId": "c37",
+            "position": 6,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-8",
+            "clientId": "c42",
+            "position": 7,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-9",
+            "clientId": "c58",
+            "position": 8,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-10",
+            "clientId": "c79",
+            "position": 9,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-11",
+            "clientId": "c9",
+            "position": 10,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-12",
+            "clientId": "c20",
+            "position": 11,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-13",
+            "clientId": "c17",
+            "position": 12,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-14",
+            "clientId": "c56",
+            "position": 13,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-15",
+            "clientId": "c62",
+            "position": 14,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-16",
+            "clientId": "c18",
+            "position": 15,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-17",
+            "clientId": "c39",
+            "position": 16,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-18",
+            "clientId": "c34",
+            "position": 17,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-19",
+            "clientId": "c51",
+            "position": 18,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-20",
+            "clientId": "c24",
+            "position": 19,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-21",
+            "clientId": "c47",
+            "position": 20,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-22",
+            "clientId": "c144",
+            "position": 21,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-23",
+            "clientId": "c6",
+            "position": 22,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-24",
+            "clientId": "c23",
+            "position": 23,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-25",
+            "clientId": "c35",
+            "position": 24,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-26",
+            "clientId": "c26",
+            "position": 25,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-27",
+            "clientId": "c1",
+            "position": 26,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-28",
+            "clientId": "c63",
+            "position": 27,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-29",
+            "clientId": "c48",
+            "position": 28,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-30",
+            "clientId": "c59",
+            "position": 29,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-31",
+            "clientId": "c64",
+            "position": 30,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-32",
+            "clientId": "c55",
+            "position": 31,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-33",
+            "clientId": "c13",
+            "position": 32,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-34",
+            "clientId": "c16",
+            "position": 33,
+            "isCompleted": false
+          },
+          {
+            "id": "s-0-2-35",
+            "clientId": "c145",
+            "position": 34,
+            "isCompleted": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "day": 1,
+    "blocks": [
+      {
+        "id": "tue-1",
+        "name": "Основной",
+        "stops": [
+          {
+            "id": "s-1-1-1",
+            "clientId": "c30",
+            "position": 0,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-2",
+            "clientId": "c31",
+            "position": 1,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-3",
+            "clientId": "c11",
+            "position": 2,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-4",
+            "clientId": "c4",
+            "position": 3,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-5",
+            "clientId": "c6",
+            "position": 4,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-6",
+            "clientId": "c7",
+            "position": 5,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-7",
+            "clientId": "c124",
+            "position": 6,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-8",
+            "clientId": "c41",
+            "position": 7,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-9",
+            "clientId": "c52",
+            "position": 8,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-10",
+            "clientId": "c46",
+            "position": 9,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-11",
+            "clientId": "c74",
+            "position": 10,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-12",
+            "clientId": "c117",
+            "position": 11,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-13",
+            "clientId": "c50",
+            "position": 12,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-14",
+            "clientId": "c3",
+            "position": 13,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-15",
+            "clientId": "c69",
+            "position": 14,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-16",
+            "clientId": "c36",
+            "position": 15,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-17",
+            "clientId": "c38",
+            "position": 16,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-18",
+            "clientId": "c73",
+            "position": 17,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-19",
+            "clientId": "c101",
+            "position": 18,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-20",
+            "clientId": "c2",
+            "position": 19,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-21",
+            "clientId": "c9",
+            "position": 20,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-22",
+            "clientId": "c122",
+            "position": 21,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-23",
+            "clientId": "c77",
+            "position": 22,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-24",
+            "clientId": "c109",
+            "position": 23,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-25",
+            "clientId": "c8",
+            "position": 24,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-26",
+            "clientId": "c66",
+            "position": 25,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-27",
+            "clientId": "c43",
+            "position": 26,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-28",
+            "clientId": "c5",
+            "position": 27,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-1-29",
+            "clientId": "c10",
+            "position": 28,
+            "isCompleted": false
+          }
+        ]
+      },
+      {
+        "id": "tue-2",
+        "name": "Юг",
+        "stops": [
+          {
+            "id": "s-1-2-1",
+            "clientId": "c12",
+            "position": 0,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-2-2",
+            "clientId": "c129",
+            "position": 1,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-2-3",
+            "clientId": "c61",
+            "position": 2,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-2-4",
+            "clientId": "c65",
+            "position": 3,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-2-5",
+            "clientId": "c106",
+            "position": 4,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-2-6",
+            "clientId": "c40",
+            "position": 5,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-2-7",
+            "clientId": "c76",
+            "position": 6,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-2-8",
+            "clientId": "c60",
+            "position": 7,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-2-9",
+            "clientId": "c104",
+            "position": 8,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-2-10",
+            "clientId": "c54",
+            "position": 9,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-2-11",
+            "clientId": "c49",
+            "position": 10,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-2-12",
+            "clientId": "c98",
+            "position": 11,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-2-13",
+            "clientId": "c85",
+            "position": 12,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-2-14",
+            "clientId": "c119",
+            "position": 13,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-2-15",
+            "clientId": "c81",
+            "position": 14,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-2-16",
+            "clientId": "c57",
+            "position": 15,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-2-17",
+            "clientId": "c116",
+            "position": 16,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-2-18",
+            "clientId": "c102",
+            "position": 17,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-2-19",
+            "clientId": "c128",
+            "position": 18,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-2-20",
+            "clientId": "c86",
+            "position": 19,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-2-21",
+            "clientId": "c127",
+            "position": 20,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-2-22",
+            "clientId": "c120",
+            "position": 21,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-2-23",
+            "clientId": "c113",
+            "position": 22,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-2-24",
+            "clientId": "c72",
+            "position": 23,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-2-25",
+            "clientId": "c1",
+            "position": 24,
+            "isCompleted": false
+          }
+        ]
+      },
+      {
+        "id": "tue-3",
+        "name": "Машиностроителей",
+        "stops": [
+          {
+            "id": "s-1-3-1",
+            "clientId": "c146",
+            "position": 0,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-3-2",
+            "clientId": "c147",
+            "position": 1,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-3-3",
+            "clientId": "c148",
+            "position": 2,
+            "isCompleted": false
+          },
+          {
+            "id": "s-1-3-4",
+            "clientId": "c149",
+            "position": 3,
+            "isCompleted": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "day": 2,
+    "blocks": [
+      {
+        "id": "wed-1",
+        "name": "Основной",
+        "stops": [
+          {
+            "id": "s-2-1-1",
+            "clientId": "c30",
+            "position": 0,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-1-2",
+            "clientId": "c31",
+            "position": 1,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-1-3",
+            "clientId": "c11",
+            "position": 2,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-1-4",
+            "clientId": "c15",
+            "position": 3,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-1-5",
+            "clientId": "c28",
+            "position": 4,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-1-6",
+            "clientId": "c4",
+            "position": 5,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-1-7",
+            "clientId": "c115",
+            "position": 6,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-1-8",
+            "clientId": "c2",
+            "position": 7,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-1-9",
+            "clientId": "c9",
+            "position": 8,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-1-10",
+            "clientId": "c79",
+            "position": 9,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-1-11",
+            "clientId": "c8",
+            "position": 10,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-1-12",
+            "clientId": "c22",
+            "position": 11,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-1-13",
+            "clientId": "c27",
+            "position": 12,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-1-14",
+            "clientId": "c14",
+            "position": 13,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-1-15",
+            "clientId": "c140",
+            "position": 14,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-1-16",
+            "clientId": "c5",
+            "position": 15,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-1-17",
+            "clientId": "c33",
+            "position": 16,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-1-18",
+            "clientId": "c112",
+            "position": 17,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-1-19",
+            "clientId": "c21",
+            "position": 18,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-1-20",
+            "clientId": "c10",
+            "position": 19,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-1-21",
+            "clientId": "c136",
+            "position": 20,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-1-22",
+            "clientId": "c20",
+            "position": 21,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-1-23",
+            "clientId": "c17",
+            "position": 22,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-1-24",
+            "clientId": "c18",
+            "position": 23,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-1-25",
+            "clientId": "c34",
+            "position": 24,
+            "isCompleted": false
+          }
+        ]
+      },
+      {
+        "id": "wed-2",
+        "name": "Центр",
+        "stops": [
+          {
+            "id": "s-2-2-1",
+            "clientId": "c19",
+            "position": 0,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-2-2",
+            "clientId": "c12",
+            "position": 1,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-2-3",
+            "clientId": "c91",
+            "position": 2,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-2-4",
+            "clientId": "c121",
+            "position": 3,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-2-5",
+            "clientId": "c24",
+            "position": 4,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-2-6",
+            "clientId": "c25",
+            "position": 5,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-2-7",
+            "clientId": "c134",
+            "position": 6,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-2-8",
+            "clientId": "c84",
+            "position": 7,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-2-9",
+            "clientId": "c3",
+            "position": 8,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-2-10",
+            "clientId": "c29",
+            "position": 9,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-2-11",
+            "clientId": "c7",
+            "position": 10,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-2-12",
+            "clientId": "c143",
+            "position": 11,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-2-13",
+            "clientId": "c32",
+            "position": 12,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-2-14",
+            "clientId": "c6",
+            "position": 13,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-2-15",
+            "clientId": "c125",
+            "position": 14,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-2-16",
+            "clientId": "c23",
+            "position": 15,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-2-17",
+            "clientId": "c35",
+            "position": 16,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-2-18",
+            "clientId": "c107",
+            "position": 17,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-2-19",
+            "clientId": "c130",
+            "position": 18,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-2-20",
+            "clientId": "c97",
+            "position": 19,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-2-21",
+            "clientId": "c94",
+            "position": 20,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-2-22",
+            "clientId": "c1",
+            "position": 21,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-2-23",
+            "clientId": "c26",
+            "position": 22,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-2-24",
+            "clientId": "c13",
+            "position": 23,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-2-25",
+            "clientId": "c16",
+            "position": 24,
+            "isCompleted": false
+          },
+          {
+            "id": "s-2-2-26",
+            "clientId": "c145",
+            "position": 25,
+            "isCompleted": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "day": 3,
+    "blocks": [
+      {
+        "id": "thu-1",
+        "name": "Основной",
+        "stops": [
+          {
+            "id": "s-3-1-1",
+            "clientId": "c30",
+            "position": 0,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-1-2",
+            "clientId": "c92",
+            "position": 1,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-1-3",
+            "clientId": "c93",
+            "position": 2,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-1-4",
+            "clientId": "c4",
+            "position": 3,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-1-5",
+            "clientId": "c144",
+            "position": 4,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-1-6",
+            "clientId": "c47",
+            "position": 5,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-1-7",
+            "clientId": "c89",
+            "position": 6,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-1-8",
+            "clientId": "c3",
+            "position": 7,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-1-9",
+            "clientId": "c96",
+            "position": 8,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-1-10",
+            "clientId": "c78",
+            "position": 9,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-1-11",
+            "clientId": "c68",
+            "position": 10,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-1-12",
+            "clientId": "c67",
+            "position": 11,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-1-13",
+            "clientId": "c56",
+            "position": 12,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-1-14",
+            "clientId": "c2",
+            "position": 13,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-1-15",
+            "clientId": "c45",
+            "position": 14,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-1-16",
+            "clientId": "c9",
+            "position": 15,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-1-17",
+            "clientId": "c111",
+            "position": 16,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-1-18",
+            "clientId": "c138",
+            "position": 17,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-1-19",
+            "clientId": "c79",
+            "position": 18,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-1-20",
+            "clientId": "c8",
+            "position": 19,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-1-21",
+            "clientId": "c108",
+            "position": 20,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-1-22",
+            "clientId": "c126",
+            "position": 21,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-1-23",
+            "clientId": "c5",
+            "position": 22,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-1-24",
+            "clientId": "c10",
+            "position": 23,
+            "isCompleted": false
+          }
+        ]
+      },
+      {
+        "id": "thu-2",
+        "name": "Центр",
+        "stops": [
+          {
+            "id": "s-3-2-1",
+            "clientId": "c132",
+            "position": 0,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-2",
+            "clientId": "c53",
+            "position": 1,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-3",
+            "clientId": "c80",
+            "position": 2,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-4",
+            "clientId": "c75",
+            "position": 3,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-5",
+            "clientId": "c12",
+            "position": 4,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-6",
+            "clientId": "c83",
+            "position": 5,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-7",
+            "clientId": "c142",
+            "position": 6,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-8",
+            "clientId": "c133",
+            "position": 7,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-9",
+            "clientId": "c70",
+            "position": 8,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-10",
+            "clientId": "c88",
+            "position": 9,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-11",
+            "clientId": "c82",
+            "position": 10,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-12",
+            "clientId": "c37",
+            "position": 11,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-13",
+            "clientId": "c42",
+            "position": 12,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-14",
+            "clientId": "c105",
+            "position": 13,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-15",
+            "clientId": "c58",
+            "position": 14,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-16",
+            "clientId": "c141",
+            "position": 15,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-17",
+            "clientId": "c139",
+            "position": 16,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-18",
+            "clientId": "c62",
+            "position": 17,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-19",
+            "clientId": "c39",
+            "position": 18,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-20",
+            "clientId": "c51",
+            "position": 19,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-21",
+            "clientId": "c131",
+            "position": 20,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-22",
+            "clientId": "c123",
+            "position": 21,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-23",
+            "clientId": "c7",
+            "position": 22,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-24",
+            "clientId": "c44",
+            "position": 23,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-25",
+            "clientId": "c114",
+            "position": 24,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-26",
+            "clientId": "c6",
+            "position": 25,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-27",
+            "clientId": "c1",
+            "position": 26,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-28",
+            "clientId": "c63",
+            "position": 27,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-29",
+            "clientId": "c48",
+            "position": 28,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-30",
+            "clientId": "c59",
+            "position": 29,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-31",
+            "clientId": "c87",
+            "position": 30,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-32",
+            "clientId": "c118",
+            "position": 31,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-33",
+            "clientId": "c64",
+            "position": 32,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-34",
+            "clientId": "c55",
+            "position": 33,
+            "isCompleted": false
+          },
+          {
+            "id": "s-3-2-35",
+            "clientId": "c95",
+            "position": 34,
+            "isCompleted": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "day": 4,
+    "blocks": [
+      {
+        "id": "fri-1",
+        "name": "Основной",
+        "stops": [
+          {
+            "id": "s-4-1-1",
+            "clientId": "c15",
+            "position": 0,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-2",
+            "clientId": "c28",
+            "position": 1,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-3",
+            "clientId": "c4",
+            "position": 2,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-4",
+            "clientId": "c29",
+            "position": 3,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-5",
+            "clientId": "c69",
+            "position": 4,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-6",
+            "clientId": "c3",
+            "position": 5,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-7",
+            "clientId": "c25",
+            "position": 6,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-8",
+            "clientId": "c50",
+            "position": 7,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-9",
+            "clientId": "c36",
+            "position": 8,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-10",
+            "clientId": "c38",
+            "position": 9,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-11",
+            "clientId": "c73",
+            "position": 10,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-12",
+            "clientId": "c2",
+            "position": 11,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-13",
+            "clientId": "c79",
+            "position": 12,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-14",
+            "clientId": "c77",
+            "position": 13,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-15",
+            "clientId": "c8",
+            "position": 14,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-16",
+            "clientId": "c8",
+            "position": 15,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-17",
+            "clientId": "c66",
+            "position": 16,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-18",
+            "clientId": "c43",
+            "position": 17,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-19",
+            "clientId": "c14",
+            "position": 18,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-20",
+            "clientId": "c100",
+            "position": 19,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-21",
+            "clientId": "c27",
+            "position": 20,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-22",
+            "clientId": "c22",
+            "position": 21,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-23",
+            "clientId": "c5",
+            "position": 22,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-24",
+            "clientId": "c33",
+            "position": 23,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-25",
+            "clientId": "c21",
+            "position": 24,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-26",
+            "clientId": "c20",
+            "position": 25,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-27",
+            "clientId": "c17",
+            "position": 26,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-28",
+            "clientId": "c18",
+            "position": 27,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-29",
+            "clientId": "c34",
+            "position": 28,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-30",
+            "clientId": "c135",
+            "position": 29,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-31",
+            "clientId": "c90",
+            "position": 30,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-1-32",
+            "clientId": "c99",
+            "position": 31,
+            "isCompleted": false
+          }
+        ]
+      },
+      {
+        "id": "fri-2",
+        "name": "Юг",
+        "stops": [
+          {
+            "id": "s-4-2-1",
+            "clientId": "c19",
+            "position": 0,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-2-2",
+            "clientId": "c72",
+            "position": 1,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-2-3",
+            "clientId": "c57",
+            "position": 2,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-2-4",
+            "clientId": "c61",
+            "position": 3,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-2-5",
+            "clientId": "c65",
+            "position": 4,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-2-6",
+            "clientId": "c24",
+            "position": 5,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-2-7",
+            "clientId": "c40",
+            "position": 6,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-2-8",
+            "clientId": "c76",
+            "position": 7,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-2-9",
+            "clientId": "c60",
+            "position": 8,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-2-10",
+            "clientId": "c54",
+            "position": 9,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-2-11",
+            "clientId": "c49",
+            "position": 10,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-2-12",
+            "clientId": "c7",
+            "position": 11,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-2-13",
+            "clientId": "c32",
+            "position": 12,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-2-14",
+            "clientId": "c110",
+            "position": 13,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-2-15",
+            "clientId": "c74",
+            "position": 14,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-2-16",
+            "clientId": "c41",
+            "position": 15,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-2-17",
+            "clientId": "c46",
+            "position": 16,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-2-18",
+            "clientId": "c52",
+            "position": 17,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-2-19",
+            "clientId": "c6",
+            "position": 18,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-2-20",
+            "clientId": "c23",
+            "position": 19,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-2-21",
+            "clientId": "c35",
+            "position": 20,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-2-22",
+            "clientId": "c1",
+            "position": 21,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-2-23",
+            "clientId": "c26",
+            "position": 22,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-2-24",
+            "clientId": "c13",
+            "position": 23,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-2-25",
+            "clientId": "c16",
+            "position": 24,
+            "isCompleted": false
+          }
+        ]
+      },
+      {
+        "id": "fri-3",
+        "name": "Машиностроителей",
+        "stops": [
+          {
+            "id": "s-4-3-1",
+            "clientId": "c146",
+            "position": 0,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-3-2",
+            "clientId": "c147",
+            "position": 1,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-3-3",
+            "clientId": "c148",
+            "position": 2,
+            "isCompleted": false
+          },
+          {
+            "id": "s-4-3-4",
+            "clientId": "c149",
+            "position": 3,
+            "isCompleted": false
+          }
+        ]
+      }
+    ]
+  }
+]

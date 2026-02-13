@@ -1,0 +1,2989 @@
+[
+  {
+    "id": "c1",
+    "originalName": "Велес гоголя 180",
+    "name": "Велес",
+    "address": "гоголя 180",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 5,
+    "days": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c2",
+    "originalName": "Велес красина 180",
+    "name": "Велес",
+    "address": "красина 180",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 5,
+    "days": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c3",
+    "originalName": "департамент финансов советская 66-150 резаный",
+    "name": "Департамент финансов",
+    "address": "советская 66",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 5,
+    "days": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c4",
+    "originalName": "метрополис к. Маркса -2x180, 2x150",
+    "name": "Метрополис",
+    "address": "к. Маркса",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 2
+      },
+      {
+        "size": "150",
+        "quantity": 2
+      }
+    ],
+    "frequency": 5,
+    "days": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c5",
+    "originalName": "метрополис Москва-2х180",
+    "name": "Метрополис",
+    "address": "Москва",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 2
+      }
+    ],
+    "frequency": 5,
+    "days": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c6",
+    "originalName": "МТС ленина 6 180",
+    "name": "МТС",
+    "address": "ленина 6",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 5,
+    "days": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c7",
+    "originalName": "пальмира Ленина 5- 200 новый 150 нов",
+    "name": "Пальмира",
+    "address": "Ленина 5",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      },
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 5,
+    "days": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c8",
+    "originalName": "чунунок к. Мяготина-2x180",
+    "name": "Чунунок",
+    "address": "к. Мяготина",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 2
+      }
+    ],
+    "frequency": 5,
+    "days": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c9",
+    "originalName": "Сбер академия 2х150 коричнев стар",
+    "name": "Сбер академия",
+    "address": "",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 2
+      }
+    ],
+    "frequency": 4,
+    "days": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c10",
+    "originalName": "Сбер красина 2х150",
+    "name": "Сбер",
+    "address": "красина 2",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 2
+      }
+    ],
+    "frequency": 4,
+    "days": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c11",
+    "originalName": "сбербанк гоголя 98-3ий вход 1 х 150",
+    "name": "Сбербанк",
+    "address": "гоголя 98",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 2
+      },
+      {
+        "size": "150",
+        "quantity": 5
+      }
+    ],
+    "frequency": 3,
+    "days": [
+      0,
+      1,
+      2
+    ],
+    "notes": "3ий вход",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c12",
+    "originalName": "сбербанк гоголя103- 2х150 коричневые",
+    "name": "Сбербанк",
+    "address": "гоголя103",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 2
+      }
+    ],
+    "frequency": 4,
+    "days": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c13",
+    "originalName": "Велес дзержинского 180",
+    "name": "Велес",
+    "address": "дзержинского",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 3,
+    "days": [
+      0,
+      2,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c14",
+    "originalName": "велес юбилейный-150 новый",
+    "name": "Велес",
+    "address": "юбилейный",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 3,
+    "days": [
+      0,
+      2,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c15",
+    "originalName": "газпроммежрегионгаз- 2x150, 180",
+    "name": "Газпроммежрегионгаз",
+    "address": "",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 3,
+    "days": [
+      0,
+      2,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c16",
+    "originalName": "Кижк 400 рез, 180",
+    "name": "Кижк 400",
+    "address": "",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      },
+      {
+        "size": "400",
+        "quantity": 1
+      }
+    ],
+    "frequency": 3,
+    "days": [
+      0,
+      2,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c17",
+    "originalName": "кодак Кирова-150 старые",
+    "name": "Кодак",
+    "address": "Кирова",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 3,
+    "days": [
+      0,
+      2,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c18",
+    "originalName": "мегаблин гоголя-180",
+    "name": "Мегаблин",
+    "address": "гоголя",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 3,
+    "days": [
+      0,
+      2,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c19",
+    "originalName": "Монетка гоголя 103 -180",
+    "name": "Монетка",
+    "address": "гоголя 103",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 3,
+    "days": [
+      0,
+      2,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c20",
+    "originalName": "Монетка кирова 180",
+    "name": "Монетка",
+    "address": "кирова",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 3,
+    "days": [
+      0,
+      2,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c21",
+    "originalName": "Монетка красина 180",
+    "name": "Монетка",
+    "address": "красина 180",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 3,
+    "days": [
+      0,
+      2,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c22",
+    "originalName": "Монетка пушкина 49-180",
+    "name": "Монетка",
+    "address": "пушкина 49",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 3,
+    "days": [
+      0,
+      2,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c23",
+    "originalName": "Монтка Ленина М Горько 180",
+    "name": "Монтка",
+    "address": "Ленина",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 3,
+    "days": [
+      0,
+      2,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c24",
+    "originalName": "Мясной к. маркса 150 рез",
+    "name": "Мясной",
+    "address": "к. маркса 150",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 3,
+    "days": [
+      0,
+      2,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c25",
+    "originalName": "Мясной советская 39 180",
+    "name": "Мясной",
+    "address": "советская 39",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 3,
+    "days": [
+      0,
+      2,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c26",
+    "originalName": "Пальмира гоголя 150",
+    "name": "Пальмира",
+    "address": "гоголя 150",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 3,
+    "days": [
+      0,
+      2,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c27",
+    "originalName": "пальмира юбилейный-180 НОВЫЙ",
+    "name": "Пальмира",
+    "address": "юбилейный",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 3,
+    "days": [
+      0,
+      2,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c28",
+    "originalName": "прогресс Пролетарская-180, 60x80",
+    "name": "Прогресс",
+    "address": "Пролетарская",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      },
+      {
+        "size": "60x80",
+        "quantity": 1
+      }
+    ],
+    "frequency": 3,
+    "days": [
+      0,
+      2,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c29",
+    "originalName": "прогресс советская 180, 150 новые",
+    "name": "Прогресс",
+    "address": "советская 180",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      },
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 3,
+    "days": [
+      0,
+      2,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c30",
+    "originalName": "сбербанк гоголя 98-1 вх 3Х150 коричневые",
+    "name": "Сбербанк",
+    "address": "гоголя 98",
+    "mats": [],
+    "frequency": 4,
+    "days": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "notes": "1 вх",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c31",
+    "originalName": "сбербанк гоголя 98-2ой вход 2х180",
+    "name": "Сбербанк",
+    "address": "гоголя 98",
+    "mats": [],
+    "frequency": 3,
+    "days": [
+      0,
+      1,
+      2
+    ],
+    "notes": "2ой вход",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c32",
+    "originalName": "теремок Куйбышева -150 старый",
+    "name": "Теремок",
+    "address": "Куйбышева",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 3,
+    "days": [
+      0,
+      2,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c33",
+    "originalName": "Тп 2х180",
+    "name": "Тп",
+    "address": "",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 2
+      }
+    ],
+    "frequency": 3,
+    "days": [
+      0,
+      2,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c34",
+    "originalName": "Хлеб да мясо 150 резаный хороший",
+    "name": "Хлеб да",
+    "address": "",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 3,
+    "days": [
+      0,
+      2,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c35",
+    "originalName": "Яхонт ленина 150",
+    "name": "Яхонт",
+    "address": "ленина 150",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 3,
+    "days": [
+      0,
+      2,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c36",
+    "originalName": "Авангард банк красина 180 сер. 1 шт",
+    "name": "Авангард банк",
+    "address": "красина 180",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      1,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c37",
+    "originalName": "Альфа банк гоголя 180",
+    "name": "Альфа банк",
+    "address": "гоголя 180",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      0,
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c38",
+    "originalName": "Альфа банк Гоголя-красина 150 сер.нов.1 шт.",
+    "name": "Альфа банк",
+    "address": "Гоголя",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      1,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c39",
+    "originalName": "Альфа мед гоголя-2х180",
+    "name": "Альфа мед",
+    "address": "гоголя",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 2
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      0,
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c40",
+    "originalName": "Альфа мед к.маркса -2х180,(ц.зд. Женщины, кометология)",
+    "name": "Альфа мед",
+    "address": "к.маркса",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 2
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      1,
+      4
+    ],
+    "notes": "ц.зд.",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c41",
+    "originalName": "Аннушка куйбышева 180",
+    "name": "Аннушка",
+    "address": "куйбышева",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      1,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c42",
+    "originalName": "Аптека гоголя 37-150",
+    "name": "Аптека",
+    "address": "гоголя 37",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      0,
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c43",
+    "originalName": "Аптека гоголя 9-150",
+    "name": "Аптека",
+    "address": "гоголя 9",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      1,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c44",
+    "originalName": "Аптека ленина 5-150",
+    "name": "Аптека",
+    "address": "ленина 5",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      0,
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c45",
+    "originalName": "Аптека пушкина 91-2х150",
+    "name": "Аптека",
+    "address": "пушкина 91",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 2
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      0,
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c46",
+    "originalName": "Атлант кирова 250",
+    "name": "Атлант",
+    "address": "кирова",
+    "mats": [
+      {
+        "size": "60x80",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      1,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c47",
+    "originalName": "Банк России 180 2шт",
+    "name": "Банк России",
+    "address": "",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 2
+      },
+      {
+        "size": "150",
+        "quantity": 2
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      0,
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c48",
+    "originalName": "Баон 150",
+    "name": "Баон 150",
+    "address": "",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      0,
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c49",
+    "originalName": "Буше горького 150",
+    "name": "Буше",
+    "address": "",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      1,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c50",
+    "originalName": "Буше красина 150 нов",
+    "name": "Буше",
+    "address": "красина 150",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      1,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c51",
+    "originalName": "Втб гоголя-250",
+    "name": "Втб",
+    "address": "гоголя",
+    "mats": [
+      {
+        "size": "250",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      0,
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c52",
+    "originalName": "Втб куйбышева 180",
+    "name": "Втб",
+    "address": "куйбышева",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      1,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c53",
+    "originalName": "Газпром банк гоголя-180",
+    "name": "Газпром банк",
+    "address": "гоголя",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      0,
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c54",
+    "originalName": "Друзья друзей 2х150",
+    "name": "Друзья друзей",
+    "address": "",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 2
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      1,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c55",
+    "originalName": "Жизнь март пролетарская -180",
+    "name": "Жизнь март",
+    "address": "пролетарская",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      0,
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c56",
+    "originalName": "инвитро красина-3х150 новые",
+    "name": "Инвитро",
+    "address": "красина",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 3
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      0,
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c57",
+    "originalName": "Инвитро ленина-2х150 новые стелим на себя",
+    "name": "Инвитро",
+    "address": "ленина",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 2
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      1,
+      4
+    ],
+    "notes": "стелим на себя",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c58",
+    "originalName": "Курган Доставка",
+    "name": "Курган Доставка",
+    "address": "",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      0,
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c59",
+    "originalName": "Летуаль 180",
+    "name": "Летуаль 180",
+    "address": "",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      0,
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c60",
+    "originalName": "М.горького 40 180*2",
+    "name": "М.горького 40",
+    "address": "М.горького 40",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 2
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      1,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c61",
+    "originalName": "Магнит Володарского 180",
+    "name": "Магнит",
+    "address": "Володарского 180",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      1,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c62",
+    "originalName": "Магнит гоголя 38-180",
+    "name": "Магнит",
+    "address": "гоголя 38",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      0,
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c63",
+    "originalName": "Магнит гоголя 66-180",
+    "name": "Магнит",
+    "address": "гоголя 66",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      0,
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c64",
+    "originalName": "Магнит Гоголя 76 180",
+    "name": "Магнит",
+    "address": "Гоголя 76",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      0,
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c65",
+    "originalName": "Магнит К.маркса 180",
+    "name": "Магнит",
+    "address": "К.маркса 180",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      1,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c66",
+    "originalName": "магнит красина 180",
+    "name": "Магнит",
+    "address": "красина 180",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      1,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c67",
+    "originalName": "Магнит советская 39 180",
+    "name": "Магнит",
+    "address": "советская 39",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      0,
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c68",
+    "originalName": "Магнит советская 40 180",
+    "name": "Магнит",
+    "address": "советская 40",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      0,
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c69",
+    "originalName": "Мегафон советская 2х150 рез",
+    "name": "Мегафон",
+    "address": "советская 2",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 2
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      1,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c70",
+    "originalName": "мтс гоголя 53 - 180серый 1",
+    "name": "Мтс",
+    "address": "гоголя 53",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      0,
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c71",
+    "originalName": "МТС Пушкина 150",
+    "name": "МТС",
+    "address": "Пушкина 150",
+    "mats": [],
+    "frequency": 2,
+    "days": [
+      0,
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c72",
+    "originalName": "мтс Пушкина 167- 150",
+    "name": "Мтс",
+    "address": "Пушкина 167",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      1,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c73",
+    "originalName": "Промсвязь банк 150,180",
+    "name": "Промсвязь банк",
+    "address": "",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      },
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      1,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c74",
+    "originalName": "Ресторан СОЛО Куйбышева",
+    "name": "Ресторан СОЛО",
+    "address": "Куйбышева",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      1,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c75",
+    "originalName": "Теле2 гоголя-150 резаный",
+    "name": "Теле2",
+    "address": "гоголя",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      0,
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c76",
+    "originalName": "Томография К. маркса",
+    "name": "Томография",
+    "address": "К. маркса",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      1,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c77",
+    "originalName": "Фикс прайс к.мяготина 180*2",
+    "name": "Фикс прайс",
+    "address": "к.мяготина",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 2
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      1,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c78",
+    "originalName": "Фикс советска40-2х180",
+    "name": "Фикс советска40",
+    "address": "",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 2
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      0,
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c79",
+    "originalName": "Чистый квартал 150, 80х80",
+    "name": "Чистый квартал",
+    "address": "",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      },
+      {
+        "size": "60x80",
+        "quantity": 1
+      }
+    ],
+    "frequency": 3,
+    "days": [
+      0,
+      2,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c80",
+    "originalName": "Япоки гоголя-180",
+    "name": "Япоки",
+    "address": "гоголя",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      0,
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c81",
+    "originalName": "4 сезона ленина-180",
+    "name": "4 сезона",
+    "address": "ленина",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      1
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c82",
+    "originalName": "Александрит 150 рез",
+    "name": "Александрит 150",
+    "address": "",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c83",
+    "originalName": "Алеф-банк 150 НОЯБРЬ",
+    "name": "Алеф-банк 150",
+    "address": "",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c84",
+    "originalName": "Альфастрахование 2х180",
+    "name": "Альфастрахование",
+    "address": "",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 2
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      2
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c85",
+    "originalName": "Аптека советская ленина 150",
+    "name": "Аптека",
+    "address": "советская",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      1
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c86",
+    "originalName": "Баден Ленина-200 старый",
+    "name": "Баден",
+    "address": "Ленина",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      1
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c87",
+    "originalName": "Банк курган Гоголя 180",
+    "name": "Банк курган",
+    "address": "Гоголя 180",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c88",
+    "originalName": "Банк курган площадь 150 сер. 1шт.",
+    "name": "Банк курган",
+    "address": "",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c89",
+    "originalName": "Банк России 150 2шт",
+    "name": "Банк России",
+    "address": "",
+    "mats": [
+      {
+        "size": "400",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c90",
+    "originalName": "Бенетон 150",
+    "name": "Бенетон 150",
+    "address": "",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c91",
+    "originalName": "Вояж володарская150 сер. 1 шт.нов.",
+    "name": "Вояж",
+    "address": "володарская150",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      2
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c92",
+    "originalName": "Газпроммежрегионгаз Гоголя 98 1x150",
+    "name": "Газпроммежрегионгаз",
+    "address": "Гоголя 98",
+    "mats": [],
+    "frequency": 1,
+    "days": [
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c93",
+    "originalName": "газпроммежрегионгаз- 5х150",
+    "name": "Газпроммежрегионгаз",
+    "address": "",
+    "mats": [],
+    "frequency": 1,
+    "days": [
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c94",
+    "originalName": "Джинса ленина 150",
+    "name": "Джинса",
+    "address": "ленина 150",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      2
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c95",
+    "originalName": "Джулия пролетарская 200 хороший",
+    "name": "Джулия",
+    "address": "пролетарская",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c96",
+    "originalName": "Джулия советская 180",
+    "name": "Джулия",
+    "address": "советская 180",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c97",
+    "originalName": "Ив роше Ленина180",
+    "name": "Ив роше",
+    "address": "Ленина180",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      2
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c98",
+    "originalName": "Ик надежда 150",
+    "name": "Ик надежда",
+    "address": "",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      1
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c99",
+    "originalName": "Инвитро пушкина 189-2х150",
+    "name": "Инвитро",
+    "address": "пушкина 189",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 2
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c100",
+    "originalName": "Инвитро юбилейный 180",
+    "name": "Инвитро",
+    "address": "юбилейный",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c101",
+    "originalName": "Ингострах 2х150",
+    "name": "Ингострах",
+    "address": "",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 2
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      1
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c102",
+    "originalName": "Календарь подарков ленина-180",
+    "name": "Календарь подарков",
+    "address": "ленина",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      1
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c103",
+    "originalName": "Каменный цветок омская 101 150 нов",
+    "name": "Каменный цветок",
+    "address": "омская 101",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      2
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c104",
+    "originalName": "Карэ гараж К.Маркса 60а 150",
+    "name": "Карэ гараж",
+    "address": "К.Маркса 60а",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      1
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c105",
+    "originalName": "Карэ гоголя 37 150 нов. кор.",
+    "name": "Карэ",
+    "address": "гоголя 37",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c106",
+    "originalName": "Карэ к. Маркса 46 3х150 нов кор",
+    "name": "Карэ",
+    "address": "к. Маркса 46",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 3
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      1
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c107",
+    "originalName": "Карэ ленина 150 коричневый",
+    "name": "Карэ",
+    "address": "ленина 150",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      2
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c108",
+    "originalName": "Комиссоныч юбилейный-150 рез.",
+    "name": "Комиссоныч",
+    "address": "юбилейный",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c109",
+    "originalName": "Консультант + васильева 7 240старый",
+    "name": "Консультант +",
+    "address": "васильева 7",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      1
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c110",
+    "originalName": "Мед центр космольская 180",
+    "name": "Мед центр",
+    "address": "космольская",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c111",
+    "originalName": "Мисс т 150 сер, нов. 1шт.",
+    "name": "Мисс т",
+    "address": "",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c112",
+    "originalName": "Неил хаус 150 новый",
+    "name": "Неил хаус",
+    "address": "",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      2
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c113",
+    "originalName": "Обувные ленина-3х150 старые",
+    "name": "Обувные",
+    "address": "ленина",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 3
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      1
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c114",
+    "originalName": "Омс 2х180",
+    "name": "Омс",
+    "address": "",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 2
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c115",
+    "originalName": "Отель сервис, ресторан 180х3",
+    "name": "Отель сервис,",
+    "address": "",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 3
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      2
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c116",
+    "originalName": "Отп ленина-150 резаный",
+    "name": "Отп",
+    "address": "ленина",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      1
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c117",
+    "originalName": "Офис центр куйбышева-красина 180,150рез",
+    "name": "Офис центр",
+    "address": "красина 180",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      },
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      1
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c118",
+    "originalName": "Палаццо Гоголя150 рез",
+    "name": "Палаццо",
+    "address": "Гоголя150",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c119",
+    "originalName": "Парикмахерская тут бут 2х150 нов",
+    "name": "Парикмахерская тут",
+    "address": "",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 2
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      1
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c120",
+    "originalName": "Планета обуви ленина- 2х200 старые",
+    "name": "Планета обуви",
+    "address": "ленина",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 2
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      1
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c121",
+    "originalName": "Платинум володарская150 сер. 1 шт.",
+    "name": "Платинум",
+    "address": "володарская150",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      2
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c122",
+    "originalName": "Платон к.Мяготина 180",
+    "name": "Платон",
+    "address": "к.Мяготина",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      1
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c123",
+    "originalName": "Подиум ленина 180",
+    "name": "Подиум",
+    "address": "ленина 180",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c124",
+    "originalName": "Прайм фитнес клуб 2х150 новые",
+    "name": "Прайм фитнес",
+    "address": "",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 2
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      1
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c125",
+    "originalName": "Пышка",
+    "name": "Пышка",
+    "address": "",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      2
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c126",
+    "originalName": "Разговоры ЦПКОИ 180",
+    "name": "Разговоры ЦПКОИ",
+    "address": "",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c127",
+    "originalName": "Рикер ленина-200 старый",
+    "name": "Рикер",
+    "address": "ленина",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      1
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c128",
+    "originalName": "Саквояж ленина-180",
+    "name": "Саквояж",
+    "address": "ленина",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      1
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c129",
+    "originalName": "Сибирский газовик володарского 65, 150 сер. 3 шт",
+    "name": "Сибирский газовик",
+    "address": "володарского 65",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 3
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      1
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c130",
+    "originalName": "Скорпион 150",
+    "name": "Скорпион 150",
+    "address": "",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      2
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c131",
+    "originalName": "Совкомбанк Ленина 180",
+    "name": "Совкомбанк",
+    "address": "Ленина 180",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c132",
+    "originalName": "совкомбанк гоголя-180",
+    "name": "Совкомбанк",
+    "address": "гоголя",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c133",
+    "originalName": "Стиляги площадь серый новый 150+150",
+    "name": "Стиляги площадь",
+    "address": "",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 2
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c134",
+    "originalName": "Триумф 180",
+    "name": "Триумф 180",
+    "address": "",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      2
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c135",
+    "originalName": "Фам-150",
+    "name": "Фам-150",
+    "address": "",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c136",
+    "originalName": "Франческо донни 150 рез.",
+    "name": "Франческо донни",
+    "address": "",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      2
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c137",
+    "originalName": "чунунок к. Мяготина-1x180",
+    "name": "Чунунок",
+    "address": "к. Мяготина",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c138",
+    "originalName": "Швейный мир 2-60х80",
+    "name": "Швейный мир",
+    "address": "",
+    "mats": [
+      {
+        "size": "60x80",
+        "quantity": 2
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c139",
+    "originalName": "Эльшуз 150",
+    "name": "Эльшуз 150",
+    "address": "",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c140",
+    "originalName": "Япошка Юбилейный 150 резаный",
+    "name": "Япошка",
+    "address": "Юбилейный",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      2
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c141",
+    "originalName": "Plaza томина 150 ноябрь",
+    "name": "Plaza",
+    "address": "томина",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c142",
+    "originalName": "SoupRamen 180",
+    "name": "SoupRamen 180",
+    "address": "",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 1
+      }
+    ],
+    "frequency": 1,
+    "days": [
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c143",
+    "originalName": "Каре Куйбышева 150",
+    "name": "Каре",
+    "address": "Куйбышева",
+    "mats": [],
+    "frequency": 1,
+    "days": [
+      2
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c144",
+    "originalName": "Кардио центр 180 3шт 150 1шт",
+    "name": "Кардио центр",
+    "address": "",
+    "mats": [
+      {
+        "size": "180",
+        "quantity": 3
+      },
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      0,
+      3
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c145",
+    "originalName": "Алые паруса 4x400, 3x240",
+    "name": "Алые паруса",
+    "address": "",
+    "mats": [
+      {
+        "size": "400",
+        "quantity": 4
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      0,
+      2
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c146",
+    "originalName": "Теле 2 машиностроителей 3а 150",
+    "name": "Теле 2",
+    "address": "Машиностроителей 3а",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      1,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c147",
+    "originalName": "дом хлеба Машиностроителей 150",
+    "name": "Дом хлеба",
+    "address": "Машиностроителей",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      1,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c148",
+    "originalName": "Компас рыбацкий Машиностр, 1 400 2шт рез",
+    "name": "Компас рыбацкий",
+    "address": "Машиностроителей 1",
+    "mats": [
+      {
+        "size": "400",
+        "quantity": 2
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      1,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "c149",
+    "originalName": "Хлеб да мясо Некрасова, 1 150",
+    "name": "Хлеб да мясо",
+    "address": "Некрасова 1",
+    "mats": [
+      {
+        "size": "150",
+        "quantity": 1
+      }
+    ],
+    "frequency": 2,
+    "days": [
+      1,
+      4
+    ],
+    "notes": "",
+    "isActive": true,
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  }
+]
