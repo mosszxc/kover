@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { DaySwitcher, DaySummary, RouteSearch, StopList, AddStopDialog, useRouteStore } from '@/modules/routes'
+import { DaySwitcher, DaySummary, RouteSearch, StopList, AddStopDialog, useRouteStore, PrintButton } from '@/modules/routes'
 import { useClientStore } from '@/modules/clients'
 import { PrintSheet } from '@/modules/print'
 
@@ -11,7 +11,10 @@ export function RoutesPage() {
 
   return (
     <div className="space-y-4">
-      <DaySwitcher />
+      <div className="flex items-center justify-between gap-2">
+        <DaySwitcher />
+        <PrintButton />
+      </div>
       <DaySummary />
       <RouteSearch value={searchQuery} onChange={setSearchQuery} />
       <StopList searchQuery={searchQuery} />
