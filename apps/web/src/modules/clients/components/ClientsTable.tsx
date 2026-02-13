@@ -8,7 +8,8 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { Check, ChevronDown, ChevronUp, ChevronsUpDown, Search, AlertTriangle } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, ChevronsUpDown, Search, AlertTriangle, Pause, Play } from 'lucide-react'
+import { toast } from 'sonner'
 import { useClientStore } from '../store'
 import type { Client } from '../types'
 import { DAY_LABELS, MAT_AREA } from '@/shared/types'
@@ -36,6 +37,7 @@ interface ClientsTableProps {
 
 export function ClientsTable({ onRowClick, isClientInRoute }: ClientsTableProps) {
   const clients = useClientStore((s) => s.clients)
+  const updateClient = useClientStore((s) => s.updateClient)
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState('')
 
@@ -110,18 +112,40 @@ export function ClientsTable({ onRowClick, isClientInRoute }: ClientsTableProps)
     {
       accessorKey: 'isActive',
       header: 'Статус',
-      cell: (info) =>
-        info.getValue() ? (
-          <span className="rounded-full bg-emerald-600/20 px-2 py-0.5 text-xs font-semibold text-emerald-400">
-            Активен
-          </span>
-        ) : (
-          <span className="rounded-full bg-amber-600/20 px-2 py-0.5 text-xs font-semibold text-amber-400">
-            На паузе
-          </span>
-        ),
+      cell: ({ row }) => {
+        const client = row.original
+        const isActive = client.isActive
+        return (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              updateClient(client.id, { isActive: !isActive })
+              toast.success(isActive ? 'Клиент на паузе' : 'Клиент активирован', { duration: 2000 })
+            }}
+            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold transition-colors ${
+              isActive
+                ? 'bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30'
+                : 'bg-amber-600/20 text-amber-400 hover:bg-amber-600/30'
+            }`}
+            aria-label={isActive ? 'Поставить на паузу' : 'Активировать'}
+          >
+            {isActive ? (
+              <>
+                <Pause className="size-3" />
+                Активен
+              </>
+            ) : (
+              <>
+                <Play className="size-3" />
+                На паузе
+              </>
+            )}
+          </button>
+        )
+      },
     },
-  ], [isClientInRoute])
+  ], [isClientInRoute, updateClient])
   const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>([])
   const [selectedFrequency, setSelectedFrequency] = useState<number | null>(null)
   const [selectedMatSize, setSelectedMatSize] = useState<MatSize | null>(null)
