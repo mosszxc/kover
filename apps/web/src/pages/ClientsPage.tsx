@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import { ClientsTable, ClientForm, useClientStore, BatchGeocode, GeocodeSettings } from '@/modules/clients'
+import { ClientsTable, ClientForm, AddClientDialog, useClientStore, BatchGeocode, GeocodeSettings } from '@/modules/clients'
 import { useRouteStore } from '@/modules/routes'
 import type { Client } from '@/modules/clients'
 import type { DayOfWeek } from '@/shared/types'
@@ -58,7 +58,7 @@ export function ClientsPage() {
         <div className="flex items-center gap-2">
           <GeocodeSettings />
           <BatchGeocode />
-          <ClientForm />
+          <AddClientDialog />
         </div>
       </div>
       <ClientsTable onRowClick={setSelectedClient} isClientInRoute={isClientInRoute} onToggleActive={handleToggleActive} />
