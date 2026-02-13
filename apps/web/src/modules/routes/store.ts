@@ -11,6 +11,7 @@ interface RouteState {
   removeStop: (day: DayOfWeek, stopId: string) => void
   moveStop: (day: DayOfWeek, stopId: string, newPosition: number) => void
   reorderStop: (day: DayOfWeek, from: number, to: number) => void
+  transferStop: (fromDay: DayOfWeek, toDay: DayOfWeek, stopId: string, toPosition?: number) => void
   toggleStopCompleted: (day: DayOfWeek, stopId: string) => void
   seedRoutes: (routes: DayRoute[]) => void
 }
@@ -84,6 +85,38 @@ export const useRouteStore = create<RouteState>()(
             }
           }),
         })),
+
+      transferStop: (fromDay, toDay, stopId, toPosition) =>
+        set((state) => {
+          const fromRoute = state.routes.find((r) => r.day === fromDay)
+          if (!fromRoute) return state
+          const stop = fromRoute.stops.find((s) => s.id === stopId)
+          if (!stop) return state
+
+          return {
+            routes: state.routes.map((route) => {
+              if (route.day === fromDay) {
+                return {
+                  ...route,
+                  stops: route.stops
+                    .filter((s) => s.id !== stopId)
+                    .map((s, i) => ({ ...s, position: i })),
+                }
+              }
+              if (route.day === toDay) {
+                const newStop = { ...stop, isCompleted: false }
+                const stops = [...route.stops]
+                const insertAt = toPosition !== undefined ? toPosition : stops.length
+                stops.splice(insertAt, 0, newStop)
+                return {
+                  ...route,
+                  stops: stops.map((s, i) => ({ ...s, position: i })),
+                }
+              }
+              return route
+            }),
+          }
+        }),
 
       toggleStopCompleted: (day, stopId) =>
         set((state) => ({
