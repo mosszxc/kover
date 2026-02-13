@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Plus, X } from 'lucide-react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { Plus, X, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/shared/ui/button'
 import {
@@ -32,9 +32,36 @@ interface FormErrors {
 
 const emptyMat = (): MatRow => ({ size: '180', quantity: 1, color: '' })
 
-export function ClientForm() {
-  const [open, setOpen] = useState(false)
+function matsToRows(mats: MatSpec[]): MatRow[] {
+  return mats.map((m) => ({ size: m.size, quantity: m.quantity, color: m.color ?? '' }))
+}
+
+function rowsToSpecs(rows: MatRow[]): MatSpec[] {
+  return rows.map((m) => ({
+    size: m.size,
+    quantity: m.quantity,
+    ...(m.color.trim() ? { color: m.color.trim() } : {}),
+  }))
+}
+
+interface ClientFormProps {
+  client?: Client
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  onDelete?: (id: string) => void
+}
+
+export function ClientForm({ client, open: controlledOpen, onOpenChange, onDelete }: ClientFormProps) {
+  const isEdit = !!client
   const addClient = useClientStore((s) => s.addClient)
+  const updateClient = useClientStore((s) => s.updateClient)
+
+  // Dialog state: controlled externally for edit, internal for add
+  const [internalOpen, setInternalOpen] = useState(false)
+  const open = isEdit ? (controlledOpen ?? false) : internalOpen
+  const setOpen = isEdit
+    ? (v: boolean) => onOpenChange?.(v)
+    : setInternalOpen
 
   // form state
   const [name, setName] = useState('')
@@ -44,6 +71,64 @@ export function ClientForm() {
   const [days, setDays] = useState<DayOfWeek[]>([])
   const [notes, setNotes] = useState('')
   const [errors, setErrors] = useState<FormErrors>({})
+
+  // Populate form when client changes (edit mode)
+  useEffect(() => {
+    if (client) {
+      setName(client.name)
+      setAddress(client.address)
+      setMats(matsToRows(client.mats))
+      setFrequency(client.frequency)
+      setDays([...client.days])
+      setNotes(client.notes)
+      setErrors({})
+    }
+  }, [client])
+
+  // Autosave for edit mode
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const autosave = useCallback(() => {
+    if (!client) return
+    if (!name.trim()) return
+
+    const data: Partial<Client> = {
+      name: name.trim(),
+      address: address.trim(),
+      mats: rowsToSpecs(mats),
+      frequency,
+      days: [...days].sort(),
+      notes: notes.trim(),
+      originalName: buildOriginalName(),
+    }
+    updateClient(client.id, data)
+    toast.success('Сохранено', { duration: 2000 })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [client, name, address, mats, frequency, days, notes, updateClient])
+
+  // Track if form was populated (skip first autosave on open)
+  const populatedRef = useRef(false)
+
+  useEffect(() => {
+    if (!isEdit) return
+    if (!populatedRef.current) {
+      populatedRef.current = true
+      return
+    }
+
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(autosave, 500)
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
+  }, [isEdit, name, address, mats, frequency, days, notes, autosave])
+
+  // Reset populated flag when dialog closes
+  useEffect(() => {
+    if (!open) {
+      populatedRef.current = false
+    }
+  }, [open])
 
   function resetForm() {
     setName('')
@@ -79,16 +164,12 @@ export function ClientForm() {
       return
     }
 
-    const client: Client = {
+    const newClient: Client = {
       id: crypto.randomUUID(),
       originalName: buildOriginalName(),
       name: name.trim(),
       address: address.trim(),
-      mats: mats.map<MatSpec>((m) => ({
-        size: m.size,
-        quantity: m.quantity,
-        ...(m.color.trim() ? { color: m.color.trim() } : {}),
-      })),
+      mats: rowsToSpecs(mats),
       frequency,
       days: [...days].sort(),
       notes: notes.trim(),
@@ -96,10 +177,16 @@ export function ClientForm() {
       createdAt: new Date().toISOString(),
     }
 
-    addClient(client)
+    addClient(newClient)
     toast.success('Сохранено', { duration: 2000 })
     setOpen(false)
     resetForm()
+  }
+
+  function handleDelete() {
+    if (!client) return
+    onDelete?.(client.id)
+    setOpen(false)
   }
 
   function addMat() {
@@ -126,6 +213,184 @@ export function ClientForm() {
   const labelClass = 'text-sm font-medium text-slate-300'
   const errorClass = 'text-xs text-red-400 mt-1'
 
+  const dialogContent = (
+    <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[500px]">
+      <DialogHeader>
+        <DialogTitle>
+          {isEdit ? `Редактирование: ${client.name}` : 'Новый клиент'}
+        </DialogTitle>
+      </DialogHeader>
+
+      <div className="space-y-4">
+        {/* Название */}
+        <div>
+          <label className={labelClass}>
+            Название <span className="text-red-400">*</span>
+          </label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value)
+              setErrors((prev) => ({ ...prev, name: undefined }))
+            }}
+            placeholder="Например: Велес"
+            className={`${inputClass} mt-1 ${errors.name ? 'ring-1 ring-red-500' : ''}`}
+          />
+          {errors.name && <p className={errorClass}>{errors.name}</p>}
+        </div>
+
+        {/* Адрес */}
+        <div>
+          <label className={labelClass}>Адрес</label>
+          <input
+            type="text"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            placeholder="Например: Гоголя 180"
+            className={`${inputClass} mt-1`}
+          />
+        </div>
+
+        {/* Коврики */}
+        <div>
+          <label className={labelClass}>
+            Коврики <span className="text-red-400">*</span>
+          </label>
+          <div className="mt-1 space-y-2">
+            {mats.map((mat, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <select
+                  value={mat.size}
+                  onChange={(e) => updateMat(i, 'size', e.target.value)}
+                  className={`${inputClass} w-28 shrink-0`}
+                >
+                  {MAT_SIZES.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+
+                <input
+                  type="number"
+                  min={1}
+                  value={mat.quantity}
+                  onChange={(e) =>
+                    updateMat(i, 'quantity', Math.max(1, Number(e.target.value)))
+                  }
+                  className={`${inputClass} w-16 shrink-0 text-center`}
+                />
+
+                <input
+                  type="text"
+                  value={mat.color}
+                  onChange={(e) => updateMat(i, 'color', e.target.value)}
+                  placeholder="Цвет"
+                  className={`${inputClass} min-w-0 flex-1`}
+                />
+
+                <button
+                  type="button"
+                  onClick={() => removeMat(i)}
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-slate-800 hover:text-slate-300"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+          {errors.mats && <p className={errorClass}>{errors.mats}</p>}
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="mt-2"
+            onClick={addMat}
+          >
+            <Plus className="h-3 w-3" />
+            Коврик
+          </Button>
+        </div>
+
+        {/* Частота */}
+        <div>
+          <label className={labelClass}>Частота (раз/нед)</label>
+          <select
+            value={frequency}
+            onChange={(e) => setFrequency(Number(e.target.value))}
+            className={`${inputClass} mt-1`}
+          >
+            {FREQUENCIES.map((f) => (
+              <option key={f} value={f}>
+                {f}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Дни */}
+        <div>
+          <label className={labelClass}>Дни</label>
+          <div className="mt-1 flex gap-2">
+            {ALL_DAYS.map((day) => (
+              <button
+                key={day}
+                type="button"
+                onClick={() => toggleDay(day)}
+                className={`flex h-11 w-11 items-center justify-center rounded-md border text-sm font-medium transition-colors ${
+                  days.includes(day)
+                    ? 'border-blue-600 bg-blue-600 text-white'
+                    : 'border-slate-700 bg-slate-900 text-slate-400 hover:border-slate-500'
+                }`}
+              >
+                {DAY_LABELS[day]}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Примечания */}
+        <div>
+          <label className={labelClass}>Примечания</label>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Дополнительная информация..."
+            rows={3}
+            className={`${inputClass} mt-1 resize-none py-2`}
+          />
+        </div>
+      </div>
+
+      <DialogFooter className={isEdit ? 'flex-row justify-between sm:justify-between' : ''}>
+        {isEdit ? (
+          <>
+            <Button variant="destructive" onClick={handleDelete}>
+              <Trash2 className="h-4 w-4" />
+              Удалить
+            </Button>
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Закрыть
+            </Button>
+          </>
+        ) : (
+          <Button onClick={handleSave}>Сохранить</Button>
+        )}
+      </DialogFooter>
+    </DialogContent>
+  )
+
+  // Edit mode: controlled dialog without trigger
+  if (isEdit) {
+    return (
+      <Dialog open={open} onOpenChange={setOpen}>
+        {dialogContent}
+      </Dialog>
+    )
+  }
+
+  // Add mode: dialog with trigger button
   return (
     <Dialog
       open={open}
@@ -140,158 +405,7 @@ export function ClientForm() {
           Добавить клиента
         </Button>
       </DialogTrigger>
-
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Новый клиент</DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-4">
-          {/* Название */}
-          <div>
-            <label className={labelClass}>
-              Название <span className="text-red-400">*</span>
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value)
-                setErrors((prev) => ({ ...prev, name: undefined }))
-              }}
-              placeholder="Например: Велес"
-              className={`${inputClass} mt-1 ${errors.name ? 'ring-1 ring-red-500' : ''}`}
-            />
-            {errors.name && <p className={errorClass}>{errors.name}</p>}
-          </div>
-
-          {/* Адрес */}
-          <div>
-            <label className={labelClass}>Адрес</label>
-            <input
-              type="text"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="Например: Гоголя 180"
-              className={`${inputClass} mt-1`}
-            />
-          </div>
-
-          {/* Коврики */}
-          <div>
-            <label className={labelClass}>
-              Коврики <span className="text-red-400">*</span>
-            </label>
-            <div className="mt-1 space-y-2">
-              {mats.map((mat, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <select
-                    value={mat.size}
-                    onChange={(e) => updateMat(i, 'size', e.target.value)}
-                    className={`${inputClass} w-28 shrink-0`}
-                  >
-                    {MAT_SIZES.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </select>
-
-                  <input
-                    type="number"
-                    min={1}
-                    value={mat.quantity}
-                    onChange={(e) =>
-                      updateMat(i, 'quantity', Math.max(1, Number(e.target.value)))
-                    }
-                    className={`${inputClass} w-16 shrink-0 text-center`}
-                  />
-
-                  <input
-                    type="text"
-                    value={mat.color}
-                    onChange={(e) => updateMat(i, 'color', e.target.value)}
-                    placeholder="Цвет"
-                    className={`${inputClass} min-w-0 flex-1`}
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() => removeMat(i)}
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-slate-800 hover:text-slate-300"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-            {errors.mats && <p className={errorClass}>{errors.mats}</p>}
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="mt-2"
-              onClick={addMat}
-            >
-              <Plus className="h-3 w-3" />
-              Коврик
-            </Button>
-          </div>
-
-          {/* Частота */}
-          <div>
-            <label className={labelClass}>Частота (раз/нед)</label>
-            <select
-              value={frequency}
-              onChange={(e) => setFrequency(Number(e.target.value))}
-              className={`${inputClass} mt-1`}
-            >
-              {FREQUENCIES.map((f) => (
-                <option key={f} value={f}>
-                  {f}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Дни */}
-          <div>
-            <label className={labelClass}>Дни</label>
-            <div className="mt-1 flex gap-2">
-              {ALL_DAYS.map((day) => (
-                <button
-                  key={day}
-                  type="button"
-                  onClick={() => toggleDay(day)}
-                  className={`flex h-11 w-11 items-center justify-center rounded-md border text-sm font-medium transition-colors ${
-                    days.includes(day)
-                      ? 'border-blue-600 bg-blue-600 text-white'
-                      : 'border-slate-700 bg-slate-900 text-slate-400 hover:border-slate-500'
-                  }`}
-                >
-                  {DAY_LABELS[day]}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Примечания */}
-          <div>
-            <label className={labelClass}>Примечания</label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Дополнительная информация..."
-              rows={3}
-              className={`${inputClass} mt-1 resize-none py-2`}
-            />
-          </div>
-        </div>
-
-        <DialogFooter>
-          <Button onClick={handleSave}>Сохранить</Button>
-        </DialogFooter>
-      </DialogContent>
+      {dialogContent}
     </Dialog>
   )
 }

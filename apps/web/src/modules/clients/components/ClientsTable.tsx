@@ -102,7 +102,11 @@ const columns: ColumnDef<Client>[] = [
   },
 ]
 
-export function ClientsTable() {
+interface ClientsTableProps {
+  onRowClick?: (client: Client) => void
+}
+
+export function ClientsTable({ onRowClick }: ClientsTableProps) {
   const clients = useClientStore((s) => s.clients)
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState('')
@@ -205,7 +209,8 @@ export function ClientsTable() {
             {table.getRowModel().rows.map((row, i) => (
               <tr
                 key={row.id}
-                className={`border-b border-slate-800 ${i % 2 === 1 ? 'bg-slate-900/50' : ''} hover:bg-slate-800/50`}
+                onClick={() => onRowClick?.(row.original)}
+                className={`border-b border-slate-800 ${i % 2 === 1 ? 'bg-slate-900/50' : ''} hover:bg-slate-800/50 ${onRowClick ? 'cursor-pointer' : ''}`}
               >
                 {row.getVisibleCells().map((cell) => (
                   <td
