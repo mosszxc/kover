@@ -1,4 +1,7 @@
-import { Check, ChevronUp, ChevronDown } from 'lucide-react'
+import { useMemo } from 'react'
+import { Check, ChevronUp, ChevronDown, GripVertical } from 'lucide-react'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { cn } from '@/shared/lib/utils'
 import type { Client, MatSpec } from '@/modules/clients'
 import { MAT_AREA } from '@/shared/types'
@@ -13,25 +16,65 @@ interface StopCardProps {
   stopIndex: number
   isFirst: boolean
   isLast: boolean
+  isDndEnabled?: boolean
 }
 
 function matArea(mats: MatSpec[]): number {
   return mats.reduce((sum, m) => sum + m.quantity * (MAT_AREA[m.size] ?? 0), 0)
 }
 
-export function StopCard({ number, client, stopId, isCompleted, stopIndex, isFirst, isLast }: StopCardProps) {
+export function StopCard({ number, client, stopId, isCompleted, stopIndex, isFirst, isLast, isDndEnabled = true }: StopCardProps) {
   const area = matArea(client.mats)
   const selectedDay = useRouteStore((s) => s.selectedDay)
   const toggleStopCompleted = useRouteStore((s) => s.toggleStopCompleted)
   const moveStop = useRouteStore((s) => s.moveStop)
 
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: stopId,
+    disabled: !isDndEnabled,
+  })
+
+  const prefersReducedMotion = useMemo(
+    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    [],
+  )
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition: prefersReducedMotion ? 'none' : transition,
+  }
+
   return (
     <div
+      ref={setNodeRef}
+      style={style}
       className={cn(
         'flex items-center gap-3 border-l-3 border-l-slate-700 p-3 transition-colors hover:bg-slate-800',
         isCompleted && 'opacity-60',
+        isDragging && 'z-10 opacity-50 ring-2 ring-blue-500',
       )}
+      {...attributes}
     >
+      {isDndEnabled && (
+        <button
+          type="button"
+          ref={setActivatorNodeRef}
+          {...listeners}
+          aria-label="Перетащить для изменения порядка"
+          className="flex size-6 shrink-0 cursor-grab items-center justify-center rounded transition-colors hover:bg-slate-700 active:cursor-grabbing print:hidden"
+        >
+          <GripVertical className="size-5 text-slate-400" />
+        </button>
+      )}
+
       <button
         type="button"
         aria-label={isCompleted ? 'Отметить как невыполненное' : 'Отметить как выполненное'}
