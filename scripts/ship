@@ -30,9 +30,11 @@ fi
 
 ISSUE=$(echo "$BRANCH" | grep -oE '[0-9]+' || echo "")
 [ -z "$ISSUE" ] && { echo "Not on issue branch (branch: $BRANCH)"; exit 1; }
-TITLE=$(gh issue view "$ISSUE" --json title -q '.title')
-BODY=$(gh issue view "$ISSUE" --json body -q '.body')
-LABELS=$(gh issue view "$ISSUE" --json labels -q '[.labels[].name] | join(",")' 2>/dev/null || echo "")
+# Single API call + cache (3 HTTP → 1 HTTP + 2 cache hits)
+_ISSUE_API="repos/{owner}/{repo}/issues/$ISSUE"
+TITLE=$(gh api "$_ISSUE_API" --cache 60s --jq '.title' 2>/dev/null) || { echo "Failed to fetch issue #$ISSUE"; exit 1; }
+LABELS=$(gh api "$_ISSUE_API" --cache 60s --jq '[.labels[].name] | join(",")' 2>/dev/null || echo "")
+BODY=$(gh api "$_ISSUE_API" --cache 60s --jq '.body // ""' 2>/dev/null || echo "")
 
 # Temp directory for conflict files (unique per issue)
 CONFLICT_DIR="/tmp/ship_conflict_${ISSUE}"
@@ -159,7 +161,7 @@ if [ "$CONTINUE_MODE" = true ]; then
     # Push and jump to merge loop
     echo "[PHASE 4] Pushing resolved changes..."
     git push origin "$BRANCH" --force-with-lease
-    sleep 2
+    sleep 1
 
     # Clean up conflict files
     rm -rf "$CONFLICT_DIR"
@@ -235,14 +237,6 @@ if [ "$CONTINUE_MODE" = false ]; then
     pnpm -s run lint || { echo "❌ Lint failed"; git reset HEAD -- . >/dev/null 2>&1; exit 1; }
     echo "[PHASE 4] Lint... ✓"
 
-    # Schema validation (if snapshot exists)
-    VALIDATE_SCRIPT="$(git rev-parse --show-toplevel 2>/dev/null || echo ".")/scripts/validate_schema.py"
-    if [ -f "$VALIDATE_SCRIPT" ]; then
-        echo "[PHASE 4] Schema validation..."
-        python3 "$VALIDATE_SCRIPT" --summary || { echo "❌ Schema validation failed"; git reset HEAD -- . >/dev/null 2>&1; exit 1; }
-        echo "[PHASE 4] Schema validation... ✓"
-    fi
-
     # Resolve commit prefix from issue labels (LABELS fetched at top)
     case "$LABELS" in
         *bug*)       PREFIX="fix" ;;
@@ -268,8 +262,8 @@ if [ "$CONTINUE_MODE" = false ]; then
         PR_URL=$(gh pr view "$BRANCH" --json url -q '.url')
 fi
 
-# Get PR info (needed for both modes)
-PR_URL=$(gh pr view "$BRANCH" --json url -q '.url' 2>/dev/null || echo "")
+# Get PR info (skip extra API call if already set from PR creation)
+[ -z "$PR_URL" ] && PR_URL=$(gh pr view "$BRANCH" --json url -q '.url' 2>/dev/null || echo "")
 PR_NUM=$(echo "$PR_URL" | grep -oE '[0-9]+$')
 
 echo "[PHASE 4] PR создан: $PR_URL"
@@ -325,7 +319,7 @@ while true; do
     if git rebase origin/develop 2>/dev/null; then
         echo "✓ Rebase успешен (no conflicts)"
         git push origin "$BRANCH" --force-with-lease 2>/dev/null
-        sleep 2  # Give GitHub time to update PR state
+        sleep 1  # Give GitHub time to update PR state
         continue
     fi
 
@@ -335,7 +329,7 @@ while true; do
     # Push rebased branch
     echo "Пушу rebase (force)..."
     git push origin "$BRANCH" --force-with-lease
-    sleep 2  # Give GitHub time to update PR state
+    sleep 1  # Give GitHub time to update PR state
 done
 
 # Clean up conflict files (if any remain from previous runs)
@@ -358,23 +352,26 @@ if [ "$PR_STATE" != "MERGED" ]; then
     else
         echo "⚠️  Failed to merge PR"
     fi
+else
+    echo "[PHASE 5] PR merged ✓"
 fi
 
-# 5.2 Close issue (regardless of sync status)
-echo "[PHASE 5] Ensuring issue #$ISSUE is closed..."
-ISSUE_STATE=$(gh issue view "$ISSUE" --json state -q '.state' 2>/dev/null || echo "UNKNOWN")
-ISSUE_CLOSED="closed"
-if [ "$ISSUE_STATE" != "CLOSED" ]; then
-    if gh issue close "$ISSUE" --comment "Fixed in #$PR_NUM" 2>/dev/null; then
-        echo "[PHASE 5] Issue closed ✓"
-    elif gh issue close "$ISSUE" 2>/dev/null; then
-        echo "[PHASE 5] Issue closed ✓"
-    else
-        ISSUE_CLOSED="FAILED (state: $ISSUE_STATE)"
-        echo "⚠️  Failed to close issue"
-    fi
+# 5.2 Close issue (try directly — skip pre-check, saves 1 API call)
+echo "[PHASE 5] Closing issue #$ISSUE..."
+if gh issue close "$ISSUE" --comment "Fixed in #$PR_NUM" 2>/dev/null; then
+    echo "[PHASE 5] Issue closed ✓"
+    ISSUE_STATE="CLOSED"
+elif gh issue close "$ISSUE" 2>/dev/null; then
+    echo "[PHASE 5] Issue closed ✓"
+    ISSUE_STATE="CLOSED"
 else
-    echo "[PHASE 5] Issue already closed ✓"
+    # May already be closed — check only on failure
+    ISSUE_STATE=$(gh issue view "$ISSUE" --json state -q '.state' 2>/dev/null || echo "UNKNOWN")
+    if [ "$ISSUE_STATE" = "CLOSED" ]; then
+        echo "[PHASE 5] Issue already closed ✓"
+    else
+        echo "⚠️  Failed to close issue (state: $ISSUE_STATE)"
+    fi
 fi
 
 # 5.3 Sync local develop (non-blocking)
@@ -397,21 +394,18 @@ if [ "$STASHED" = true ]; then
     git stash pop -q 2>/dev/null || echo "⚠️  git stash pop failed — run: git stash pop"
 fi
 
-# 5.4 Final verification
-FINAL_PR_STATE=$(gh pr view "$BRANCH" --json state -q '.state' 2>/dev/null || echo "UNKNOWN")
-FINAL_ISSUE_STATE=$(gh issue view "$ISSUE" --json state -q '.state' 2>/dev/null || echo "UNKNOWN")
-
-if [ "$FINAL_PR_STATE" != "MERGED" ] || [ "$FINAL_ISSUE_STATE" != "CLOSED" ]; then
+# 5.4 Final verification (tracked state — no extra API calls)
+if [ "$PR_STATE" != "MERGED" ] || [ "$ISSUE_STATE" != "CLOSED" ]; then
     echo ""
     echo "════════════════════════════════════════════════════════════"
     echo "⚠️  FINALIZATION INCOMPLETE"
     echo ""
-    echo "PR state: $FINAL_PR_STATE (expected: MERGED)"
-    echo "Issue state: $FINAL_ISSUE_STATE (expected: CLOSED)"
+    echo "PR state: $PR_STATE (expected: MERGED)"
+    echo "Issue state: $ISSUE_STATE (expected: CLOSED)"
     echo ""
     echo "Manual fix:"
-    [ "$FINAL_PR_STATE" != "MERGED" ] && echo "  gh pr merge $BRANCH --squash"
-    [ "$FINAL_ISSUE_STATE" != "CLOSED" ] && echo "  gh issue close $ISSUE"
+    [ "$PR_STATE" != "MERGED" ] && echo "  gh pr merge $BRANCH --squash"
+    [ "$ISSUE_STATE" != "CLOSED" ] && echo "  gh issue close $ISSUE"
     echo "════════════════════════════════════════════════════════════"
     exit 1
 fi

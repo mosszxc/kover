@@ -98,6 +98,12 @@ Short, dense. Lists > prose.
 │    • Business rules                                        │
 │    • User stories                                          │
 │                                                             │
+│  design/architecture.md  ← HOW it's built:                  │
+│    • Modular Monolith structure                            │
+│    • Module boundaries & import rules                      │
+│    • File naming, store conventions                        │
+│    • Checklist for new modules                             │
+│                                                             │
 │  design/roadmap.md  ← WHAT and WHEN:                        │
 │    • Task order, iterations                                │
 │    • Links to spec (NO type duplication)                   │
@@ -111,7 +117,7 @@ Short, dense. Lists > prose.
 │    • References spec for details                           │
 │    • References roadmap for context                        │
 │                                                             │
-│  Priority: spec > roadmap > issues                         │
+│  Priority: spec > architecture > roadmap > issues          │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -122,25 +128,39 @@ Short, dense. Lists > prose.
 
 **Kover** — Route Management System. React SPA + localStorage.
 
+## Architecture
+
+**Modular Monolith** — см. `design/architecture.md`
+
+Модуль = вертикальный слайс (компоненты + стор + типы + хуки).
+
+```
+Import rules:  pages/ → modules/* → shared/  (однонаправленно)
+Forbidden:     modules/A → modules/B  (межмодульный импорт)
+Cross-module:  через shared/types/ или props из page
+```
+
 ## Structure
 
 ```
 kover/
 ├── apps/
-│   └── web/           # React frontend (Vite + Tailwind)
-│       └── src/
-│           ├── components/  # UI components
-│           ├── pages/       # Route pages
-│           ├── store/       # Zustand stores
-│           ├── types/       # TypeScript interfaces
-│           ├── data/        # Seed data (143 clients)
-│           └── lib/         # Utilities
+│   └── web/src/
+│       ├── app/             # Router, layout, providers
+│       ├── modules/         # Business modules (vertical slices)
+│       │   ├── routes/      # Day route view + management
+│       │   ├── clients/     # Client CRUD + table
+│       │   ├── print/       # Print sheet (@media print)
+│       │   └── import/      # Excel import + validation
+│       ├── shared/          # UI kit, utils, common types, seed data
+│       └── pages/           # Thin composition layer
 ├── scripts/
 │   ├── fix            # Start working on issue
 │   ├── ship           # Finish: commit, PR, merge
 │   ├── batch-fix      # Batch issue processing
 │   └── prune          # Cleanup merged worktrees
 ├── design/
+│   ├── architecture.md # Modular Monolith rules
 │   └── roadmap.md     # Iterations & tasks
 ├── design-system/
 │   └── kover/MASTER.md # Colors, typography, components
@@ -183,6 +203,13 @@ Vite + React 19 + TypeScript
 4. **Dark mode first**
 5. **pnpm** — not npm/yarn
 6. **Shadcn components** — don't reinvent
+7. **Modular Monolith** — see `design/architecture.md`
+8. **Import direction** — pages → modules → shared (never reverse)
+9. **Module isolation** — modules don't import from other modules
+10. **Public API** — import modules only through `index.ts`
+11. **Path aliases** — `@/*`, `@/modules/*`, `@/shared/*` (no `../../`)
+12. **Store naming** — `kover-<module>` in localStorage
+13. **Pages are thin** — composition only, no business logic (< 50 lines)
 
 ## Labels
 
@@ -215,4 +242,28 @@ Vite + React 19 + TypeScript
 localStorage.setItem('clients', JSON.stringify(data))
 // YES Zustand persist
 const useStore = create(persist((set) => ({ ... }), { name: 'kover-store' }))
+
+// NO cross-module imports
+import { ClientForm } from '@/modules/clients/components/ClientForm'
+// YES through public API
+import { ClientForm } from '@/modules/clients'
+
+// NO relative paths
+import { Button } from '../../../shared/ui/button'
+// YES path aliases
+import { Button } from '@/shared/ui/button'
+
+// NO business logic in pages
+export function RoutesPage() {
+  const stops = useRouteStore(s => s.routes.filter(...).sort(...)) // ← NO
+}
+// YES logic in module hooks
+export function RoutesPage() {
+  return <StopList /> // module handles its own logic
+}
+
+// NO module reading another module's store directly
+// inside modules/print/components/PrintSheet.tsx:
+import { useRouteStore } from '@/modules/routes/store' // ← NO
+// YES receive data via props from page
 ```

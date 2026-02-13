@@ -82,15 +82,6 @@
 | Success | `green-600` | `#16A34A` |
 | Destructive | `red-600` | `#DC2626` |
 
-### Semantic Colors (Route Blocks)
-
-| Block | Color | Usage |
-|-------|-------|-------|
-| Block 1 | `blue-500/10` | First sub-route background |
-| Block 2 | `amber-500/10` | Second sub-route background |
-| Block 3 | `emerald-500/10` | Third sub-route background |
-| Divider | `border-dashed` | Between blocks |
-
 ---
 
 ## Typography
@@ -151,7 +142,7 @@ Base unit: 4px (Tailwind default)
 │       2×180  2×150                    [✓] [⋯] │
 └──────────────────────────────────────────────┘
 ```
-- Border-left: 3px colored by block
+- Border-left: 3px `border-l-blue-500`
 - Padding: 12px 16px
 - Hover: `bg-slate-800` (dark) / `bg-slate-50` (light)
 - Active drag: `ring-2 ring-blue-500 shadow-lg`
@@ -213,8 +204,7 @@ Separate CSS for `@media print`:
 - **Layout:** A4 portrait, margins 15mm
 - **Table:** full borders, alternating light grey rows
 - **Columns:** # | Name (originalName) | 180 | 150 | 60x80 | 400 | 250 | Area | Checkbox
-- **Block dividers:** bold horizontal line + block subtotals
-- **Footer:** grand total row (counts per size + total area)
+- **Footer:** total row (counts per size + total area)
 - **Checkbox column:** empty 15x15mm square for manual marks
 
 ---

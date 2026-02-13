@@ -33,16 +33,13 @@ export function AddStopDialog({ clients }: AddStopDialogProps) {
   const moveStop = useRouteStore((s) => s.moveStop)
 
   const dayRoute = routes.find((r) => r.day === selectedDay)
-  const block = dayRoute?.blocks[0]
-  const stops = block?.stops ?? []
+  const stops = dayRoute?.stops ?? []
 
   const currentClientIds = useMemo(() => {
     if (!dayRoute) return new Set<string>()
     const ids = new Set<string>()
-    for (const b of dayRoute.blocks) {
-      for (const s of b.stops) {
-        ids.add(s.clientId)
-      }
+    for (const s of dayRoute.stops) {
+      ids.add(s.clientId)
     }
     return ids
   }, [dayRoute])
@@ -72,7 +69,7 @@ export function AddStopDialog({ clients }: AddStopDialogProps) {
       isCompleted: false,
     }
 
-    addStop(selectedDay, 0, newStop)
+    addStop(selectedDay, newStop)
 
     if (position !== -1) {
       moveStop(selectedDay, stopId, position)
