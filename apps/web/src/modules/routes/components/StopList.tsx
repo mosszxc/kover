@@ -70,6 +70,7 @@ export function StopList({ searchQuery = '' }: StopListProps) {
             />
             {blockStops.map(({ stop, client, number }) => {
               if (!client) return null
+              const stopIndex = block.stops.indexOf(stop)
               return (
                 <StopCard
                   key={stop.id}
@@ -78,6 +79,9 @@ export function StopList({ searchQuery = '' }: StopListProps) {
                   blockIndex={blockIndex}
                   stopId={stop.id}
                   isCompleted={stop.isCompleted}
+                  stopIndex={stopIndex}
+                  isFirst={stopIndex === 0}
+                  isLast={stopIndex === block.stops.length - 1}
                 />
               )
             })}

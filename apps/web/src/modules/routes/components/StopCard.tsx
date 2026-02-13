@@ -1,4 +1,4 @@
-import { Check } from 'lucide-react'
+import { Check, ChevronUp, ChevronDown } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import type { Client, MatSpec } from '@/modules/clients'
 import { MAT_AREA } from '@/shared/types'
@@ -16,17 +16,21 @@ interface StopCardProps {
   blockIndex: number
   stopId: string
   isCompleted: boolean
+  stopIndex: number
+  isFirst: boolean
+  isLast: boolean
 }
 
 function matArea(mats: MatSpec[]): number {
   return mats.reduce((sum, m) => sum + m.quantity * (MAT_AREA[m.size] ?? 0), 0)
 }
 
-export function StopCard({ number, client, blockIndex, stopId, isCompleted }: StopCardProps) {
+export function StopCard({ number, client, blockIndex, stopId, isCompleted, stopIndex, isFirst, isLast }: StopCardProps) {
   const borderColor = BLOCK_BORDER_COLORS[blockIndex % BLOCK_BORDER_COLORS.length]
   const area = matArea(client.mats)
   const selectedDay = useRouteStore((s) => s.selectedDay)
   const toggleStopCompleted = useRouteStore((s) => s.toggleStopCompleted)
+  const moveStop = useRouteStore((s) => s.moveStop)
 
   return (
     <div
@@ -49,6 +53,33 @@ export function StopCard({ number, client, blockIndex, stopId, isCompleted }: St
       >
         {isCompleted && <Check className="size-4" />}
       </button>
+
+      <div className="flex shrink-0 flex-col">
+        {!isFirst ? (
+          <button
+            type="button"
+            aria-label="Переместить вверх"
+            onClick={() => moveStop(selectedDay, stopId, stopIndex - 1)}
+            className="flex size-6 items-center justify-center rounded transition-colors hover:bg-slate-800"
+          >
+            <ChevronUp className="size-5 text-slate-400" />
+          </button>
+        ) : (
+          <div className="size-6" />
+        )}
+        {!isLast ? (
+          <button
+            type="button"
+            aria-label="Переместить вниз"
+            onClick={() => moveStop(selectedDay, stopId, stopIndex + 1)}
+            className="flex size-6 items-center justify-center rounded transition-colors hover:bg-slate-800"
+          >
+            <ChevronDown className="size-5 text-slate-400" />
+          </button>
+        ) : (
+          <div className="size-6" />
+        )}
+      </div>
 
       <span className="w-8 shrink-0 text-center text-sm tabular-nums text-slate-500">
         {number}
