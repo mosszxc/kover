@@ -1,0 +1,748 @@
+#!/bin/bash
+# Dependency-aware issue processing with topological sort
+# Usage: ./scripts/auto-fix [--limit N] [--label LABEL] [--dry-run] [--force] [--graph]
+#
+# Sources of dependencies (in order of priority):
+#   1. Epic checklists — parse "- [ ] N.M description #<issue>" from epic bodies
+#   2. "blocked by" / "depends on" — parse from any issue body
+#   3. Roadmap iterations — parse design/roadmap.md for cross-iteration deps
+#
+# Limits:
+#   - Max 15 issues per session (hard cap)
+#   - Throughput check: closed/created >= 0.7 over last 7 days
+#   - Use --force to bypass throughput check
+
+set -e
+
+# ═══════════════════════════════════════════════════════════
+# Configuration
+# ═══════════════════════════════════════════════════════════
+
+SESSION_LIMIT=15
+THROUGHPUT_THRESHOLD="0.7"
+THROUGHPUT_WINDOW_DAYS=7
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+ROADMAP_FILE="$ROOT_DIR/design/roadmap.md"
+
+# ═══════════════════════════════════════════════════════════
+# Parse arguments
+# ═══════════════════════════════════════════════════════════
+
+LIMIT=0
+LABEL=""
+DRY_RUN=false
+FORCE=false
+SHOW_GRAPH=false
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --limit)
+            LIMIT="$2"
+            shift 2
+            ;;
+        --label)
+            LABEL="$2"
+            shift 2
+            ;;
+        --dry-run)
+            DRY_RUN=true
+            shift
+            ;;
+        --force)
+            FORCE=true
+            shift
+            ;;
+        --graph)
+            SHOW_GRAPH=true
+            DRY_RUN=true  # --graph implies dry-run
+            shift
+            ;;
+        *)
+            echo "Unknown argument: $1"
+            echo "Usage: ./scripts/auto-fix [--limit N] [--label LABEL] [--dry-run] [--force] [--graph]"
+            exit 1
+            ;;
+    esac
+done
+
+# ═══════════════════════════════════════════════════════════
+# Throughput check (reused from batch-fix)
+# ═══════════════════════════════════════════════════════════
+
+check_throughput() {
+    local SINCE_DATE
+    SINCE_DATE=$(date -d "-${THROUGHPUT_WINDOW_DAYS} days" +%Y-%m-%d 2>/dev/null || \
+                 date -v-${THROUGHPUT_WINDOW_DAYS}d +%Y-%m-%d 2>/dev/null)
+
+    local CREATED
+    CREATED=$(gh issue list --state all --json createdAt -q \
+        "[.[] | select(.createdAt >= \"${SINCE_DATE}\")] | length" \
+        --limit 500 2>/dev/null || echo "0")
+
+    local CLOSED
+    CLOSED=$(gh issue list --state closed --json closedAt -q \
+        "[.[] | select(.closedAt >= \"${SINCE_DATE}\")] | length" \
+        --limit 500 2>/dev/null || echo "0")
+
+    local THROUGHPUT
+    if [ "$CREATED" -eq 0 ]; then
+        THROUGHPUT="1.0"
+    else
+        THROUGHPUT=$(awk "BEGIN { printf \"%.2f\", $CLOSED / $CREATED }")
+    fi
+
+    echo "  Created (${THROUGHPUT_WINDOW_DAYS}d): $CREATED"
+    echo "  Closed  (${THROUGHPUT_WINDOW_DAYS}d): $CLOSED"
+    echo "  Throughput: $THROUGHPUT (threshold: >= $THROUGHPUT_THRESHOLD)"
+
+    local PASS
+    PASS=$(awk "BEGIN { print ($THROUGHPUT >= $THROUGHPUT_THRESHOLD) ? 1 : 0 }")
+
+    if [ "$PASS" -eq 0 ]; then
+        return 1
+    fi
+    return 0
+}
+
+# ═══════════════════════════════════════════════════════════
+# Fetch issues
+# ═══════════════════════════════════════════════════════════
+
+fetch_issues() {
+    echo "Fetching open issues..."
+    local QUERY_ARGS=(--state open --json "number,title,labels,body" --limit 500)
+    if [ -n "$LABEL" ]; then
+        QUERY_ARGS+=(--label "$LABEL")
+        echo "  Filter: label=$LABEL"
+    fi
+
+    ISSUES_JSON=$(gh issue list "${QUERY_ARGS[@]}" 2>/dev/null)
+    ISSUE_COUNT=$(echo "$ISSUES_JSON" | jq 'length')
+    echo "  Found $ISSUE_COUNT open issues"
+}
+
+# ═══════════════════════════════════════════════════════════
+# Dependency graph data structures
+# We use temp files as associative arrays aren't robust enough
+# ═══════════════════════════════════════════════════════════
+
+DEPS_DIR=$(mktemp -d)
+trap 'rm -rf "$DEPS_DIR"' EXIT
+
+# Store: $DEPS_DIR/deps/<issue> = space-separated list of deps
+# Store: $DEPS_DIR/titles/<issue> = title
+# Store: $DEPS_DIR/labels/<issue> = comma-separated labels
+# Store: $DEPS_DIR/all_issues = space-separated list of all issue numbers
+# Store: $DEPS_DIR/epic_issues = space-separated list of epic issue numbers
+# Store: $DEPS_DIR/iteration/<issue> = iteration number
+
+mkdir -p "$DEPS_DIR/deps" "$DEPS_DIR/titles" "$DEPS_DIR/labels" "$DEPS_DIR/iteration"
+
+# ═══════════════════════════════════════════════════════════
+# Parse epic checklists
+# Epic body format: "- [ ] N.M description #<issue>"
+# Order of lines = execution order within epic
+# ═══════════════════════════════════════════════════════════
+
+parse_epic_deps() {
+    local epic_issues
+    epic_issues=$(echo "$ISSUES_JSON" | jq -r '.[] | select(.labels[]?.name == "epic") | .number')
+
+    for epic_num in $epic_issues; do
+        echo "$epic_num" >> "$DEPS_DIR/epic_issues"
+
+        local body
+        body=$(echo "$ISSUES_JSON" | jq -r ".[] | select(.number == $epic_num) | .body // \"\"")
+
+        # Extract issue numbers from checklist in order
+        local prev_issue=""
+        while IFS= read -r line; do
+            # Match "- [ ] ... #<number>" or "- [x] ... #<number>"
+            local issue_ref
+            issue_ref=$(echo "$line" | grep -oP '#\K[0-9]+' | head -1)
+            if [ -n "$issue_ref" ]; then
+                if [ -n "$prev_issue" ]; then
+                    # Current issue depends on previous (sequential order)
+                    local existing
+                    existing=$(cat "$DEPS_DIR/deps/$issue_ref" 2>/dev/null || echo "")
+                    if [ -n "$existing" ]; then
+                        echo "$existing $prev_issue" > "$DEPS_DIR/deps/$issue_ref"
+                    else
+                        echo "$prev_issue" > "$DEPS_DIR/deps/$issue_ref"
+                    fi
+                fi
+                prev_issue="$issue_ref"
+            fi
+        done <<< "$(echo "$body" | grep -E '^\s*- \[[ x]\]')"
+    done
+}
+
+# ═══════════════════════════════════════════════════════════
+# Parse "blocked by" / "depends on" from issue bodies
+# ═══════════════════════════════════════════════════════════
+
+parse_body_deps() {
+    local count=$ISSUE_COUNT
+    for i in $(seq 0 $((count - 1))); do
+        local num body
+        num=$(echo "$ISSUES_JSON" | jq -r ".[$i].number")
+        body=$(echo "$ISSUES_JSON" | jq -r ".[$i].body // \"\"")
+
+        # Match: "blocked by #N", "depends on #N", "зависит от #N" (case insensitive)
+        local dep_refs
+        dep_refs=$(echo "$body" | grep -ioP '(blocked by|depends on|зависит от)\s+#\K[0-9]+' || true)
+
+        for dep in $dep_refs; do
+            local existing
+            existing=$(cat "$DEPS_DIR/deps/$num" 2>/dev/null || echo "")
+            if [ -n "$existing" ]; then
+                # Avoid duplicates
+                if ! echo " $existing " | grep -q " $dep "; then
+                    echo "$existing $dep" > "$DEPS_DIR/deps/$num"
+                fi
+            else
+                echo "$dep" > "$DEPS_DIR/deps/$num"
+            fi
+        done
+    done
+}
+
+# ═══════════════════════════════════════════════════════════
+# Parse roadmap.md for cross-iteration dependencies
+# Format: "**Зависимости:** Итерация N (description)"
+# Maps iteration tasks to their dependencies
+# ═══════════════════════════════════════════════════════════
+
+parse_roadmap_deps() {
+    if [ ! -f "$ROADMAP_FILE" ]; then
+        echo "  Warning: $ROADMAP_FILE not found, skipping roadmap deps"
+        return
+    fi
+
+    local roadmap
+    roadmap=$(cat "$ROADMAP_FILE")
+
+    # First pass: map each issue to its iteration by parsing "| N.M |" rows
+    local current_iteration=""
+    while IFS= read -r line; do
+        # Detect iteration headers: "## Итерация N —"
+        local iter_match
+        iter_match=$(echo "$line" | grep -oP '## Итерация \K[0-9]+' || true)
+        if [ -n "$iter_match" ]; then
+            current_iteration="$iter_match"
+            continue
+        fi
+
+        # Map issue numbers from table rows "| N.M |"
+        if [ -n "$current_iteration" ]; then
+            local task_prefix
+            task_prefix=$(echo "$line" | grep -oP '^\|\s*\K[0-9]+\.[0-9]+' || true)
+            if [ -n "$task_prefix" ]; then
+                # task_prefix is like "6.1" — iteration is the part before dot
+                local iter_from_task
+                iter_from_task=$(echo "$task_prefix" | cut -d. -f1)
+                # Store iteration for any matching issue title
+                echo "$iter_from_task" >> "$DEPS_DIR/iteration_tasks_${current_iteration}" 2>/dev/null || true
+            fi
+        fi
+    done <<< "$roadmap"
+
+    # Second pass: find dependency declarations
+    # "**Зависимости:** Итерация N" means current iteration depends on iteration N
+    current_iteration=""
+    local dep_iterations=""
+    while IFS= read -r line; do
+        local iter_match
+        iter_match=$(echo "$line" | grep -oP '## Итерация \K[0-9]+' || true)
+        if [ -n "$iter_match" ]; then
+            current_iteration="$iter_match"
+            continue
+        fi
+
+        if [ -n "$current_iteration" ]; then
+            # Match "**Зависимости:** Итерация N"
+            local dep_iter
+            dep_iter=$(echo "$line" | grep -oP '\*\*Зависимости:\*\*.*Итерация \K[0-9]+' || true)
+            if [ -n "$dep_iter" ]; then
+                # All issues in current_iteration depend on all issues in dep_iter
+                # Find issues belonging to each iteration
+                local current_issues dep_issues
+                current_issues=$(echo "$ISSUES_JSON" | jq -r ".[].number" | while read -r num; do
+                    local title
+                    title=$(echo "$ISSUES_JSON" | jq -r ".[] | select(.number == $num) | .title")
+                    # Check if title starts with "N.M" where N = current_iteration
+                    if echo "$title" | grep -qP "^${current_iteration}\.[0-9]"; then
+                        echo "$num"
+                    fi
+                done)
+
+                dep_issues=$(echo "$ISSUES_JSON" | jq -r ".[].number" | while read -r num; do
+                    local title
+                    title=$(echo "$ISSUES_JSON" | jq -r ".[] | select(.number == $num) | .title")
+                    if echo "$title" | grep -qP "^${dep_iter}\.[0-9]"; then
+                        echo "$num"
+                    fi
+                done)
+
+                # Each issue in current_iteration is blocked by all issues in dep_iter
+                for curr in $current_issues; do
+                    for dep in $dep_issues; do
+                        local existing
+                        existing=$(cat "$DEPS_DIR/deps/$curr" 2>/dev/null || echo "")
+                        if [ -n "$existing" ]; then
+                            if ! echo " $existing " | grep -q " $dep "; then
+                                echo "$existing $dep" > "$DEPS_DIR/deps/$curr"
+                            fi
+                        else
+                            echo "$dep" > "$DEPS_DIR/deps/$curr"
+                        fi
+                    done
+                done
+            fi
+        fi
+    done <<< "$roadmap"
+}
+
+# ═══════════════════════════════════════════════════════════
+# Build graph and store metadata
+# ═══════════════════════════════════════════════════════════
+
+build_graph() {
+    echo "Building dependency graph..."
+
+    # Store titles and labels for all issues
+    local count=$ISSUE_COUNT
+    local all_issues=""
+    for i in $(seq 0 $((count - 1))); do
+        local num title labels
+        num=$(echo "$ISSUES_JSON" | jq -r ".[$i].number")
+        title=$(echo "$ISSUES_JSON" | jq -r ".[$i].title")
+        labels=$(echo "$ISSUES_JSON" | jq -r "[.[$i].labels[]?.name] | join(\",\")")
+
+        echo "$title" > "$DEPS_DIR/titles/$num"
+        echo "$labels" > "$DEPS_DIR/labels/$num"
+        all_issues="$all_issues $num"
+    done
+    echo "$all_issues" > "$DEPS_DIR/all_issues"
+
+    # Parse all dependency sources
+    parse_epic_deps
+    parse_body_deps
+    parse_roadmap_deps
+
+    echo "  Graph built."
+}
+
+# ═══════════════════════════════════════════════════════════
+# Topological sort (Kahn's algorithm)
+# ═══════════════════════════════════════════════════════════
+
+topo_sort() {
+    local all_issues
+    all_issues=$(cat "$DEPS_DIR/all_issues")
+
+    # Calculate in-degree for each issue (only count deps that are in our open set)
+    local -A in_degree
+    local -A adj_list  # reverse: adj_list[dep] = issues blocked by dep
+
+    for num in $all_issues; do
+        in_degree[$num]=0
+    done
+
+    for num in $all_issues; do
+        local deps
+        deps=$(cat "$DEPS_DIR/deps/$num" 2>/dev/null || echo "")
+        for dep in $deps; do
+            # Only count if dep is in our open issues set
+            if [ -n "${in_degree[$dep]+x}" ]; then
+                in_degree[$num]=$(( ${in_degree[$num]} + 1 ))
+                adj_list[$dep]="${adj_list[$dep]:-} $num"
+            fi
+            # If dep is not in open issues, it's already closed — skip
+        done
+    done
+
+    # Queue: issues with in-degree 0, sorted by number
+    local queue=()
+    for num in $(echo "$all_issues" | tr ' ' '\n' | sort -n); do
+        if [ "${in_degree[$num]}" -eq 0 ]; then
+            queue+=("$num")
+        fi
+    done
+
+    SORTED_ISSUES=()
+    local processed=0
+
+    while [ ${#queue[@]} -gt 0 ]; do
+        # Take first from queue (already sorted by number)
+        local current="${queue[0]}"
+        queue=("${queue[@]:1}")
+
+        SORTED_ISSUES+=("$current")
+        processed=$((processed + 1))
+
+        # Reduce in-degree of neighbors
+        local neighbors="${adj_list[$current]:-}"
+        local new_ready=()
+        for neighbor in $neighbors; do
+            in_degree[$neighbor]=$(( ${in_degree[$neighbor]} - 1 ))
+            if [ "${in_degree[$neighbor]}" -eq 0 ]; then
+                new_ready+=("$neighbor")
+            fi
+        done
+
+        # Insert newly ready issues in sorted order
+        if [ ${#new_ready[@]} -gt 0 ]; then
+            local merged=()
+            local qi=0
+            local ni=0
+            local sorted_new
+            sorted_new=($(printf '%s\n' "${new_ready[@]}" | sort -n))
+
+            while [ $qi -lt ${#queue[@]} ] && [ $ni -lt ${#sorted_new[@]} ]; do
+                if [ "${queue[$qi]}" -lt "${sorted_new[$ni]}" ]; then
+                    merged+=("${queue[$qi]}")
+                    qi=$((qi + 1))
+                else
+                    merged+=("${sorted_new[$ni]}")
+                    ni=$((ni + 1))
+                fi
+            done
+            while [ $qi -lt ${#queue[@]} ]; do
+                merged+=("${queue[$qi]}")
+                qi=$((qi + 1))
+            done
+            while [ $ni -lt ${#sorted_new[@]} ]; do
+                merged+=("${sorted_new[$ni]}")
+                ni=$((ni + 1))
+            done
+            queue=("${merged[@]}")
+        fi
+    done
+
+    # Cycle detection
+    local total_issues
+    total_issues=$(echo "$all_issues" | wc -w)
+    if [ "$processed" -lt "$total_issues" ]; then
+        echo ""
+        echo "ERROR: Dependency cycle detected!"
+        echo "The following issues are part of a cycle:"
+        for num in $all_issues; do
+            if [ "${in_degree[$num]}" -gt 0 ]; then
+                local title deps
+                title=$(cat "$DEPS_DIR/titles/$num" 2>/dev/null || echo "???")
+                deps=$(cat "$DEPS_DIR/deps/$num" 2>/dev/null || echo "")
+                echo "  #$num ($title) → depends on: $deps"
+            fi
+        done
+        exit 1
+    fi
+}
+
+# ═══════════════════════════════════════════════════════════
+# Print dependency graph (--graph)
+# ═══════════════════════════════════════════════════════════
+
+print_graph() {
+    echo ""
+    echo "════════════════════════════════════════════════════════════"
+    echo "  Dependency Graph"
+    echo "════════════════════════════════════════════════════════════"
+    echo ""
+
+    for num in "${SORTED_ISSUES[@]}"; do
+        local title deps labels
+        title=$(cat "$DEPS_DIR/titles/$num" 2>/dev/null || echo "???")
+        deps=$(cat "$DEPS_DIR/deps/$num" 2>/dev/null || echo "")
+        labels=$(cat "$DEPS_DIR/labels/$num" 2>/dev/null || echo "")
+
+        local dep_str=""
+        if [ -n "$deps" ]; then
+            for dep in $deps; do
+                local dep_state
+                dep_state=$(gh issue view "$dep" --json state -q '.state' 2>/dev/null || echo "UNKNOWN")
+                if [ "$dep_state" = "CLOSED" ]; then
+                    dep_str="${dep_str}#${dep} ✓ (closed), "
+                else
+                    dep_str="${dep_str}#${dep}, "
+                fi
+            done
+            dep_str="${dep_str%, }"  # trim trailing comma
+            echo "  #$num ($title)"
+            echo "    → depends on: $dep_str"
+        else
+            echo "  #$num ($title)"
+            echo "    → no dependencies"
+        fi
+    done
+    echo ""
+}
+
+# ═══════════════════════════════════════════════════════════
+# Filter and prepare execution list
+# ═══════════════════════════════════════════════════════════
+
+prepare_execution_list() {
+    EXEC_ISSUES=()
+    SKIPPED_ISSUES=()
+
+    local epic_issues
+    epic_issues=$(cat "$DEPS_DIR/epic_issues" 2>/dev/null || echo "")
+
+    for num in "${SORTED_ISSUES[@]}"; do
+        local labels
+        labels=$(cat "$DEPS_DIR/labels/$num" 2>/dev/null || echo "")
+
+        # Skip epic issues (organizational)
+        if echo " $epic_issues " | grep -q " $num "; then
+            SKIPPED_ISSUES+=("$num:Epic (organizational)")
+            continue
+        fi
+
+        # Skip needs-human issues
+        if echo "$labels" | grep -q "needs-human"; then
+            SKIPPED_ISSUES+=("$num:needs-human")
+            continue
+        fi
+
+        EXEC_ISSUES+=("$num")
+    done
+
+    # Apply --limit
+    if [ "$LIMIT" -gt 0 ] && [ ${#EXEC_ISSUES[@]} -gt "$LIMIT" ]; then
+        EXEC_ISSUES=("${EXEC_ISSUES[@]:0:$LIMIT}")
+    fi
+
+    # Enforce session limit
+    if [ ${#EXEC_ISSUES[@]} -gt "$SESSION_LIMIT" ]; then
+        echo ""
+        echo "════════════════════════════════════════════════════════════"
+        echo "  SESSION LIMIT: max $SESSION_LIMIT issues per batch"
+        echo "  Would process: ${#EXEC_ISSUES[@]}"
+        echo "════════════════════════════════════════════════════════════"
+        echo ""
+        echo "Use --limit to reduce, or split into multiple runs."
+        exit 1
+    fi
+}
+
+# ═══════════════════════════════════════════════════════════
+# Process issue (reused from batch-fix)
+# ═══════════════════════════════════════════════════════════
+
+process_issue() {
+    local ISSUE_NUM="$1"
+    local ATTEMPT="$2"
+
+    echo ""
+    echo "────────────────────────────────────────────────────────────"
+    echo "  Processing #$ISSUE_NUM (attempt $ATTEMPT)"
+    echo "────────────────────────────────────────────────────────────"
+
+    # Create worktree
+    if ! ./scripts/fix "$ISSUE_NUM" --force 2>&1; then
+        echo "  Failed to create worktree for #$ISSUE_NUM"
+        return 1
+    fi
+
+    local WORKTREE=".worktrees/issue-$ISSUE_NUM"
+
+    # Run Claude in headless mode
+    if ! (cd "$WORKTREE" && claude -p "fix #$ISSUE_NUM" --dangerously-skip-permissions 2>&1); then
+        echo "  Claude failed for #$ISSUE_NUM"
+        return 1
+    fi
+
+    # Ship
+    if ! (cd "$WORKTREE" && ./scripts/ship 2>&1); then
+        echo "  Ship failed for #$ISSUE_NUM"
+        return 1
+    fi
+
+    return 0
+}
+
+# ═══════════════════════════════════════════════════════════
+# Main
+# ═══════════════════════════════════════════════════════════
+
+echo ""
+echo "════════════════════════════════════════════════════════════"
+echo "  Auto Fix — Dependency-Aware Issue Processing"
+echo "════════════════════════════════════════════════════════════"
+echo ""
+
+# Throughput check (skip for dry-run)
+if [ "$DRY_RUN" = false ]; then
+    if ! check_throughput; then
+        echo ""
+        if [ "$FORCE" = true ]; then
+            echo "  Throughput below threshold — overriding with --force"
+        else
+            echo "  Throughput below threshold!"
+            echo ""
+            echo "  Close more issues before starting a new batch."
+            echo "  Issue Throughput must be >= $THROUGHPUT_THRESHOLD"
+            echo ""
+            echo "  Use --force to bypass this check."
+            exit 1
+        fi
+    else
+        echo ""
+        echo "  Throughput OK"
+    fi
+    echo ""
+fi
+
+# Fetch and build graph
+fetch_issues
+
+if [ "$ISSUE_COUNT" -eq 0 ]; then
+    echo "No open issues found."
+    exit 0
+fi
+
+build_graph
+topo_sort
+prepare_execution_list
+
+# Show graph if requested
+if [ "$SHOW_GRAPH" = true ]; then
+    print_graph
+fi
+
+# Show execution order
+echo ""
+echo "════════════════════════════════════════════════════════════"
+echo "  Execution Order"
+echo "════════════════════════════════════════════════════════════"
+echo ""
+
+_idx=1
+for _num in "${EXEC_ISSUES[@]}"; do
+    _title=$(cat "$DEPS_DIR/titles/$_num" 2>/dev/null || echo "???")
+    _labels=$(cat "$DEPS_DIR/labels/$_num" 2>/dev/null || echo "")
+    _label_str=""
+    if [ -n "$_labels" ]; then
+        _label_str=" [$_labels]"
+    fi
+    echo "  $_idx. #$_num — ${_title}${_label_str}"
+    _idx=$((_idx + 1))
+done
+
+if [ ${#SKIPPED_ISSUES[@]} -gt 0 ]; then
+    echo ""
+    echo "Skipped:"
+    for _entry in "${SKIPPED_ISSUES[@]}"; do
+        _num="${_entry%%:*}"
+        _reason="${_entry#*:}"
+        _title=$(cat "$DEPS_DIR/titles/$_num" 2>/dev/null || echo "???")
+        echo "  #$_num — $_title ($_reason)"
+    done
+fi
+
+echo ""
+
+# Dry run — stop here
+if [ "$DRY_RUN" = true ]; then
+    echo "[DRY RUN] Would process ${#EXEC_ISSUES[@]} issues in the order above. Exiting."
+    exit 0
+fi
+
+# ═══════════════════════════════════════════════════════════
+# Execute issues in topological order
+# ═══════════════════════════════════════════════════════════
+
+SUCCEEDED=()
+FAILED=()
+SKIPPED_RUN=()
+
+for ISSUE_NUM in "${EXEC_ISSUES[@]}"; do
+    # Check if already closed
+    STATE=$(gh issue view "$ISSUE_NUM" --json state -q '.state' 2>/dev/null || echo "UNKNOWN")
+    if [ "$STATE" = "CLOSED" ]; then
+        echo "  #$ISSUE_NUM already closed — skipping"
+        SKIPPED_RUN+=("$ISSUE_NUM")
+        continue
+    fi
+
+    # Check if dependencies are still open (safety check at execution time)
+    deps_ok=true
+    _deps=$(cat "$DEPS_DIR/deps/$ISSUE_NUM" 2>/dev/null || echo "")
+    for dep in $_deps; do
+        dep_state=$(gh issue view "$dep" --json state -q '.state' 2>/dev/null || echo "UNKNOWN")
+        if [ "$dep_state" != "CLOSED" ]; then
+            # Check if dep was already succeeded in this session
+            found_in_session=false
+            for s in "${SUCCEEDED[@]}"; do
+                if [ "$s" = "$dep" ]; then
+                    found_in_session=true
+                    break
+                fi
+            done
+            if [ "$found_in_session" = false ]; then
+                echo "  #$ISSUE_NUM blocked by #$dep (still open) — skipping"
+                deps_ok=false
+                break
+            fi
+        fi
+    done
+
+    if [ "$deps_ok" = "false" ]; then
+        SKIPPED_RUN+=("$ISSUE_NUM")
+        continue
+    fi
+
+    # Attempt 1
+    if process_issue "$ISSUE_NUM" 1; then
+        SUCCEEDED+=("$ISSUE_NUM")
+        continue
+    fi
+
+    # Retry (attempt 2)
+    echo "  Retrying #$ISSUE_NUM..."
+    if process_issue "$ISSUE_NUM" 2; then
+        SUCCEEDED+=("$ISSUE_NUM")
+        continue
+    fi
+
+    # Failed after retry — label as needs-human
+    echo "  #$ISSUE_NUM failed after retry — labeling needs-human"
+    gh issue edit "$ISSUE_NUM" --add-label "needs-human" 2>/dev/null || true
+    FAILED+=("$ISSUE_NUM")
+done
+
+# ═══════════════════════════════════════════════════════════
+# Report
+# ═══════════════════════════════════════════════════════════
+
+echo ""
+echo "════════════════════════════════════════════════════════════"
+echo "  Auto Fix Report"
+echo "════════════════════════════════════════════════════════════"
+echo ""
+echo "  Total:     ${#EXEC_ISSUES[@]}"
+echo "  Succeeded: ${#SUCCEEDED[@]}  ${SUCCEEDED[*]:+(${SUCCEEDED[*]})}"
+echo "  Failed:    ${#FAILED[@]}  ${FAILED[*]:+(${FAILED[*]})}"
+echo "  Skipped:   ${#SKIPPED_RUN[@]}  ${SKIPPED_RUN[*]:+(${SKIPPED_RUN[*]})}"
+echo ""
+
+# Show updated throughput
+echo "Updated throughput:"
+check_throughput
+echo ""
+
+if [ ${#FAILED[@]} -gt 0 ]; then
+    echo "Failed issues (labeled needs-human):"
+    for i in "${FAILED[@]}"; do
+        echo "  gh issue view $i"
+    done
+    echo ""
+fi
+
+echo "════════════════════════════════════════════════════════════"
+
+# Exit with error if any failures
+[ ${#FAILED[@]} -gt 0 ] && exit 1
+exit 0
