@@ -8,7 +8,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { Check, ChevronDown, ChevronUp, ChevronsUpDown, Search, AlertTriangle, Pause, Play, MapPin } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, ChevronsUpDown, Search, AlertTriangle, Pause, Play, MapPin, TriangleAlert } from 'lucide-react'
 import { toast } from 'sonner'
 import { useClientStore } from '../store'
 import type { Client } from '../types'
@@ -34,9 +34,10 @@ interface ClientsTableProps {
   onRowClick?: (client: Client) => void
   isClientInRoute?: (clientId: string, day: DayOfWeek) => boolean
   onToggleActive?: (client: Client) => void
+  anomalyIds?: Set<string>
 }
 
-export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive }: ClientsTableProps) {
+export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, anomalyIds }: ClientsTableProps) {
   const clients = useClientStore((s) => s.clients)
   const updateClient = useClientStore((s) => s.updateClient)
   const [sorting, setSorting] = useState<SortingState>([])
@@ -51,14 +52,21 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive }: Cl
     {
       accessorKey: 'address',
       header: 'Адрес',
-      cell: ({ row }) => (
-        <span className="flex items-center gap-1.5">
-          {row.original.address}
-          {row.original.lat != null && row.original.lng != null && (
-            <MapPin className="h-3.5 w-3.5 shrink-0 text-green-400" />
-          )}
-        </span>
-      ),
+      cell: ({ row }) => {
+        const isAnomaly = anomalyIds?.has(row.original.id) ?? false
+        return (
+          <span className="flex items-center gap-1.5">
+            {row.original.address}
+            {isAnomaly ? (
+              <span title="Далеко от остальных — проверьте адрес">
+                <TriangleAlert className="h-3.5 w-3.5 shrink-0 text-amber-400" />
+              </span>
+            ) : row.original.lat != null && row.original.lng != null ? (
+              <MapPin className="h-3.5 w-3.5 shrink-0 text-green-400" />
+            ) : null}
+          </span>
+        )
+      },
     },
     {
       id: 'mats',
@@ -157,7 +165,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive }: Cl
         )
       },
     },
-  ], [isClientInRoute, updateClient, onToggleActive])
+  ], [isClientInRoute, updateClient, onToggleActive, anomalyIds])
   const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>([])
   const [selectedFrequency, setSelectedFrequency] = useState<number | null>(null)
   const [selectedMatSize, setSelectedMatSize] = useState<MatSize | null>(null)
