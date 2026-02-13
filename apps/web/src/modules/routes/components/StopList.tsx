@@ -16,6 +16,7 @@ import {
 import { useRouteStore } from '../store'
 import { useClientStore } from '@/modules/clients'
 import type { Client } from '@/modules/clients'
+import { useGeoAnomalies } from '../hooks/useGeoAnomalies'
 import { StopCard, type DriverOption } from './StopCard'
 
 interface StopListProps {
@@ -71,6 +72,12 @@ export function StopList({ searchQuery = '', drivers = [], driverFilter = null }
         return client?.isActive !== false
       })
     : []
+
+  const activeClients = useMemo(
+    () => activeStops.map((s) => clientMap.get(s.clientId)).filter(Boolean) as Client[],
+    [activeStops, clientMap],
+  )
+  const anomalies = useGeoAnomalies(activeClients)
 
   if (!dayRoute || activeStops.length === 0) {
     return (
@@ -134,6 +141,7 @@ export function StopList({ searchQuery = '', drivers = [], driverFilter = null }
                 isFirst={activeIndex === 0}
                 isLast={activeIndex === activeStops.length - 1}
                 isDndEnabled={!isSearching}
+                isAnomaly={anomalies.has(client.id)}
               />
             )
           })}

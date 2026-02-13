@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Check, ChevronUp, ChevronDown, GripVertical } from 'lucide-react'
+import { Check, ChevronUp, ChevronDown, GripVertical, TriangleAlert } from 'lucide-react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { cn } from '@/shared/lib/utils'
@@ -25,13 +25,14 @@ interface StopCardProps {
   isFirst: boolean
   isLast: boolean
   isDndEnabled?: boolean
+  isAnomaly?: boolean
 }
 
 function matArea(mats: MatSpec[]): number {
   return mats.reduce((sum, m) => sum + m.quantity * (MAT_AREA[m.size] ?? 0), 0)
 }
 
-export function StopCard({ number, client, stopId, isCompleted, driverId, drivers, stopIndex, isFirst, isLast, isDndEnabled = true }: StopCardProps) {
+export function StopCard({ number, client, stopId, isCompleted, driverId, drivers, stopIndex, isFirst, isLast, isDndEnabled = true, isAnomaly = false }: StopCardProps) {
   const area = matArea(client.mats)
   const selectedDay = useRouteStore((s) => s.selectedDay)
   const toggleStopCompleted = useRouteStore((s) => s.toggleStopCompleted)
@@ -67,7 +68,11 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
       style={style}
       className={cn(
         'flex items-center gap-3 border-l-3 p-3 transition-colors hover:bg-slate-800',
-        driverId ? 'border-l-blue-500' : 'border-l-slate-700',
+        isAnomaly
+          ? 'border-l-amber-500 bg-amber-500/5'
+          : driverId
+            ? 'border-l-blue-500'
+            : 'border-l-slate-700',
         isCompleted && 'opacity-60',
         isDragging && 'z-10 opacity-50 ring-2 ring-blue-500',
       )}
@@ -131,12 +136,19 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
       </span>
 
       <div className="min-w-0 flex-1">
-        <p className={cn(
-          'truncate text-base text-slate-50',
-          isCompleted && 'line-through',
-        )}>
-          {client.originalName}
-        </p>
+        <div className="flex items-center gap-1.5">
+          {isAnomaly && (
+            <span title="Далеко от остальных остановок" className="shrink-0 print:hidden">
+              <TriangleAlert className="size-4 text-amber-400" aria-label="Далеко от остальных остановок" />
+            </span>
+          )}
+          <p className={cn(
+            'truncate text-base text-slate-50',
+            isCompleted && 'line-through',
+          )}>
+            {client.originalName}
+          </p>
+        </div>
       </div>
 
       {drivers.length > 0 && (
