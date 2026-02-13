@@ -116,7 +116,7 @@ export function AddStopDialog({ clients }: AddStopDialogProps) {
               className="h-11 w-full rounded-md border border-slate-700 bg-slate-900 px-3 text-sm text-slate-50 focus:border-slate-500 focus:outline-none"
             >
               <option value={-1}>В конец</option>
-              {stops.map((_stop: unknown, i: number) => (
+              {stops.map((_stop, i) => (
                 <option key={i} value={i + 1}>
                   После точки №{i + 1}
                 </option>

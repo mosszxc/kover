@@ -57,6 +57,7 @@ export function StopList({ searchQuery = '' }: StopListProps) {
     <div className="space-y-px">
       {stops.map(({ stop, client, number }) => {
         if (!client) return null
+        const stopIndex = dayRoute.stops.indexOf(stop)
         return (
           <StopCard
             key={stop.id}
@@ -64,6 +65,9 @@ export function StopList({ searchQuery = '' }: StopListProps) {
             client={client}
             stopId={stop.id}
             isCompleted={stop.isCompleted}
+            stopIndex={stopIndex}
+            isFirst={stopIndex === 0}
+            isLast={stopIndex === dayRoute.stops.length - 1}
           />
         )
       })}
