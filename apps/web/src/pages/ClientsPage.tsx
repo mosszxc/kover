@@ -4,14 +4,19 @@ import { useRouteStore } from '@/modules/routes'
 import type { Client } from '@/modules/clients'
 import type { DayOfWeek } from '@/shared/types'
 import { generateId } from '@/shared/lib/generateId'
+import { detectGeoAnomalies } from '@/shared/lib/geoAnomalies'
 
 export function ClientsPage() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
+  const clients = useClientStore((s) => s.clients)
   const deleteClient = useClientStore((s) => s.deleteClient)
   const updateClient = useClientStore((s) => s.updateClient)
   const removeClientFromAllRoutes = useRouteStore((s) => s.removeClientFromAllRoutes)
   const addStop = useRouteStore((s) => s.addStop)
   const routes = useRouteStore((s) => s.routes)
+
+  const activeClients = useMemo(() => clients.filter((c) => c.isActive), [clients])
+  const anomalyIds = useMemo(() => detectGeoAnomalies(activeClients), [activeClients])
 
   const routeClientSet = useMemo(() => {
     const set = new Set<string>()
@@ -61,7 +66,7 @@ export function ClientsPage() {
           <AddClientDialog />
         </div>
       </div>
-      <ClientsTable onRowClick={setSelectedClient} isClientInRoute={isClientInRoute} onToggleActive={handleToggleActive} />
+      <ClientsTable onRowClick={setSelectedClient} isClientInRoute={isClientInRoute} onToggleActive={handleToggleActive} anomalyIds={anomalyIds} />
       {selectedClient && (
         <EditClientDialog
           client={selectedClient}

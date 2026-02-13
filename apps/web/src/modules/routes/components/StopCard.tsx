@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Check, ChevronUp, ChevronDown, GripVertical, TriangleAlert } from 'lucide-react'
+import { Check, ChevronUp, ChevronDown, GripVertical, Pencil, TriangleAlert } from 'lucide-react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { cn } from '@/shared/lib/utils'
@@ -34,13 +34,14 @@ interface StopCardProps {
   isLast: boolean
   isDndEnabled?: boolean
   isAnomaly?: boolean
+  onEditClient?: (client: Client) => void
 }
 
 function matArea(mats: MatSpec[]): number {
   return mats.reduce((sum, m) => sum + m.quantity * (MAT_AREA[m.size] ?? 0), 0)
 }
 
-export function StopCard({ number, client, stopId, isCompleted, driverId, drivers, stopIndex, isFirst, isLast, isDndEnabled = true, isAnomaly = false }: StopCardProps) {
+export function StopCard({ number, client, stopId, isCompleted, driverId, drivers, stopIndex, isFirst, isLast, isDndEnabled = true, isAnomaly = false, onEditClient }: StopCardProps) {
   const area = matArea(client.mats)
   const selectedDay = useRouteStore((s) => s.selectedDay)
   const toggleStopCompleted = useRouteStore((s) => s.toggleStopCompleted)
@@ -156,6 +157,19 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
           )}>
             {client.originalName}
           </p>
+          {isAnomaly && onEditClient && (
+            <button
+              type="button"
+              title="Исправить адрес"
+              onClick={(e) => {
+                e.stopPropagation()
+                onEditClient(client)
+              }}
+              className="shrink-0 rounded p-0.5 text-amber-400 transition-colors hover:bg-amber-500/20 hover:text-amber-300 print:hidden"
+            >
+              <Pencil className="size-3.5" />
+            </button>
+          )}
         </div>
       </div>
 

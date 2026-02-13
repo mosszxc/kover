@@ -23,9 +23,10 @@ interface StopListProps {
   searchQuery?: string
   drivers?: DriverOption[]
   driverFilter?: string | 'unassigned' | null
+  onEditClient?: (client: Client) => void
 }
 
-export function StopList({ searchQuery = '', drivers = [], driverFilter = null }: StopListProps) {
+export function StopList({ searchQuery = '', drivers = [], driverFilter = null, onEditClient }: StopListProps) {
   const routes = useRouteStore((s) => s.routes)
   const selectedDay = useRouteStore((s) => s.selectedDay)
   const reorderStop = useRouteStore((s) => s.reorderStop)
@@ -142,6 +143,7 @@ export function StopList({ searchQuery = '', drivers = [], driverFilter = null }
                 isLast={activeIndex === activeStops.length - 1}
                 isDndEnabled={!isSearching}
                 isAnomaly={anomalies.has(client.id)}
+                onEditClient={onEditClient}
               />
             )
           })}
