@@ -8,10 +8,12 @@ import { ErrorBoundary } from "@/shared/components/ErrorBoundary"
 import { LoadingFallback } from "@/shared/components/LoadingFallback"
 import { useChangeLogger } from "@/shared/hooks/useChangeLogger"
 import { useAutoBackup } from "@/shared/hooks/useAutoBackup"
+import { useFileSync } from "@/shared/hooks/useFileSync"
 
 export function AppLayout() {
   useChangeLogger()
   useAutoBackup()
+  useFileSync()
 
   return (
     <div className="print-root min-h-screen bg-slate-950">

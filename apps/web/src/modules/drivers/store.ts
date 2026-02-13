@@ -8,6 +8,7 @@ interface DriverState {
   addDriver: (driver: Driver) => void
   updateDriver: (id: string, data: Partial<Driver>) => void
   deleteDriver: (id: string) => void
+  seedDrivers: (drivers: Driver[]) => void
 }
 
 export const useDriverStore = create<DriverState>()(
@@ -30,6 +31,8 @@ export const useDriverStore = create<DriverState>()(
           set((state) => ({
             drivers: state.drivers.filter((d) => d.id !== id),
           })),
+
+        seedDrivers: (drivers) => set({ drivers }),
       }),
       {
         limit: 20,
