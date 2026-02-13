@@ -1,5 +1,6 @@
 import { WeeklySummary, DayLoadChart, ClientStats } from '@/modules/stats'
 import { ChangeLog } from '@/shared/components/ChangeLog'
+import { BackupManager } from '@/shared/components/BackupManager'
 
 export function StatsPage() {
   return (
@@ -9,6 +10,7 @@ export function StatsPage() {
       <DayLoadChart />
       <ClientStats />
       <ChangeLog />
+      <BackupManager />
     </div>
   )
 }
