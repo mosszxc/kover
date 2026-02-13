@@ -1,34 +1,22 @@
 #!/bin/bash
-# Настройка port forwarding для доступа к dev серверам из локальной сети
-# Автоматически определяет IP WSL и пробрасывает порты
+# Настройка port forwarding для доступа к dev серверу из локальной сети (WSL)
 
 set -e
 
 WSL_IP=$(hostname -I | awk '{print $1}')
-PORTS=(5173 10000)
+PORT=5173
 PS_PATH="/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe"
 
-echo "🔧 Настройка port forwarding..."
+echo "Настройка port forwarding..."
 echo "   WSL IP: $WSL_IP"
 
-for PORT in "${PORTS[@]}"; do
-    # Удаляем старое правило (если есть)
-    $PS_PATH -Command "netsh interface portproxy delete v4tov4 listenport=$PORT listenaddress=0.0.0.0" 2>/dev/null || true
+$PS_PATH -Command "netsh interface portproxy delete v4tov4 listenport=$PORT listenaddress=0.0.0.0" 2>/dev/null || true
+$PS_PATH -Command "netsh interface portproxy add v4tov4 listenport=$PORT listenaddress=0.0.0.0 connectport=$PORT connectaddress=$WSL_IP"
+echo "   Port $PORT forwarded"
 
-    # Добавляем новое правило
-    $PS_PATH -Command "netsh interface portproxy add v4tov4 listenport=$PORT listenaddress=0.0.0.0 connectport=$PORT connectaddress=$WSL_IP"
-    echo "   ✓ Порт $PORT проброшен"
-done
-
-echo ""
-echo "✅ Port forwarding настроен"
-echo ""
-
-# Показываем Windows IP для подключения (предпочитаем 192.168.x.x)
 WIN_IP=$($PS_PATH -Command "(Get-NetIPAddress -AddressFamily IPv4 | Where-Object { \$_.InterfaceAlias -notmatch 'Loopback|vEthernet|WSL' -and \$_.IPAddress -match '^192\.168\.' }).IPAddress" 2>/dev/null | tr -d '\r' | head -1)
 if [ -n "$WIN_IP" ]; then
-    echo "📱 Подключайся с других устройств:"
+    echo ""
     echo "   Web: http://$WIN_IP:5173"
-    echo "   API: http://$WIN_IP:10000"
     echo ""
 fi

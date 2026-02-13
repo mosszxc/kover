@@ -93,73 +93,25 @@ Short, dense. Lists > prose.
 │                                                             │
 │  DOCUMENT HIERARCHY:                                        │
 │                                                             │
-│  engineering/tech-spec.md  ← SINGLE source for:             │
-│    • DB schemas (tables, fields, types)                     │
-│    • API contracts (endpoints, request/response)            │
-│    • Algorithms                                             │
+│  SPEC_маршруты_v1.md  ← Product spec:                       │
+│    • Data model (types, fields, relationships)              │
+│    • Business rules                                        │
+│    • User stories                                          │
 │                                                             │
 │  design/roadmap.md  ← WHAT and WHEN:                        │
 │    • Task order, iterations                                │
-│    • Links to tech spec (NO schema duplication)            │
+│    • Links to spec (NO type duplication)                   │
 │                                                             │
-│  engineering/architecture.md  ← HOW to write code:          │
-│    • Architecture (api → domains → pipelines)              │
-│    • Current state and tech debt                           │
-│    • Pre-ship checklist                                    │
+│  design-system/kover/MASTER.md  ← HOW it looks:             │
+│    • Colors, typography, spacing                           │
+│    • Component specs, accessibility                        │
+│    • Print layout rules                                    │
 │                                                             │
 │  Issues  ← Concrete task:                                   │
-│    • References tech spec for details                      │
+│    • References spec for details                           │
 │    • References roadmap for context                        │
 │                                                             │
-│  Priority: tech-spec > roadmap > issues                    │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
-
-## MIGRATIONS + CODE = ONE PR
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                                                             │
-│  RULE: migration + code = ONE PR (atomic)                   │
-│                                                             │
-│  When changing DB schema:                                    │
-│  1. Update engineering/tech-spec.md (source of truth)       │
-│  2. Create migration (apply_migration)                      │
-│  3. Update domains/*/repository.py (db.table() calls)      │
-│  4. Update domains/*/schemas.py (Pydantic models)          │
-│                                                             │
-│  MIGRATION TEMPLATE:                                        │
-│  1. CREATE TABLE                                            │
-│  2. ALTER TABLE ... ENABLE ROW LEVEL SECURITY               │
-│  3. CREATE POLICY (anon + service_role)                     │
-│  4. GRANT TO anon, authenticated, service_role              │
-│                                                             │
-│  Without GRANT → "permission denied" (42501)                │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
-
-## SUPABASE: TOKEN ECONOMY
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                                                             │
-│  list_tables = ~20k tokens (full schema of all tables)      │
-│                                                             │
-│  DO NOT USE list_tables / generate_typescript_types          │
-│  without absolute necessity                                 │
-│                                                             │
-│  USE execute_sql:                                           │
-│                                                             │
-│  List tables (~300 tokens):                                 │
-│  SELECT table_name FROM information_schema.tables           │
-│  WHERE table_schema = 'public';                             │
-│                                                             │
-│  Schema of one table (~200 tokens):                         │
-│  SELECT column_name, data_type, is_nullable                 │
-│  FROM information_schema.columns                            │
-│  WHERE table_name = 'xxx';                                  │
+│  Priority: spec > roadmap > issues                         │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -168,30 +120,30 @@ Short, dense. Lists > prose.
 
 ## Project
 
-**Kover** — Decision Engine Platform. Monorepo: API (FastAPI) + Web (React).
+**Kover** — Route Management System. React SPA + localStorage.
 
 ## Structure
 
 ```
 kover/
 ├── apps/
-│   ├── api/           # Python backend (FastAPI + Temporal)
-│   │   └── src/
-│   │       ├── api/       # HTTP routers
-│   │       ├── domains/   # Business logic (service + repository + schemas)
-│   │       ├── pipelines/ # Orchestration (Temporal workflows)
-│   │       ├── core/      # Config, dependencies
-│   │       ├── clients/   # External API clients
-│   │       └── workers/   # Temporal workers
 │   └── web/           # React frontend (Vite + Tailwind)
-├── packages/
-│   ├── types/         # Shared TypeScript types
-│   └── shared/        # Shared utilities
+│       └── src/
+│           ├── components/  # UI components
+│           ├── pages/       # Route pages
+│           ├── store/       # Zustand stores
+│           ├── types/       # TypeScript interfaces
+│           ├── data/        # Seed data (143 clients)
+│           └── lib/         # Utilities
 ├── scripts/
 │   ├── fix            # Start working on issue
 │   ├── ship           # Finish: commit, PR, merge
 │   ├── batch-fix      # Batch issue processing
 │   └── prune          # Cleanup merged worktrees
+├── design/
+│   └── roadmap.md     # Iterations & tasks
+├── design-system/
+│   └── kover/MASTER.md # Colors, typography, components
 ├── turbo.json
 └── pnpm-workspace.yaml
 ```
@@ -200,69 +152,33 @@ kover/
 
 ```bash
 pnpm install
-pnpm dev          # API + Web in parallel
-pnpm dev:api      # localhost:10000
 pnpm dev:web      # localhost:5173
 ```
 
 ## Stack
 
-### API (apps/api)
-
-```
-Python 3.11+
-├── FastAPI
-├── Temporal (orchestration)
-├── Supabase (DB)
-└── uv (package manager)
-```
-
-### Web (apps/web)
-
 ```
 Vite + React 19 + TypeScript
 ├── Tailwind v4
 ├── Shadcn/ui
-├── TanStack Query
+├── Zustand + persist (localStorage)
 ├── React Router
-└── Supabase client
-```
-
-## Env Variables
-
-### API (apps/api/.env)
-
-```
-SUPABASE_URL=
-SUPABASE_SERVICE_ROLE_KEY=
-TEMPORAL_ADDRESS=localhost:7233
-TEMPORAL_NAMESPACE=default
-OPENAI_API_KEY=
-```
-
-### Web (apps/web/.env)
-
-```
-VITE_API_URL=http://localhost:10000
-VITE_SUPABASE_URL=
-VITE_SUPABASE_ANON_KEY=
+├── @dnd-kit (drag & drop)
+└── Lucide React (icons)
 ```
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `pnpm dev` | API + Web in parallel |
-| `pnpm dev:api` | API on :10000 |
 | `pnpm dev:web` | Web on :5173 |
-| `pnpm build` | Build all (turbo) |
-| `pnpm lint` | Lint all (turbo) |
-| `pnpm clean` | Clean all |
+| `pnpm build` | Build |
+| `pnpm lint` | Lint |
 
 ## Conventions
 
 1. **TypeScript strict mode** everywhere
-2. **TanStack Query** for all API calls
+2. **Zustand** for state (localStorage persistence)
 3. **Tailwind v4** — no inline styles
 4. **Dark mode first**
 5. **pnpm** — not npm/yarn
@@ -275,8 +191,7 @@ VITE_SUPABASE_ANON_KEY=
 | `P1` | Priority 1 — Critical path |
 | `P2` | Priority 2 — Important |
 | `P3` | Priority 3 — Nice to have |
-| `db` | Database/migrations |
-| `api` | Backend/API issues |
+| `data` | Data model/store |
 | `web` | Frontend/Web issues |
 | `ui` | Frontend/UI |
 | `e2e` | E2E testing issues |
@@ -296,13 +211,8 @@ VITE_SUPABASE_ANON_KEY=
 // YES Tailwind
 <div className="bg-black">
 
-// NO fetch directly
-const data = await fetch('/api/...')
-// YES TanStack Query
-const { data } = useQuery({ queryKey: ['key'], queryFn: fetchFn })
-
-// NO hardcoded URLs
-fetch('https://api.example.com/...')
-// YES from env
-fetch(`${import.meta.env.VITE_API_URL}/...`)
+// NO direct localStorage
+localStorage.setItem('clients', JSON.stringify(data))
+// YES Zustand persist
+const useStore = create(persist((set) => ({ ... }), { name: 'kover-store' }))
 ```
