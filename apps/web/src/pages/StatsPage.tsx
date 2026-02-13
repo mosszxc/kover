@@ -1,4 +1,4 @@
-import { WeeklySummary, DayLoadChart } from '@/modules/stats'
+import { WeeklySummary, DayLoadChart, ClientStats } from '@/modules/stats'
 
 export function StatsPage() {
   return (
@@ -6,6 +6,7 @@ export function StatsPage() {
       <h1 className="text-2xl font-bold text-slate-50">Статистика</h1>
       <WeeklySummary />
       <DayLoadChart />
+      <ClientStats />
     </div>
   )
 }
