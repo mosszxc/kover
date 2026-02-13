@@ -4,9 +4,11 @@ import { TopBar } from "./TopBar"
 import { BottomTabs } from "./BottomTabs"
 import { Toaster } from "@/shared/ui/sonner"
 import { useChangeLogger } from "@/shared/hooks/useChangeLogger"
+import { useAutoBackup } from "@/shared/hooks/useAutoBackup"
 
 export function AppLayout() {
   useChangeLogger()
+  useAutoBackup()
 
   return (
     <div className="print-root min-h-screen bg-slate-950">
