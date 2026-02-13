@@ -47,7 +47,15 @@ export function OptimizeRouteDialog() {
   function handleApply() {
     if (!result) return
     reorderAllStops(selectedDay, result.optimizedIds)
-    toast.success('Порядок маршрута оптимизирован')
+    toast.success('Порядок маршрута оптимизирован', {
+      action: {
+        label: 'Отменить',
+        onClick: () => {
+          useRouteStore.temporal.getState().undo()
+          toast.info('Оптимизация отменена')
+        },
+      },
+    })
     setOpen(false)
   }
 
