@@ -34,9 +34,8 @@ export function ExcelUpload({ onParsed }: ExcelUploadProps) {
           .map((name) => parseClientName(name))
 
         onParsed({ clients, routesByDay: parsed.routesByDay })
-      } catch (err) {
+      } catch {
         toast.error('Ошибка при чтении файла')
-        console.error(err)
       } finally {
         setIsLoading(false)
       }

@@ -1,8 +1,5 @@
-import { DAY_LABELS } from '@/shared/types'
-import type { MatSize } from '@/shared/types'
+import { DAY_LABELS, MAT_SIZES } from '@/shared/types'
 import { useWeeklyStats } from '../hooks/useWeeklyStats'
-
-const MAT_SIZES: MatSize[] = ['180', '150', '60x80', '400', '250']
 
 export function WeeklySummary() {
   const { days, totals } = useWeeklyStats()

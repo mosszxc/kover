@@ -12,6 +12,9 @@ export const DAY_LABELS: Record<DayOfWeek, string> = {
   4: 'ПТ',
 }
 
+/** Все размеры ковриков в стандартном порядке */
+export const MAT_SIZES: MatSize[] = ['180', '150', '60x80', '400', '250']
+
 export const MAT_AREA: Record<MatSize, number> = {
   '180': 2.07,
   '150': 1.275,
