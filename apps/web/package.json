@@ -1,0 +1,10 @@
+{
+  "name": "@kover/web",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo 'web dev server not configured yet'",
+    "build": "echo 'web build not configured yet'",
+    "lint": "echo 'web lint not configured yet'"
+  }
+}
