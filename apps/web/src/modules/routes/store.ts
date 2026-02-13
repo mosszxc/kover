@@ -16,6 +16,7 @@ interface RouteState {
   reorderAllStops: (day: DayOfWeek, stopIds: string[]) => void
   transferStop: (fromDay: DayOfWeek, toDay: DayOfWeek, stopId: string, toPosition?: number) => void
   toggleStopCompleted: (day: DayOfWeek, stopId: string) => void
+  assignDriver: (day: DayOfWeek, stopId: string, driverId: string | null) => void
   seedRoutes: (routes: DayRoute[]) => void
 }
 
@@ -164,6 +165,21 @@ export const useRouteStore = create<RouteState>()(
               stops: route.stops.map((s) =>
                 s.id === stopId
                   ? { ...s, isCompleted: !s.isCompleted }
+                  : s,
+              ),
+            }
+          }),
+        })),
+
+      assignDriver: (day, stopId, driverId) =>
+        set((state) => ({
+          routes: state.routes.map((route) => {
+            if (route.day !== day) return route
+            return {
+              ...route,
+              stops: route.stops.map((s) =>
+                s.id === stopId
+                  ? { ...s, driverId: driverId ?? undefined }
                   : s,
               ),
             }

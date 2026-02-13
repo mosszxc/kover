@@ -5,6 +5,7 @@ export interface RouteStop {
   clientId: string
   position: number
   isCompleted: boolean
+  driverId?: string
 }
 
 export interface DayRoute {

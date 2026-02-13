@@ -9,11 +9,18 @@ import { useRouteStore } from '../store'
 import { RemoveStopDialog } from './RemoveStopDialog'
 import { TransferStopDialog } from './TransferStopDialog'
 
+export interface DriverOption {
+  id: string
+  name: string
+}
+
 interface StopCardProps {
   number: number
   client: Client
   stopId: string
   isCompleted: boolean
+  driverId?: string
+  drivers: DriverOption[]
   stopIndex: number
   isFirst: boolean
   isLast: boolean
@@ -24,10 +31,11 @@ function matArea(mats: MatSpec[]): number {
   return mats.reduce((sum, m) => sum + m.quantity * (MAT_AREA[m.size] ?? 0), 0)
 }
 
-export function StopCard({ number, client, stopId, isCompleted, stopIndex, isFirst, isLast, isDndEnabled = true }: StopCardProps) {
+export function StopCard({ number, client, stopId, isCompleted, driverId, drivers, stopIndex, isFirst, isLast, isDndEnabled = true }: StopCardProps) {
   const area = matArea(client.mats)
   const selectedDay = useRouteStore((s) => s.selectedDay)
   const toggleStopCompleted = useRouteStore((s) => s.toggleStopCompleted)
+  const assignDriver = useRouteStore((s) => s.assignDriver)
   const moveStop = useRouteStore((s) => s.moveStop)
 
   const {
@@ -58,7 +66,8 @@ export function StopCard({ number, client, stopId, isCompleted, stopIndex, isFir
       ref={setNodeRef}
       style={style}
       className={cn(
-        'flex items-center gap-3 border-l-3 border-l-slate-700 p-3 transition-colors hover:bg-slate-800',
+        'flex items-center gap-3 border-l-3 p-3 transition-colors hover:bg-slate-800',
+        driverId ? 'border-l-blue-500' : 'border-l-slate-700',
         isCompleted && 'opacity-60',
         isDragging && 'z-10 opacity-50 ring-2 ring-blue-500',
       )}
@@ -129,6 +138,25 @@ export function StopCard({ number, client, stopId, isCompleted, stopIndex, isFir
           {client.originalName}
         </p>
       </div>
+
+      {drivers.length > 0 && (
+        <select
+          value={driverId ?? ''}
+          onChange={(e) => assignDriver(selectedDay, stopId, e.target.value || null)}
+          aria-label="Назначить водителя"
+          className={cn(
+            'h-8 w-28 shrink-0 cursor-pointer truncate rounded border px-1.5 text-xs transition-colors print:hidden',
+            driverId
+              ? 'border-blue-600/50 bg-blue-950/50 text-blue-300'
+              : 'border-slate-700 bg-slate-900 text-slate-500',
+          )}
+        >
+          <option value="">—</option>
+          {drivers.map((d) => (
+            <option key={d.id} value={d.id}>{d.name}</option>
+          ))}
+        </select>
+      )}
 
       <div className="flex shrink-0 items-center gap-1.5">
         {client.mats.map((mat, i) => (
