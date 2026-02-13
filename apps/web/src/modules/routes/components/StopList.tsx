@@ -21,9 +21,10 @@ import { StopCard, type DriverOption } from './StopCard'
 interface StopListProps {
   searchQuery?: string
   drivers?: DriverOption[]
+  driverFilter?: string | 'unassigned' | null
 }
 
-export function StopList({ searchQuery = '', drivers = [] }: StopListProps) {
+export function StopList({ searchQuery = '', drivers = [], driverFilter = null }: StopListProps) {
   const routes = useRouteStore((s) => s.routes)
   const selectedDay = useRouteStore((s) => s.selectedDay)
   const reorderStop = useRouteStore((s) => s.reorderStop)
@@ -79,7 +80,13 @@ export function StopList({ searchQuery = '', drivers = [] }: StopListProps) {
     )
   }
 
-  const stops = activeStops
+  const filteredByDriver = driverFilter
+    ? activeStops.filter((stop) =>
+        driverFilter === 'unassigned' ? !stop.driverId : stop.driverId === driverFilter,
+      )
+    : activeStops
+
+  const stops = filteredByDriver
     .map((stop, index) => {
       const client = clientMap.get(stop.clientId)
       return { stop, client, number: index + 1 }
