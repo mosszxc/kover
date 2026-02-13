@@ -1,5 +1,12 @@
 import { Minus, Plus, X } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/shared/ui/select'
 import { MAT_SIZE_OPTIONS } from '@/shared/constants'
 import type { MatRow } from '../lib/formHelpers'
 
@@ -28,18 +35,21 @@ export function MatRowCard({
   return (
     <div className="rounded-lg border border-slate-700 bg-slate-900/50 p-3 space-y-2">
       <div className="flex items-center gap-2">
-        <select
-          value={mat.size}
-          onChange={(e) => onSizeChange(e.target.value)}
-          aria-label={`Размер коврика ${index + 1}`}
-          className={`${baseInput} w-24 shrink-0 cursor-pointer`}
-        >
-          {MAT_SIZE_OPTIONS.map((s) => (
-            <option key={s.value} value={s.value}>
-              {s.label}
-            </option>
-          ))}
-        </select>
+        <Select value={mat.size} onValueChange={onSizeChange}>
+          <SelectTrigger
+            aria-label={`Размер коврика ${index + 1}`}
+            className={`${baseInput} w-24 shrink-0 cursor-pointer`}
+          >
+            <SelectValue placeholder="Размер" />
+          </SelectTrigger>
+          <SelectContent>
+            {MAT_SIZE_OPTIONS.map((s) => (
+              <SelectItem key={s.value} value={s.value}>
+                {s.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
         <div className="flex shrink-0 items-center">
           <Button
