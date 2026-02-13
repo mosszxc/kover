@@ -76,6 +76,8 @@ export function StopList({ searchQuery = '' }: StopListProps) {
                   number={number}
                   client={client}
                   blockIndex={blockIndex}
+                  stopId={stop.id}
+                  isCompleted={stop.isCompleted}
                 />
               )
             })}
