@@ -12,6 +12,7 @@ interface RouteState {
   removeClientFromAllRoutes: (clientId: string) => void
   moveStop: (day: DayOfWeek, stopId: string, newPosition: number) => void
   reorderStop: (day: DayOfWeek, from: number, to: number) => void
+  reorderAllStops: (day: DayOfWeek, stopIds: string[]) => void
   transferStop: (fromDay: DayOfWeek, toDay: DayOfWeek, stopId: string, toPosition?: number) => void
   toggleStopCompleted: (day: DayOfWeek, stopId: string) => void
   seedRoutes: (routes: DayRoute[]) => void
@@ -96,6 +97,27 @@ export const useRouteStore = create<RouteState>()(
               ...route,
               stops: stops.map((s, i) => ({ ...s, position: i })),
             }
+          }),
+        })),
+
+      reorderAllStops: (day, stopIds) =>
+        set((state) => ({
+          routes: state.routes.map((route) => {
+            if (route.day !== day) return route
+            const stopMap = new Map(route.stops.map((s) => [s.id, s]))
+            const reordered: RouteStop[] = []
+            for (const id of stopIds) {
+              const stop = stopMap.get(id)
+              if (stop) {
+                reordered.push({ ...stop, position: reordered.length })
+                stopMap.delete(id)
+              }
+            }
+            // Append any stops not in stopIds (without coords) at the end
+            for (const stop of stopMap.values()) {
+              reordered.push({ ...stop, position: reordered.length })
+            }
+            return { ...route, stops: reordered }
           }),
         })),
 
