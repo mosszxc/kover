@@ -14,7 +14,7 @@ import { useClientStore } from '../store'
 import type { Client } from '../types'
 import { DAY_LABELS, MAT_AREA } from '@/shared/types'
 import type { DayOfWeek, MatSize } from '@/shared/types'
-import { ClientsFilters } from './ClientsFilters'
+import { ClientsFilters, type StatusFilter } from './ClientsFilters'
 
 function formatMats(client: Client): string {
   const grouped = new Map<string, number>()
@@ -149,9 +149,15 @@ export function ClientsTable({ onRowClick, isClientInRoute }: ClientsTableProps)
   const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>([])
   const [selectedFrequency, setSelectedFrequency] = useState<number | null>(null)
   const [selectedMatSize, setSelectedMatSize] = useState<MatSize | null>(null)
+  const [selectedStatus, setSelectedStatus] = useState<StatusFilter>('all')
 
   const filteredClients = useMemo(() => {
     let result = clients
+    if (selectedStatus === 'active') {
+      result = result.filter((c) => c.isActive)
+    } else if (selectedStatus === 'paused') {
+      result = result.filter((c) => !c.isActive)
+    }
     if (selectedDays.length > 0) {
       result = result.filter((c) =>
         selectedDays.some((d) => c.days.includes(d)),
@@ -166,7 +172,7 @@ export function ClientsTable({ onRowClick, isClientInRoute }: ClientsTableProps)
       )
     }
     return result
-  }, [clients, selectedDays, selectedFrequency, selectedMatSize])
+  }, [clients, selectedDays, selectedFrequency, selectedMatSize, selectedStatus])
 
   const table = useReactTable({
     data: filteredClients,
@@ -216,6 +222,8 @@ export function ClientsTable({ onRowClick, isClientInRoute }: ClientsTableProps)
         onFrequencyChange={setSelectedFrequency}
         selectedMatSize={selectedMatSize}
         onMatSizeChange={setSelectedMatSize}
+        selectedStatus={selectedStatus}
+        onStatusChange={setSelectedStatus}
       />
 
       <div className="overflow-x-auto rounded-lg border border-slate-700">
