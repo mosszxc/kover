@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate } from "react-router"
 import { AppLayout } from "@/app/layout/AppLayout"
 import { RoutesPage } from "@/pages/RoutesPage"
 import { ClientsPage } from "@/pages/ClientsPage"
+import { DriversPage } from "@/pages/DriversPage"
 import { LoadingFallback } from "@/shared/components/LoadingFallback"
 
 const ImportPage = lazy(() =>
@@ -30,6 +31,10 @@ export const router = createBrowserRouter([
       {
         path: "/clients",
         element: <ClientsPage />,
+      },
+      {
+        path: "/drivers",
+        element: <DriversPage />,
       },
       {
         path: "/import",
