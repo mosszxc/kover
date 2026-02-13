@@ -3,6 +3,13 @@ import { Check, ChevronUp, ChevronDown, GripVertical, TriangleAlert } from 'luci
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { cn } from '@/shared/lib/utils'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/shared/ui/select'
 import type { Client, MatSpec } from '@/modules/clients'
 import { MAT_AREA } from '@/shared/types'
 import { useRouteStore } from '../store'
@@ -152,22 +159,29 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
       </div>
 
       {drivers.length > 0 && (
-        <select
-          value={driverId ?? ''}
-          onChange={(e) => assignDriver(selectedDay, stopId, e.target.value || null)}
-          aria-label="Назначить водителя"
-          className={cn(
-            'h-8 w-28 shrink-0 cursor-pointer truncate rounded border px-1.5 text-xs transition-colors print:hidden',
-            driverId
-              ? 'border-blue-600/50 bg-blue-950/50 text-blue-300'
-              : 'border-slate-700 bg-slate-900 text-slate-500',
-          )}
+        <Select
+          value={driverId ?? '__none__'}
+          onValueChange={(value) => assignDriver(selectedDay, stopId, value === '__none__' ? null : value)}
         >
-          <option value="">—</option>
-          {drivers.map((d) => (
-            <option key={d.id} value={d.id}>{d.name}</option>
-          ))}
-        </select>
+          <SelectTrigger
+            size="sm"
+            aria-label="Назначить водителя"
+            className={cn(
+              'w-28 shrink-0 cursor-pointer truncate text-xs print:hidden',
+              driverId
+                ? 'border-blue-600/50 bg-blue-950/50 text-blue-300'
+                : 'border-slate-700 bg-slate-900 text-slate-500',
+            )}
+          >
+            <SelectValue placeholder="Водитель" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__none__">Без водителя</SelectItem>
+            {drivers.map((d) => (
+              <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       )}
 
       <div className="flex shrink-0 items-center gap-1.5">

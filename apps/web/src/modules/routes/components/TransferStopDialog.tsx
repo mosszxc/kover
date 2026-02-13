@@ -2,6 +2,13 @@ import { useState } from 'react'
 import { ArrowRightLeft } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/shared/ui/select'
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -82,18 +89,22 @@ export function TransferStopDialog({ stopId, clientName, day }: TransferStopDial
           {targetDay !== null && targetStops.length > 0 && (
             <div className="space-y-2">
               <p className="text-sm text-slate-400">Позиция</p>
-              <select
-                value={position}
-                onChange={(e) => setPosition(Number(e.target.value))}
-                className="h-11 w-full rounded-md border border-slate-700 bg-slate-900 px-3 text-sm text-slate-50 focus:border-slate-500 focus:outline-none"
+              <Select
+                value={String(position)}
+                onValueChange={(value) => setPosition(Number(value))}
               >
-                <option value={-1}>В конец</option>
-                {targetStops.map((_stop, i) => (
-                  <option key={i} value={i}>
-                    После точки №{i + 1}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="h-11 w-full border-slate-700 bg-slate-900 text-sm text-slate-50">
+                  <SelectValue placeholder="Позиция" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="-1">В конец</SelectItem>
+                  {targetStops.map((_stop, i) => (
+                    <SelectItem key={i} value={String(i)}>
+                      После точки №{i + 1}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
 

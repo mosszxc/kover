@@ -3,6 +3,13 @@ import { Plus, Search } from 'lucide-react'
 import { generateId } from '@/shared/lib/generateId'
 import { Button } from '@/shared/ui/button'
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/shared/ui/select'
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -113,18 +120,22 @@ export function AddStopDialog({ clients }: AddStopDialogProps) {
           </div>
 
           {stops.length > 0 && (
-            <select
-              value={position}
-              onChange={(e) => setPosition(Number(e.target.value))}
-              className="h-11 w-full rounded-md border border-slate-700 bg-slate-900 px-3 text-sm text-slate-50 focus:border-slate-500 focus:outline-none"
+            <Select
+              value={String(position)}
+              onValueChange={(value) => setPosition(Number(value))}
             >
-              <option value={-1}>В конец</option>
-              {stops.map((_stop, i) => (
-                <option key={i} value={i + 1}>
-                  После точки №{i + 1}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="h-11 w-full border-slate-700 bg-slate-900 text-sm text-slate-50">
+                <SelectValue placeholder="Позиция" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="-1">В конец</SelectItem>
+                {stops.map((_stop, i) => (
+                  <SelectItem key={i} value={String(i + 1)}>
+                    После точки №{i + 1}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
 
           <div className="-mx-6 max-h-[300px] overflow-y-auto">
