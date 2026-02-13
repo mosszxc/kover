@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { DaySwitcher, DaySummary, RouteSearch, StopList, AddStopDialog, useRouteStore, PrintButton } from '@/modules/routes'
 import { useClientStore } from '@/modules/clients'
 import { PrintSheet } from '@/modules/print'
@@ -8,6 +8,15 @@ export function RoutesPage() {
   const clients = useClientStore((s) => s.clients)
   const selectedDay = useRouteStore((s) => s.selectedDay)
   const stops = useRouteStore((s) => s.routes.find((r) => r.day === selectedDay)?.stops ?? [])
+
+  const activeClientIds = useMemo(
+    () => new Set(clients.filter((c) => c.isActive).map((c) => c.id)),
+    [clients],
+  )
+  const activeStops = useMemo(
+    () => stops.filter((s) => activeClientIds.has(s.clientId)),
+    [stops, activeClientIds],
+  )
 
   return (
     <div className="space-y-4">
@@ -19,7 +28,7 @@ export function RoutesPage() {
       <RouteSearch value={searchQuery} onChange={setSearchQuery} />
       <StopList searchQuery={searchQuery} />
       <AddStopDialog clients={clients} />
-      <PrintSheet stops={stops} clients={clients} selectedDay={selectedDay} />
+      <PrintSheet stops={activeStops} clients={clients} selectedDay={selectedDay} />
     </div>
   )
 }

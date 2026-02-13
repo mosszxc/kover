@@ -63,7 +63,14 @@ export function StopList({ searchQuery = '' }: StopListProps) {
     [dayRoute, selectedDay, reorderStop],
   )
 
-  if (!dayRoute || dayRoute.stops.length === 0) {
+  const activeStops = dayRoute
+    ? dayRoute.stops.filter((stop) => {
+        const client = clientMap.get(stop.clientId)
+        return client?.isActive !== false
+      })
+    : []
+
+  if (!dayRoute || activeStops.length === 0) {
     return (
       <div className="py-12 text-center text-sm text-slate-500">
         Нет точек на этот день
@@ -71,7 +78,7 @@ export function StopList({ searchQuery = '' }: StopListProps) {
     )
   }
 
-  const stops = dayRoute.stops
+  const stops = activeStops
     .map((stop, index) => {
       const client = clientMap.get(stop.clientId)
       return { stop, client, number: index + 1 }
@@ -105,6 +112,7 @@ export function StopList({ searchQuery = '' }: StopListProps) {
           {stops.map(({ stop, client, number }) => {
             if (!client) return null
             const stopIndex = dayRoute.stops.indexOf(stop)
+            const activeIndex = activeStops.indexOf(stop)
             return (
               <StopCard
                 key={stop.id}
@@ -113,8 +121,8 @@ export function StopList({ searchQuery = '' }: StopListProps) {
                 stopId={stop.id}
                 isCompleted={stop.isCompleted}
                 stopIndex={stopIndex}
-                isFirst={stopIndex === 0}
-                isLast={stopIndex === dayRoute.stops.length - 1}
+                isFirst={activeIndex === 0}
+                isLast={activeIndex === activeStops.length - 1}
                 isDndEnabled={!isSearching}
               />
             )

@@ -25,11 +25,13 @@ export function useRouteSummary(): RouteSummary {
 
     const matsBySize: Partial<Record<MatSize, number>> = {}
     let totalArea = 0
+    let activeStopCount = 0
 
     for (const stop of dayRoute.stops) {
       const client = clientMap.get(stop.clientId)
-      if (!client) continue
+      if (!client || !client.isActive) continue
 
+      activeStopCount++
       for (const mat of client.mats) {
         matsBySize[mat.size] = (matsBySize[mat.size] ?? 0) + mat.quantity
         totalArea += mat.quantity * (MAT_AREA[mat.size] ?? 0)
@@ -37,7 +39,7 @@ export function useRouteSummary(): RouteSummary {
     }
 
     return {
-      stopCount: dayRoute.stops.length,
+      stopCount: activeStopCount,
       matsBySize,
       totalArea: Math.round(totalArea * 100) / 100,
     }
