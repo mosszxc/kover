@@ -1,2 +1,1 @@
-// modules/clients — Public API
-// Client CRUD & table (Iteration 4)
+export type { Client, MatSpec } from './types'
