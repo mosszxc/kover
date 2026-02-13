@@ -9,6 +9,7 @@ interface RouteState {
   selectDay: (day: DayOfWeek) => void
   addStop: (day: DayOfWeek, stop: RouteStop) => void
   removeStop: (day: DayOfWeek, stopId: string) => void
+  removeClientFromAllRoutes: (clientId: string) => void
   moveStop: (day: DayOfWeek, stopId: string, newPosition: number) => void
   reorderStop: (day: DayOfWeek, from: number, to: number) => void
   transferStop: (fromDay: DayOfWeek, toDay: DayOfWeek, stopId: string, toPosition?: number) => void
@@ -49,6 +50,18 @@ export const useRouteStore = create<RouteState>()(
               stops: route.stops
                 .filter((s) => s.id !== stopId)
                 .map((s, i) => ({ ...s, position: i })),
+            }
+          }),
+        })),
+
+      removeClientFromAllRoutes: (clientId) =>
+        set((state) => ({
+          routes: state.routes.map((route) => {
+            const filtered = route.stops.filter((s) => s.clientId !== clientId)
+            if (filtered.length === route.stops.length) return route
+            return {
+              ...route,
+              stops: filtered.map((s, i) => ({ ...s, position: i })),
             }
           }),
         })),
