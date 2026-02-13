@@ -1,4 +1,5 @@
 export { WeeklySummary } from './components/WeeklySummary'
 export { DayLoadChart } from './components/DayLoadChart'
+export { ClientStats } from './components/ClientStats'
 export { useWeeklyStats } from './hooks/useWeeklyStats'
 export type { DayStat, WeeklyStats } from './hooks/useWeeklyStats'
