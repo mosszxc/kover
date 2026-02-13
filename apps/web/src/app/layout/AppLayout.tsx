@@ -3,8 +3,11 @@ import { Sidebar } from "./Sidebar"
 import { TopBar } from "./TopBar"
 import { BottomTabs } from "./BottomTabs"
 import { Toaster } from "@/shared/ui/sonner"
+import { useChangeLogger } from "@/shared/hooks/useChangeLogger"
 
 export function AppLayout() {
+  useChangeLogger()
+
   return (
     <div className="print-root min-h-screen bg-slate-950">
       <Sidebar />
