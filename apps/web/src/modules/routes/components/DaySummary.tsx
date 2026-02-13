@@ -1,5 +1,5 @@
 import { MapPin, Ruler, LayoutGrid } from 'lucide-react'
-import { useRouteSummary, type BlockSummary } from '../hooks/useRouteSummary'
+import { useRouteSummary } from '../hooks/useRouteSummary'
 import type { MatSize } from '@/shared/types'
 
 const MAT_SIZE_LABELS: Record<MatSize, string> = {
@@ -19,29 +19,6 @@ function formatMats(matsBySize: Partial<Record<MatSize, number>>): string {
     .join(' | ')
 }
 
-function BlockSummaryRow({ block, index }: { block: BlockSummary; index: number }) {
-  const matsText = formatMats(block.matsBySize)
-  if (block.stopCount === 0) return null
-
-  return (
-    <div className="flex items-center gap-3 rounded-lg bg-slate-800/50 px-3 py-2 text-sm">
-      <span className="font-medium text-slate-400">
-        {block.blockName ?? `Блок ${index + 1}`}
-      </span>
-      <span className="text-slate-500">·</span>
-      <span className="text-slate-300">{block.stopCount} точек</span>
-      {matsText && (
-        <>
-          <span className="text-slate-500">·</span>
-          <span className="tabular-nums text-slate-300">{matsText}</span>
-        </>
-      )}
-      <span className="text-slate-500">·</span>
-      <span className="tabular-nums text-slate-300">{block.totalArea} м²</span>
-    </div>
-  )
-}
-
 export function DaySummary() {
   const summary = useRouteSummary()
 
@@ -56,33 +33,23 @@ export function DaySummary() {
   const matsText = formatMats(summary.matsBySize)
 
   return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-3 gap-3">
-        <SummaryCard
-          icon={<MapPin className="h-4 w-4 text-blue-400" />}
-          value={summary.stopCount}
-          label="Точек"
-        />
-        <SummaryCard
-          icon={<LayoutGrid className="h-4 w-4 text-emerald-400" />}
-          value={matsText || '—'}
-          label="Коврики"
-          wide
-        />
-        <SummaryCard
-          icon={<Ruler className="h-4 w-4 text-amber-400" />}
-          value={`${summary.totalArea} м²`}
-          label="Метраж"
-        />
-      </div>
-
-      {summary.hasMultipleBlocks && (
-        <div className="space-y-1.5">
-          {summary.blocks.map((block, i) => (
-            <BlockSummaryRow key={block.blockId} block={block} index={i} />
-          ))}
-        </div>
-      )}
+    <div className="grid grid-cols-3 gap-3">
+      <SummaryCard
+        icon={<MapPin className="h-4 w-4 text-blue-400" />}
+        value={summary.stopCount}
+        label="Точек"
+      />
+      <SummaryCard
+        icon={<LayoutGrid className="h-4 w-4 text-emerald-400" />}
+        value={matsText || '—'}
+        label="Коврики"
+        wide
+      />
+      <SummaryCard
+        icon={<Ruler className="h-4 w-4 text-amber-400" />}
+        value={`${summary.totalArea} м²`}
+        label="Метраж"
+      />
     </div>
   )
 }

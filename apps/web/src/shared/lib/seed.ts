@@ -12,6 +12,13 @@ export const useSeedStore = create<SeedState>()(
       isSeeded: false,
       markSeeded: () => set({ isSeeded: true }),
     }),
-    { name: 'kover-seed', version: 1 },
+    {
+      name: 'kover-seed',
+      version: 2,
+      migrate: () => {
+        // v1→v2: routes changed from blocks to flat — force re-seed
+        return { isSeeded: false }
+      },
+    },
   ),
 )

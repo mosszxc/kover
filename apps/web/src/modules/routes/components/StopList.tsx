@@ -1,9 +1,8 @@
 import { useMemo } from 'react'
 import { useRouteStore } from '../store'
 import { useClientStore } from '@/modules/clients'
-import type { Client, MatSpec } from '@/modules/clients'
+import type { Client } from '@/modules/clients'
 import { StopCard } from './StopCard'
-import { BlockDivider } from './BlockDivider'
 
 interface StopListProps {
   searchQuery?: string
@@ -25,7 +24,7 @@ export function StopList({ searchQuery = '' }: StopListProps) {
   const dayRoute = routes.find((r) => r.day === selectedDay)
   const query = searchQuery.toLowerCase()
 
-  if (!dayRoute || dayRoute.blocks.every((b) => b.stops.length === 0)) {
+  if (!dayRoute || dayRoute.stops.length === 0) {
     return (
       <div className="py-12 text-center text-sm text-slate-500">
         Нет точек на этот день
@@ -33,71 +32,41 @@ export function StopList({ searchQuery = '' }: StopListProps) {
     )
   }
 
-  let globalNumber = 0
+  const stops = dayRoute.stops
+    .map((stop, index) => {
+      const client = clientMap.get(stop.clientId)
+      return { stop, client, number: index + 1 }
+    })
+    .filter(({ client }) => {
+      if (!query || !client) return true
+      return (
+        client.originalName.toLowerCase().includes(query) ||
+        client.address.toLowerCase().includes(query)
+      )
+    })
+
+  if (stops.length === 0) {
+    return (
+      <div className="py-12 text-center text-sm text-slate-500">
+        Ничего не найдено
+      </div>
+    )
+  }
 
   return (
-    <div className="space-y-2">
-      {dayRoute.blocks.map((block, blockIndex) => {
-        if (block.stops.length === 0) return null
-
-        const blockMats: MatSpec[] = []
-        const blockStops = block.stops
-          .map((stop) => {
-            globalNumber++
-            const client = clientMap.get(stop.clientId)
-            if (client) {
-              blockMats.push(...client.mats)
-            }
-            return { stop, client, number: globalNumber }
-          })
-          .filter(({ client }) => {
-            if (!query || !client) return true
-            return (
-              client.originalName.toLowerCase().includes(query) ||
-              client.address.toLowerCase().includes(query)
-            )
-          })
-
-        if (blockStops.length === 0) return null
-
+    <div className="space-y-px">
+      {stops.map(({ stop, client, number }) => {
+        if (!client) return null
         return (
-          <div key={block.id} className="space-y-px">
-            <BlockDivider
-              name={block.name ?? `Блок ${blockIndex + 1}`}
-              blockIndex={blockIndex}
-              stopCount={block.stops.length}
-              mats={blockMats}
-            />
-            {blockStops.map(({ stop, client, number }) => {
-              if (!client) return null
-              return (
-                <StopCard
-                  key={stop.id}
-                  number={number}
-                  client={client}
-                  blockIndex={blockIndex}
-                  stopId={stop.id}
-                  isCompleted={stop.isCompleted}
-                />
-              )
-            })}
-          </div>
+          <StopCard
+            key={stop.id}
+            number={number}
+            client={client}
+            stopId={stop.id}
+            isCompleted={stop.isCompleted}
+          />
         )
       })}
-      {query && dayRoute.blocks.every((block) =>
-        block.stops.every((stop) => {
-          const client = clientMap.get(stop.clientId)
-          if (!client) return true
-          return (
-            !client.originalName.toLowerCase().includes(query) &&
-            !client.address.toLowerCase().includes(query)
-          )
-        })
-      ) && (
-        <div className="py-12 text-center text-sm text-slate-500">
-          Ничего не найдено
-        </div>
-      )}
     </div>
   )
 }

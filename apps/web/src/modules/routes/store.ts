@@ -7,7 +7,7 @@ interface RouteState {
   routes: DayRoute[]
   selectedDay: DayOfWeek
   selectDay: (day: DayOfWeek) => void
-  addStop: (day: DayOfWeek, blockIndex: number, stop: RouteStop) => void
+  addStop: (day: DayOfWeek, stop: RouteStop) => void
   removeStop: (day: DayOfWeek, stopId: string) => void
   moveStop: (day: DayOfWeek, stopId: string, newPosition: number) => void
   reorderStop: (day: DayOfWeek, from: number, to: number) => void
@@ -16,11 +16,11 @@ interface RouteState {
 }
 
 const initialRoutes: DayRoute[] = [
-  { day: 0, blocks: [{ id: 'mon-1', stops: [] }] },
-  { day: 1, blocks: [{ id: 'tue-1', stops: [] }] },
-  { day: 2, blocks: [{ id: 'wed-1', stops: [] }] },
-  { day: 3, blocks: [{ id: 'thu-1', stops: [] }] },
-  { day: 4, blocks: [{ id: 'fri-1', stops: [] }] },
+  { day: 0, stops: [] },
+  { day: 1, stops: [] },
+  { day: 2, stops: [] },
+  { day: 3, stops: [] },
+  { day: 4, stops: [] },
 ]
 
 export const useRouteStore = create<RouteState>()(
@@ -31,17 +31,11 @@ export const useRouteStore = create<RouteState>()(
 
       selectDay: (day) => set({ selectedDay: day }),
 
-      addStop: (day, blockIndex, stop) =>
+      addStop: (day, stop) =>
         set((state) => ({
           routes: state.routes.map((route) => {
             if (route.day !== day) return route
-            return {
-              ...route,
-              blocks: route.blocks.map((block, i) => {
-                if (i !== blockIndex) return block
-                return { ...block, stops: [...block.stops, stop] }
-              }),
-            }
+            return { ...route, stops: [...route.stops, stop] }
           }),
         })),
 
@@ -51,10 +45,9 @@ export const useRouteStore = create<RouteState>()(
             if (route.day !== day) return route
             return {
               ...route,
-              blocks: route.blocks.map((block) => ({
-                ...block,
-                stops: block.stops.filter((s) => s.id !== stopId),
-              })),
+              stops: route.stops
+                .filter((s) => s.id !== stopId)
+                .map((s, i) => ({ ...s, position: i })),
             }
           }),
         })),
@@ -63,22 +56,15 @@ export const useRouteStore = create<RouteState>()(
         set((state) => ({
           routes: state.routes.map((route) => {
             if (route.day !== day) return route
+            const stopIndex = route.stops.findIndex((s) => s.id === stopId)
+            if (stopIndex === -1) return route
+            const stops = [...route.stops]
+            const moved = stops.splice(stopIndex, 1)[0]
+            if (!moved) return route
+            stops.splice(newPosition, 0, moved)
             return {
               ...route,
-              blocks: route.blocks.map((block) => {
-                const stopIndex = block.stops.findIndex(
-                  (s) => s.id === stopId,
-                )
-                if (stopIndex === -1) return block
-                const stops = [...block.stops]
-                const moved = stops.splice(stopIndex, 1)[0]
-                if (!moved) return block
-                stops.splice(newPosition, 0, moved)
-                return {
-                  ...block,
-                  stops: stops.map((s, i) => ({ ...s, position: i })),
-                }
-              }),
+              stops: stops.map((s, i) => ({ ...s, position: i })),
             }
           }),
         })),
@@ -87,19 +73,14 @@ export const useRouteStore = create<RouteState>()(
         set((state) => ({
           routes: state.routes.map((route) => {
             if (route.day !== day) return route
+            if (from < 0 || from >= route.stops.length) return route
+            const stops = [...route.stops]
+            const moved = stops.splice(from, 1)[0]
+            if (!moved) return route
+            stops.splice(to, 0, moved)
             return {
               ...route,
-              blocks: route.blocks.map((block) => {
-                if (from < 0 || from >= block.stops.length) return block
-                const stops = [...block.stops]
-                const moved = stops.splice(from, 1)[0]
-                if (!moved) return block
-                stops.splice(to, 0, moved)
-                return {
-                  ...block,
-                  stops: stops.map((s, i) => ({ ...s, position: i })),
-                }
-              }),
+              stops: stops.map((s, i) => ({ ...s, position: i })),
             }
           }),
         })),
@@ -110,20 +91,24 @@ export const useRouteStore = create<RouteState>()(
             if (route.day !== day) return route
             return {
               ...route,
-              blocks: route.blocks.map((block) => ({
-                ...block,
-                stops: block.stops.map((s) =>
-                  s.id === stopId
-                    ? { ...s, isCompleted: !s.isCompleted }
-                    : s,
-                ),
-              })),
+              stops: route.stops.map((s) =>
+                s.id === stopId
+                  ? { ...s, isCompleted: !s.isCompleted }
+                  : s,
+              ),
             }
           }),
         })),
 
       seedRoutes: (routes) => set({ routes }),
     }),
-    { name: 'kover-routes', version: 1 },
+    {
+      name: 'kover-routes',
+      version: 2,
+      migrate: () => {
+        // v1 had blocks, v2 is flat — force re-seed
+        return { routes: initialRoutes, selectedDay: 0 as DayOfWeek }
+      },
+    },
   ),
 )
