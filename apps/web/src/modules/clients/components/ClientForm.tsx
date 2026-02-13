@@ -167,24 +167,35 @@ export function ClientForm({
         </div>
 
         <div>
-          <span className={labelClass}>Дни обслуживания</span>
+          <span className={labelClass}>
+            Дни обслуживания
+            <span className="ml-1.5 font-normal text-muted-foreground">
+              ({form.days.length}/{form.frequency})
+            </span>
+          </span>
           <div className="flex gap-2">
-            {ALL_WORK_DAYS.map((day) => (
-              <button
-                key={day}
-                type="button"
-                onClick={() => form.toggleDay(day)}
-                aria-label={`${DAY_LABELS[day]}${form.days.includes(day) ? ' (выбран)' : ''}`}
-                aria-pressed={form.days.includes(day)}
-                className={`flex h-11 w-full max-w-[64px] items-center justify-center rounded-md border text-base font-medium transition-colors ${
-                  form.days.includes(day)
-                    ? 'border-blue-600 bg-blue-600 text-white'
-                    : 'border-border bg-card text-muted-foreground hover:border-ring hover:text-accent-foreground'
-                }`}
-              >
-                {DAY_LABELS[day]}
-              </button>
-            ))}
+            {ALL_WORK_DAYS.map((day) => {
+              const isSelected = form.days.includes(day)
+              const isAtLimit = form.days.length >= form.frequency && !isSelected
+              return (
+                <button
+                  key={day}
+                  type="button"
+                  onClick={() => form.toggleDay(day)}
+                  aria-label={`${DAY_LABELS[day]}${isSelected ? ' (выбран)' : ''}`}
+                  aria-pressed={isSelected}
+                  className={`flex h-11 w-full max-w-[64px] items-center justify-center rounded-md border text-base font-medium transition-colors ${
+                    isSelected
+                      ? 'border-blue-600 bg-blue-600 text-white'
+                      : isAtLimit
+                        ? 'cursor-not-allowed border-border bg-card text-muted-foreground/40'
+                        : 'border-border bg-card text-muted-foreground hover:border-ring hover:text-accent-foreground'
+                  }`}
+                >
+                  {DAY_LABELS[day]}
+                </button>
+              )
+            })}
           </div>
         </div>
       </div>

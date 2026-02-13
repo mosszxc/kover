@@ -22,10 +22,15 @@ export function useClientForm() {
   const [name, setName] = useState('')
   const [address, setAddress] = useState('')
   const [mats, setMats] = useState<MatRow[]>([emptyMat()])
-  const [frequency, setFrequency] = useState(1)
+  const [frequency, setFrequencyRaw] = useState(1)
   const [days, setDays] = useState<DayOfWeek[]>([])
   const [notes, setNotes] = useState('')
   const [errors, setErrors] = useState<FormErrors>({})
+
+  const setFrequency = useCallback((freq: number) => {
+    setFrequencyRaw(freq)
+    setDays((prev) => (prev.length > freq ? prev.sort().slice(0, freq) : prev))
+  }, [])
 
   const clearError = useCallback((field: keyof FormErrors) => {
     setErrors((prev) => ({ ...prev, [field]: undefined }))
@@ -49,11 +54,16 @@ export function useClientForm() {
     [],
   )
 
-  const toggleDay = useCallback((day: DayOfWeek) => {
-    setDays((prev) =>
-      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day],
-    )
-  }, [])
+  const toggleDay = useCallback(
+    (day: DayOfWeek) => {
+      setDays((prev) => {
+        if (prev.includes(day)) return prev.filter((d) => d !== day)
+        if (prev.length >= frequency) return prev
+        return [...prev, day]
+      })
+    },
+    [frequency],
+  )
 
   const validate = useCallback((): boolean => {
     const e = validateClientForm(name, mats)
@@ -68,7 +78,7 @@ export function useClientForm() {
     setName('')
     setAddress('')
     setMats([emptyMat()])
-    setFrequency(1)
+    setFrequencyRaw(1)
     setDays([])
     setNotes('')
     setErrors({})
@@ -78,7 +88,7 @@ export function useClientForm() {
     setName(opts.name)
     setAddress(opts.address)
     setMats(specsToRows(opts.mats))
-    setFrequency(opts.frequency)
+    setFrequencyRaw(opts.frequency)
     setDays([...opts.days])
     setNotes(opts.notes)
     setErrors({})
