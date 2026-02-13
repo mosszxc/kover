@@ -12,6 +12,7 @@ interface RouteState {
   moveStop: (day: DayOfWeek, stopId: string, newPosition: number) => void
   reorderStop: (day: DayOfWeek, from: number, to: number) => void
   toggleStopCompleted: (day: DayOfWeek, stopId: string) => void
+  seedRoutes: (routes: DayRoute[]) => void
 }
 
 const initialRoutes: DayRoute[] = [
@@ -120,6 +121,8 @@ export const useRouteStore = create<RouteState>()(
             }
           }),
         })),
+
+      seedRoutes: (routes) => set({ routes }),
     }),
     { name: 'kover-routes', version: 1 },
   ),

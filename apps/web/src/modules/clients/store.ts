@@ -7,6 +7,7 @@ interface ClientState {
   addClient: (client: Client) => void
   updateClient: (id: string, data: Partial<Client>) => void
   deleteClient: (id: string) => void
+  seedClients: (clients: Client[]) => void
 }
 
 export const useClientStore = create<ClientState>()(
@@ -28,6 +29,8 @@ export const useClientStore = create<ClientState>()(
         set((state) => ({
           clients: state.clients.filter((c) => c.id !== id),
         })),
+
+      seedClients: (clients) => set({ clients }),
     }),
     { name: 'kover-clients', version: 1 },
   ),
