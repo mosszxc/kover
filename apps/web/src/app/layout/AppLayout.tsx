@@ -3,6 +3,7 @@ import { Sidebar } from "./Sidebar"
 import { TopBar } from "./TopBar"
 import { BottomTabs } from "./BottomTabs"
 import { Toaster } from "@/shared/ui/sonner"
+import { ErrorBoundary } from "@/shared/components/ErrorBoundary"
 import { useChangeLogger } from "@/shared/hooks/useChangeLogger"
 import { useAutoBackup } from "@/shared/hooks/useAutoBackup"
 
@@ -18,7 +19,9 @@ export function AppLayout() {
         <TopBar />
 
         <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6">
-          <Outlet />
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
         </main>
       </div>
 

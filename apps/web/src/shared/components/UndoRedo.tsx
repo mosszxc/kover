@@ -66,6 +66,7 @@ export function UndoRedo() {
         onClick={handleUndo}
         disabled={!hasPast}
         title="Отменить (Ctrl+Z)"
+        aria-label="Отменить"
         className="h-8 w-8 p-0"
       >
         <Undo2 className="h-4 w-4" />
@@ -76,6 +77,7 @@ export function UndoRedo() {
         onClick={handleRedo}
         disabled={!hasFuture}
         title="Повторить (Ctrl+Shift+Z)"
+        aria-label="Повторить"
         className="h-8 w-8 p-0"
       >
         <Redo2 className="h-4 w-4" />
