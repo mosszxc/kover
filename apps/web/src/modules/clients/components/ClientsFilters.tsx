@@ -7,6 +7,8 @@ const DAYS: DayOfWeek[] = [0, 1, 2, 3, 4]
 const FREQUENCIES = [1, 2, 3, 4, 5] as const
 const MAT_SIZES: MatSize[] = ['180', '150', '60x80', '400', '250']
 
+export type StatusFilter = 'all' | 'active' | 'paused'
+
 interface ClientsFiltersProps {
   selectedDays: DayOfWeek[]
   onDaysChange: (days: DayOfWeek[]) => void
@@ -14,7 +16,15 @@ interface ClientsFiltersProps {
   onFrequencyChange: (frequency: number | null) => void
   selectedMatSize: MatSize | null
   onMatSizeChange: (size: MatSize | null) => void
+  selectedStatus: StatusFilter
+  onStatusChange: (status: StatusFilter) => void
 }
+
+const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
+  { value: 'all', label: 'Все' },
+  { value: 'active', label: 'Активные' },
+  { value: 'paused', label: 'На паузе' },
+]
 
 export function ClientsFilters({
   selectedDays,
@@ -23,11 +33,14 @@ export function ClientsFilters({
   onFrequencyChange,
   selectedMatSize,
   onMatSizeChange,
+  selectedStatus,
+  onStatusChange,
 }: ClientsFiltersProps) {
   const hasFilters =
     selectedDays.length > 0 ||
     selectedFrequency !== null ||
-    selectedMatSize !== null
+    selectedMatSize !== null ||
+    selectedStatus !== 'all'
 
   function toggleDay(day: DayOfWeek) {
     if (selectedDays.includes(day)) {
@@ -49,6 +62,7 @@ export function ClientsFilters({
     onDaysChange([])
     onFrequencyChange(null)
     onMatSizeChange(null)
+    onStatusChange('all')
   }
 
   return (
@@ -109,6 +123,26 @@ export function ClientsFilters({
             )}
           >
             {size}
+          </button>
+        ))}
+      </div>
+
+      {/* Status filter */}
+      <div className="flex items-center gap-1.5">
+        <span className="text-xs font-medium text-slate-500">Статус:</span>
+        {STATUS_OPTIONS.map((opt) => (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => onStatusChange(opt.value)}
+            className={cn(
+              'min-h-[44px] rounded-full px-3 py-1.5 text-sm font-medium transition-colors',
+              selectedStatus === opt.value
+                ? 'bg-blue-600 text-white'
+                : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-300',
+            )}
+          >
+            {opt.label}
           </button>
         ))}
       </div>
