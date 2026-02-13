@@ -7,7 +7,7 @@ export function MapPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-50">Карта маршрута</h1>
+        <h1 className="text-2xl font-bold text-foreground">Карта маршрута</h1>
         <OptimizeRouteDialog />
       </div>
       <DaySwitcher />

@@ -36,15 +36,15 @@ export class ErrorBoundary extends Component<Props, State> {
         <div className="flex min-h-[50vh] items-center justify-center p-6">
           <div className="max-w-md space-y-4 text-center">
             <AlertTriangle className="mx-auto h-12 w-12 text-amber-400" />
-            <h2 className="text-xl font-semibold text-slate-50">
+            <h2 className="text-xl font-semibold text-foreground">
               Что-то пошло не так
             </h2>
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-muted-foreground">
               Произошла ошибка при отображении страницы. Попробуйте обновить или
               вернуться назад.
             </p>
             {this.state.error && (
-              <pre className="rounded-md bg-slate-800 p-3 text-left text-xs text-slate-400 overflow-auto max-h-32">
+              <pre className="rounded-md bg-muted p-3 text-left text-xs text-muted-foreground overflow-auto max-h-32">
                 {this.state.error.message}
               </pre>
             )}

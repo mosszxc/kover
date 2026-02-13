@@ -9,29 +9,29 @@ export function DayLoadChart() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-slate-50">Загрузка по дням</h2>
+      <h2 className="text-lg font-semibold text-foreground">Загрузка по дням</h2>
 
       <div className="space-y-6">
         {/* By area */}
         <div className="space-y-2">
-          <p className="text-sm font-medium text-slate-400">По метражу (кв.м)</p>
+          <p className="text-sm font-medium text-muted-foreground">По метражу (кв.м)</p>
           {days.map((day) => {
             const pct = (day.totalArea / maxArea) * 100
             const isMax = day.totalArea === maxArea
             return (
               <div key={day.day} className="flex items-center gap-3">
-                <span className="w-8 text-sm font-medium text-slate-400">
+                <span className="w-8 text-sm font-medium text-muted-foreground">
                   {DAY_LABELS[day.day]}
                 </span>
                 <div className="flex-1">
                   <div
                     className={`h-6 rounded transition-all ${
-                      isMax ? 'bg-blue-600' : 'bg-slate-700'
+                      isMax ? 'bg-blue-600' : 'bg-muted'
                     }`}
                     style={{ width: `${Math.max(pct, 2)}%` }}
                   />
                 </div>
-                <span className="w-16 text-right text-sm tabular-nums text-slate-50">
+                <span className="w-16 text-right text-sm tabular-nums text-foreground">
                   {day.totalArea.toFixed(1)}
                 </span>
               </div>
@@ -41,24 +41,24 @@ export function DayLoadChart() {
 
         {/* By stop count */}
         <div className="space-y-2">
-          <p className="text-sm font-medium text-slate-400">По количеству точек</p>
+          <p className="text-sm font-medium text-muted-foreground">По количеству точек</p>
           {days.map((day) => {
             const pct = (day.stopCount / maxStops) * 100
             const isMax = day.stopCount === maxStops
             return (
               <div key={day.day} className="flex items-center gap-3">
-                <span className="w-8 text-sm font-medium text-slate-400">
+                <span className="w-8 text-sm font-medium text-muted-foreground">
                   {DAY_LABELS[day.day]}
                 </span>
                 <div className="flex-1">
                   <div
                     className={`h-6 rounded transition-all ${
-                      isMax ? 'bg-blue-600' : 'bg-slate-700'
+                      isMax ? 'bg-blue-600' : 'bg-muted'
                     }`}
                     style={{ width: `${Math.max(pct, 2)}%` }}
                   />
                 </div>
-                <span className="w-16 text-right text-sm tabular-nums text-slate-50">
+                <span className="w-16 text-right text-sm tabular-nums text-foreground">
                   {day.stopCount}
                 </span>
               </div>

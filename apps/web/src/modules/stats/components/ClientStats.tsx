@@ -32,22 +32,22 @@ export function ClientStats() {
     <div className="space-y-6">
       {/* Top clients by area */}
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-slate-50">Топ-10 клиентов по метражу</h2>
+        <h2 className="text-lg font-semibold text-foreground">Топ-10 клиентов по метражу</h2>
         <div className="space-y-2">
           {topClients.map((client, i) => {
             const pct = (client.area / maxArea) * 100
             return (
               <div key={i} className="flex items-center gap-3">
-                <span className="w-44 truncate text-sm text-slate-400" title={client.name}>
+                <span className="w-44 truncate text-sm text-muted-foreground" title={client.name}>
                   {client.name}
                 </span>
                 <div className="flex-1">
                   <div
-                    className={`h-6 rounded ${i === 0 ? 'bg-blue-600' : 'bg-slate-700'}`}
+                    className={`h-6 rounded ${i === 0 ? 'bg-blue-600' : 'bg-muted'}`}
                     style={{ width: `${Math.max(pct, 2)}%` }}
                   />
                 </div>
-                <span className="w-16 text-right text-sm tabular-nums text-slate-50">
+                <span className="w-16 text-right text-sm tabular-nums text-foreground">
                   {client.area.toFixed(1)}
                 </span>
               </div>
@@ -58,19 +58,19 @@ export function ClientStats() {
 
       {/* Frequency distribution */}
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-slate-50">Распределение по частоте</h2>
+        <h2 className="text-lg font-semibold text-foreground">Распределение по частоте</h2>
         <div className="flex gap-3">
           {[1, 2, 3, 4, 5].map((freq) => {
             const count = frequencyDist[freq] ?? 0
             return (
               <div
                 key={freq}
-                className="flex-1 rounded-lg border border-slate-700 bg-slate-900 p-4 text-center"
+                className="flex-1 rounded-lg border border-border bg-card p-4 text-center"
               >
-                <div className="text-2xl font-bold tabular-nums text-slate-50">
+                <div className="text-2xl font-bold tabular-nums text-foreground">
                   {count}
                 </div>
-                <div className="text-sm text-slate-400">
+                <div className="text-sm text-muted-foreground">
                   {freq}x/нед
                 </div>
               </div>

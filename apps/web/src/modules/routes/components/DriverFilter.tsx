@@ -14,13 +14,13 @@ export function DriverFilter({ drivers, value, onChange }: DriverFilterProps) {
     cn(
       'shrink-0 rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
       active
-        ? 'bg-slate-700 text-slate-50'
-        : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200',
+        ? 'bg-muted text-foreground'
+        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
     )
 
   return (
     <div className="flex flex-wrap items-center gap-1.5">
-      <span className="mr-1 text-xs text-slate-500">Водитель:</span>
+      <span className="mr-1 text-xs text-muted-foreground">Водитель:</span>
       <button
         type="button"
         onClick={() => onChange(null)}

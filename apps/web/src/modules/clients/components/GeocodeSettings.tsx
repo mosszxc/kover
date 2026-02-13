@@ -43,7 +43,7 @@ export function GeocodeSettings() {
           <DialogTitle>Город для геокодирования</DialogTitle>
         </DialogHeader>
         <div className="space-y-2">
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-muted-foreground">
             Адреса клиентов будут искаться в первую очередь в этом городе.
           </p>
           <input
@@ -51,7 +51,7 @@ export function GeocodeSettings() {
             value={city}
             onChange={(e) => setCity(e.target.value)}
             placeholder="Например: Курган"
-            className="h-11 w-full rounded-md border border-slate-700 bg-slate-900 px-3 text-sm text-slate-50 placeholder:text-slate-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-colors"
+            className="h-11 w-full rounded-md border border-border bg-card px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-colors"
             autoFocus
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleSave()

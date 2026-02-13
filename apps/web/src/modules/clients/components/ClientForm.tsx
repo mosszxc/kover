@@ -15,16 +15,16 @@ interface ClientFormProps {
 }
 
 const inputClass =
-  'h-11 w-full rounded-md border border-slate-700 bg-slate-900 px-3 text-base text-slate-50 placeholder:text-slate-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-colors'
-const labelClass = 'block text-sm font-medium text-slate-300 mb-1.5'
+  'h-11 w-full rounded-md border border-border bg-card px-3 text-base text-foreground placeholder:text-muted-foreground focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-colors'
+const labelClass = 'block text-sm font-medium text-foreground mb-1.5'
 
 function SectionDivider({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="text-sm font-semibold uppercase tracking-wide text-slate-400">
+      <span className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
         {children}
       </span>
-      <hr className="flex-1 border-slate-700" />
+      <hr className="flex-1 border-border" />
     </div>
   )
 }
@@ -80,7 +80,7 @@ export function ClientForm({
             className={inputClass}
           />
           {mode === 'add' && (
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               Координаты определятся автоматически при сохранении
             </p>
           )}
@@ -95,7 +95,7 @@ export function ClientForm({
                 {coordinates.lat.toFixed(5)}, {coordinates.lng.toFixed(5)}
               </span>
             ) : (
-              <span className="text-sm text-slate-500">Координаты не определены</span>
+              <span className="text-sm text-muted-foreground">Координаты не определены</span>
             )}
             {onGeocode && (
               <Button
@@ -149,7 +149,7 @@ export function ClientForm({
           type="button"
           variant="ghost"
           size="sm"
-          className="text-slate-400 hover:text-slate-200"
+          className="text-muted-foreground hover:text-accent-foreground"
           onClick={form.addMat}
         >
           <Plus className="h-4 w-4" />
@@ -179,7 +179,7 @@ export function ClientForm({
                 className={`flex h-11 w-full max-w-[64px] items-center justify-center rounded-md border text-base font-medium transition-colors ${
                   form.days.includes(day)
                     ? 'border-blue-600 bg-blue-600 text-white'
-                    : 'border-slate-700 bg-slate-900 text-slate-400 hover:border-slate-500 hover:text-slate-200'
+                    : 'border-border bg-card text-muted-foreground hover:border-ring hover:text-accent-foreground'
                 }`}
               >
                 {DAY_LABELS[day]}

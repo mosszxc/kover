@@ -61,9 +61,9 @@ export function ExcelUpload({ onParsed }: ExcelUploadProps) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center gap-3 rounded-lg border border-dashed border-slate-600 p-12">
-        <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
-        <span className="text-slate-400">Обработка файла...</span>
+      <div className="flex items-center justify-center gap-3 rounded-lg border border-dashed border-border p-12">
+        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        <span className="text-muted-foreground">Обработка файла...</span>
       </div>
     )
   }
@@ -73,7 +73,7 @@ export function ExcelUpload({ onParsed }: ExcelUploadProps) {
       className={`flex flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed p-12 transition-colors ${
         isDragging
           ? 'border-blue-500 bg-blue-500/5'
-          : 'border-slate-600 hover:border-slate-500'
+          : 'border-border hover:border-ring'
       }`}
       onDragOver={(e) => {
         e.preventDefault()
@@ -82,8 +82,8 @@ export function ExcelUpload({ onParsed }: ExcelUploadProps) {
       onDragLeave={() => setIsDragging(false)}
       onDrop={handleDrop}
     >
-      <FileSpreadsheet className="h-10 w-10 text-slate-500" />
-      <p className="text-sm text-slate-400">
+      <FileSpreadsheet className="h-10 w-10 text-muted-foreground" />
+      <p className="text-sm text-muted-foreground">
         Перетащите файл .xlsx сюда или выберите вручную
       </p>
       <label>

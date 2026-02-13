@@ -43,7 +43,7 @@ function EditableCell({
   if (editing) {
     return (
       <input
-        className="w-full rounded bg-slate-800 px-2 py-1 text-sm text-slate-200 outline-none ring-1 ring-blue-500"
+        className="w-full rounded bg-muted px-2 py-1 text-sm text-foreground outline-none ring-1 ring-blue-500"
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
         onBlur={() => {
@@ -67,13 +67,13 @@ function EditableCell({
 
   return (
     <span
-      className="cursor-pointer rounded px-2 py-1 hover:bg-slate-700"
+      className="cursor-pointer rounded px-2 py-1 hover:bg-accent"
       onClick={() => {
         setDraft(value)
         setEditing(true)
       }}
     >
-      {value || <span className="italic text-slate-600">&mdash;</span>}
+      {value || <span className="italic text-muted-foreground">&mdash;</span>}
     </span>
   )
 }
@@ -109,9 +109,9 @@ export function ImportPreview({
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-4 text-sm">
-        <span className="text-slate-300">
+        <span className="text-foreground">
           Распознано:{' '}
-          <strong className="text-slate-50">{highCount}</strong> из{' '}
+          <strong className="text-foreground">{highCount}</strong> из{' '}
           {totalCount}
         </span>
         {lowCount > 0 && (
@@ -122,10 +122,10 @@ export function ImportPreview({
         )}
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-slate-700">
+      <div className="overflow-x-auto rounded-lg border border-border">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-700 bg-slate-800/50 text-left text-slate-400">
+            <tr className="border-b border-border bg-muted/50 text-left text-muted-foreground">
               <th className="w-10 px-3 py-2">#</th>
               <th className="min-w-[200px] px-3 py-2">Исходная строка</th>
               <th className="min-w-[150px] px-3 py-2">Название</th>
@@ -138,14 +138,14 @@ export function ImportPreview({
             {clients.map((client, idx) => (
               <tr
                 key={idx}
-                className={`border-b border-slate-700/50 ${
+                className={`border-b border-border/50 ${
                   client.confidence === 'low'
                     ? 'border-l-2 border-l-orange-500 bg-orange-500/10'
-                    : 'hover:bg-slate-800/30'
+                    : 'hover:bg-accent/30'
                 }`}
               >
-                <td className="px-3 py-2 text-slate-500">{idx + 1}</td>
-                <td className="px-3 py-2 font-mono text-xs text-slate-500">
+                <td className="px-3 py-2 text-muted-foreground">{idx + 1}</td>
+                <td className="px-3 py-2 font-mono text-xs text-muted-foreground">
                   {client.originalName}
                 </td>
                 <td className="px-3 py-2">

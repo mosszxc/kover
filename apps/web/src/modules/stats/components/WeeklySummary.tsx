@@ -8,27 +8,27 @@ export function WeeklySummary() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-slate-50">Недельная сводка</h2>
+      <h2 className="text-lg font-semibold text-foreground">Недельная сводка</h2>
 
-      <div className="overflow-x-auto rounded-lg border border-slate-700">
+      <div className="overflow-x-auto rounded-lg border border-border">
         <table className="w-full">
-          <thead className="bg-slate-900">
+          <thead className="bg-card">
             <tr>
-              <th className="border-b border-slate-700 px-4 py-3 text-left text-sm font-medium text-slate-400">
+              <th className="border-b border-border px-4 py-3 text-left text-sm font-medium text-muted-foreground">
                 День
               </th>
-              <th className="border-b border-slate-700 px-4 py-3 text-right text-sm font-medium text-slate-400">
+              <th className="border-b border-border px-4 py-3 text-right text-sm font-medium text-muted-foreground">
                 Точки
               </th>
               {sizes.map((s) => (
                 <th
                   key={s.id}
-                  className="border-b border-slate-700 px-4 py-3 text-right text-sm font-medium text-slate-400"
+                  className="border-b border-border px-4 py-3 text-right text-sm font-medium text-muted-foreground"
                 >
                   {s.label}
                 </th>
               ))}
-              <th className="border-b border-slate-700 px-4 py-3 text-right text-sm font-medium text-slate-400">
+              <th className="border-b border-border px-4 py-3 text-right text-sm font-medium text-muted-foreground">
                 Кв.м
               </th>
             </tr>
@@ -37,45 +37,45 @@ export function WeeklySummary() {
             {days.map((day, i) => (
               <tr
                 key={day.day}
-                className={`border-b border-slate-800 ${i % 2 === 1 ? 'bg-slate-900/50' : ''}`}
+                className={`border-b border-border ${i % 2 === 1 ? 'bg-card/50' : ''}`}
               >
-                <td className="px-4 py-3 text-sm font-medium text-slate-50">
+                <td className="px-4 py-3 text-sm font-medium text-foreground">
                   {DAY_LABELS[day.day]}
                 </td>
-                <td className="px-4 py-3 text-right text-sm tabular-nums text-slate-50">
+                <td className="px-4 py-3 text-right text-sm tabular-nums text-foreground">
                   {day.stopCount}
                 </td>
                 {sizes.map((s) => (
                   <td
                     key={s.id}
-                    className="px-4 py-3 text-right text-sm tabular-nums text-slate-50"
+                    className="px-4 py-3 text-right text-sm tabular-nums text-foreground"
                   >
                     {day.matsBySize[s.id] || ''}
                   </td>
                 ))}
-                <td className="px-4 py-3 text-right text-sm font-semibold tabular-nums text-slate-50">
+                <td className="px-4 py-3 text-right text-sm font-semibold tabular-nums text-foreground">
                   {day.totalArea.toFixed(1)}
                 </td>
               </tr>
             ))}
           </tbody>
           <tfoot>
-            <tr className="border-t-2 border-slate-600 bg-slate-900">
-              <td className="px-4 py-3 text-sm font-bold text-slate-50">
+            <tr className="border-t-2 border-border bg-card">
+              <td className="px-4 py-3 text-sm font-bold text-foreground">
                 Итого
               </td>
-              <td className="px-4 py-3 text-right text-sm font-bold tabular-nums text-slate-50">
+              <td className="px-4 py-3 text-right text-sm font-bold tabular-nums text-foreground">
                 {totals.stopCount}
               </td>
               {sizes.map((s) => (
                 <td
                   key={s.id}
-                  className="px-4 py-3 text-right text-sm font-bold tabular-nums text-slate-50"
+                  className="px-4 py-3 text-right text-sm font-bold tabular-nums text-foreground"
                 >
                   {totals.matsBySize[s.id] || ''}
                 </td>
               ))}
-              <td className="px-4 py-3 text-right text-sm font-bold tabular-nums text-slate-50">
+              <td className="px-4 py-3 text-right text-sm font-bold tabular-nums text-foreground">
                 {totals.totalArea.toFixed(1)}
               </td>
             </tr>

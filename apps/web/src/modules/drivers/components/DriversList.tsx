@@ -17,14 +17,14 @@ export function DriversList({ onRowClick }: DriversListProps) {
   )
 
   const inputClass =
-    'h-11 w-full rounded-md border border-slate-700 bg-slate-900 px-3 text-base text-slate-50 placeholder:text-slate-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-colors'
+    'h-11 w-full rounded-md border border-border bg-card px-3 text-base text-foreground placeholder:text-muted-foreground focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-colors'
 
   if (drivers.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-700 py-12 text-center">
-        <User className="mb-3 h-10 w-10 text-slate-600" />
-        <p className="text-sm text-slate-400">Водителей пока нет</p>
-        <p className="mt-1 text-xs text-slate-500">
+      <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border py-12 text-center">
+        <User className="mb-3 h-10 w-10 text-muted-foreground" />
+        <p className="text-sm text-muted-foreground">Водителей пока нет</p>
+        <p className="mt-1 text-xs text-muted-foreground">
           Добавьте первого водителя кнопкой выше
         </p>
       </div>
@@ -49,24 +49,24 @@ export function DriversList({ onRowClick }: DriversListProps) {
             key={driver.id}
             type="button"
             onClick={() => onRowClick?.(driver)}
-            className="flex w-full items-center gap-3 rounded-lg border border-slate-700 bg-slate-800/50 px-4 py-3 text-left transition-colors hover:border-slate-600 hover:bg-slate-800"
+            className="flex w-full items-center gap-3 rounded-lg border border-border bg-muted/50 px-4 py-3 text-left transition-colors hover:border-ring hover:bg-muted"
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-700 text-slate-300">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-foreground">
               <User className="h-5 w-5" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-slate-50">
+              <p className="truncate text-sm font-medium text-foreground">
                 {driver.name}
               </p>
               {driver.phone && (
-                <p className="flex items-center gap-1 text-xs text-slate-400">
+                <p className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Phone className="h-3 w-3" />
                   {driver.phone}
                 </p>
               )}
             </div>
             {!driver.isActive && (
-              <span className="shrink-0 rounded-full bg-slate-700 px-2 py-0.5 text-xs text-slate-400">
+              <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
                 Неактивен
               </span>
             )}
@@ -74,7 +74,7 @@ export function DriversList({ onRowClick }: DriversListProps) {
         ))}
 
         {filtered.length === 0 && search && (
-          <p className="py-4 text-center text-sm text-slate-500">
+          <p className="py-4 text-center text-sm text-muted-foreground">
             Ничего не найдено
           </p>
         )}

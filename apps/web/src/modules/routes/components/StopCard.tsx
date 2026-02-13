@@ -69,12 +69,12 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
       ref={setNodeRef}
       style={style}
       className={cn(
-        'flex items-center gap-3 border-l-3 p-3 transition-colors hover:bg-slate-800',
+        'flex items-center gap-3 border-l-3 p-3 transition-colors hover:bg-accent',
         isAnomaly
           ? 'border-l-amber-500 bg-amber-500/5'
           : driverId
             ? 'border-l-blue-500'
-            : 'border-l-slate-700',
+            : 'border-l-border',
         isCompleted && 'opacity-60',
         isDragging && 'z-10 opacity-50 ring-2 ring-blue-500',
       )}
@@ -86,9 +86,9 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
           ref={setActivatorNodeRef}
           {...listeners}
           aria-label="Перетащить для изменения порядка"
-          className="flex size-6 shrink-0 cursor-grab items-center justify-center rounded transition-colors hover:bg-slate-700 active:cursor-grabbing focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 print:hidden"
+          className="flex size-6 shrink-0 cursor-grab items-center justify-center rounded transition-colors hover:bg-accent active:cursor-grabbing focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 print:hidden"
         >
-          <GripVertical className="size-5 text-slate-400" />
+          <GripVertical className="size-5 text-muted-foreground" />
         </button>
       )}
 
@@ -100,7 +100,7 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
           'flex size-6 shrink-0 items-center justify-center rounded border transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 print:hidden',
           isCompleted
             ? 'border-green-500 bg-green-500 text-white'
-            : 'border-slate-600 bg-transparent hover:border-slate-400',
+            : 'border-border bg-transparent hover:border-ring',
         )}
       >
         {isCompleted && <Check className="size-4" />}
@@ -112,9 +112,9 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
             type="button"
             aria-label="Переместить вверх"
             onClick={() => moveStop(selectedDay, stopId, stopIndex - 1)}
-            className="flex size-6 items-center justify-center rounded transition-colors hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            className="flex size-6 items-center justify-center rounded transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
-            <ChevronUp className="size-5 text-slate-400" />
+            <ChevronUp className="size-5 text-muted-foreground" />
           </button>
         ) : (
           <div className="size-6" />
@@ -124,16 +124,16 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
             type="button"
             aria-label="Переместить вниз"
             onClick={() => moveStop(selectedDay, stopId, stopIndex + 1)}
-            className="flex size-6 items-center justify-center rounded transition-colors hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            className="flex size-6 items-center justify-center rounded transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
-            <ChevronDown className="size-5 text-slate-400" />
+            <ChevronDown className="size-5 text-muted-foreground" />
           </button>
         ) : (
           <div className="size-6" />
         )}
       </div>
 
-      <span className="w-8 shrink-0 text-center text-sm tabular-nums text-slate-500">
+      <span className="w-8 shrink-0 text-center text-sm tabular-nums text-muted-foreground">
         {number}
       </span>
 
@@ -145,7 +145,7 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
             </span>
           )}
           <p className={cn(
-            'truncate text-base text-slate-50',
+            'truncate text-base text-foreground',
             isCompleted && 'line-through',
           )}>
             {client.originalName}
@@ -179,7 +179,7 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
               'w-34 shrink-0 cursor-pointer truncate text-xs print:hidden',
               driverId
                 ? 'border-blue-600/50 bg-blue-950/50 text-blue-300'
-                : 'border-slate-700 bg-slate-900 text-slate-500',
+                : 'border-border bg-card text-muted-foreground',
             )}
           >
             <SelectValue placeholder="Водитель" />
@@ -197,7 +197,7 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
         {client.mats.map((mat, i) => (
           <span
             key={i}
-            className="rounded bg-slate-800 px-1.5 py-0.5 text-xs font-semibold text-slate-300"
+            className="rounded bg-muted px-1.5 py-0.5 text-xs font-semibold text-foreground"
           >
             {labelMap[mat.size] ?? mat.size}
             {mat.quantity > 1 && <span className="opacity-60"> x{mat.quantity}</span>}
@@ -205,7 +205,7 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
         ))}
       </div>
 
-      <span className="w-16 shrink-0 text-right text-sm font-semibold tabular-nums text-slate-300">
+      <span className="w-16 shrink-0 text-right text-sm font-semibold tabular-nums text-foreground">
         {area.toFixed(1)} м²
       </span>
 

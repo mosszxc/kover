@@ -26,7 +26,7 @@ export function FeedbackDialog() {
         <DialogHeader>
           <DialogTitle>Обратная связь</DialogTitle>
         </DialogHeader>
-        <p className="text-sm text-slate-400">
+        <p className="text-sm text-muted-foreground">
           Нашли баг или есть предложение? Напишите в Telegram:
         </p>
         <a

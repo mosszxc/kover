@@ -84,7 +84,7 @@ export function BackupManager() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-slate-50">Бекапы</h2>
+        <h2 className="text-lg font-semibold text-foreground">Бекапы</h2>
         <Button variant="outline" size="sm" onClick={handleCreateBackup} disabled={loading}>
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           Создать бекап
@@ -92,7 +92,7 @@ export function BackupManager() {
       </div>
 
       {backups.length === 0 ? (
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-muted-foreground">
           Нет бекапов. Бекапы создаются автоматически каждые 30 минут.
         </p>
       ) : (
@@ -100,11 +100,11 @@ export function BackupManager() {
           {backups.map((backup) => (
             <div
               key={backup.key}
-              className="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-900 px-4 py-3"
+              className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3"
             >
               <div>
-                <div className="text-sm text-slate-50">{formatDate(backup.timestamp)}</div>
-                <div className="text-xs text-slate-400">
+                <div className="text-sm text-foreground">{formatDate(backup.timestamp)}</div>
+                <div className="text-xs text-muted-foreground">
                   {backup.clientCount} клиентов, {backup.routeStopCount} точек
                 </div>
               </div>
@@ -134,7 +134,7 @@ export function BackupManager() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 w-8 p-0 text-slate-500 hover:text-red-400"
+                  className="h-8 w-8 p-0 text-muted-foreground hover:text-red-400"
                   onClick={() => handleDelete(backup.key)}
                   aria-label="Удалить бекап"
                 >

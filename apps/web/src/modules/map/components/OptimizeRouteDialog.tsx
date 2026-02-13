@@ -95,9 +95,9 @@ export function OptimizeRouteDialog() {
         {result && (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <div className="rounded-lg border border-slate-700 bg-slate-900 p-3 text-center">
-                <div className="text-sm text-slate-400">Сейчас</div>
-                <div className="text-xl font-bold tabular-nums text-slate-50">
+              <div className="rounded-lg border border-border bg-card p-3 text-center">
+                <div className="text-sm text-muted-foreground">Сейчас</div>
+                <div className="text-xl font-bold tabular-nums text-foreground">
                   {result.originalDistance.toFixed(1)} км
                 </div>
               </div>
@@ -118,7 +118,7 @@ export function OptimizeRouteDialog() {
               </div>
             )}
 
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-muted-foreground">
               Оптимизировано {result.optimizedIds.length} точек с координатами.
               Точки без координат останутся в конце маршрута.
             </p>

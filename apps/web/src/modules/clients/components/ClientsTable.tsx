@@ -225,7 +225,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, anom
 
   const sortIcon = (columnId: string) => {
     const sort = sorting.find((s) => s.id === columnId)
-    if (!sort) return <ChevronsUpDown className="size-4 text-slate-500" />
+    if (!sort) return <ChevronsUpDown className="size-4 text-muted-foreground" />
     return sort.desc ? (
       <ChevronDown className="size-4 text-blue-400" />
     ) : (
@@ -236,13 +236,13 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, anom
   return (
     <div className="space-y-4">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <input
           type="text"
           placeholder="Поиск по названию или адресу..."
           value={globalFilter}
           onChange={(e) => setGlobalFilter(e.target.value)}
-          className="w-full rounded-lg border border-slate-700 bg-slate-900 py-2.5 pl-10 pr-4 text-sm text-slate-50 placeholder:text-slate-500 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/50"
+          className="w-full rounded-lg border border-border bg-card py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/50"
         />
       </div>
 
@@ -257,16 +257,16 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, anom
         onStatusChange={setSelectedStatus}
       />
 
-      <div className="overflow-x-auto rounded-lg border border-slate-700">
+      <div className="overflow-x-auto rounded-lg border border-border">
         <table className="w-full">
-          <thead className="sticky top-0 z-10 bg-slate-900">
+          <thead className="sticky top-0 z-10 bg-card">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
                     onClick={header.column.getToggleSortingHandler()}
-                    className="cursor-pointer select-none border-b border-slate-700 px-4 py-3 text-left text-sm font-medium text-slate-400 hover:text-slate-200"
+                    className="cursor-pointer select-none border-b border-border px-4 py-3 text-left text-sm font-medium text-muted-foreground hover:text-accent-foreground"
                   >
                     <div className="flex items-center gap-1">
                       {flexRender(
@@ -285,12 +285,12 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, anom
               <tr
                 key={row.id}
                 onClick={() => onRowClick?.(row.original)}
-                className={`border-b border-slate-800 ${i % 2 === 1 ? 'bg-slate-900/50' : ''} hover:bg-slate-800/50 ${onRowClick ? 'cursor-pointer' : ''}`}
+                className={`border-b border-border ${i % 2 === 1 ? 'bg-card/50' : ''} hover:bg-muted/50 ${onRowClick ? 'cursor-pointer' : ''}`}
               >
                 {row.getVisibleCells().map((cell) => (
                   <td
                     key={cell.id}
-                    className="min-h-12 px-4 py-3 text-sm text-slate-50"
+                    className="min-h-12 px-4 py-3 text-sm text-foreground"
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
@@ -301,7 +301,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, anom
         </table>
       </div>
 
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-muted-foreground">
         Показано {table.getFilteredRowModel().rows.length} из {clients.length} клиентов
       </p>
     </div>

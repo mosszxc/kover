@@ -10,7 +10,7 @@ export function PrintButton() {
     <Button
       variant="ghost"
       onClick={() => window.print()}
-      className="print:hidden min-w-[44px] min-h-[44px] gap-2 text-slate-400 hover:bg-slate-800 hover:text-slate-300"
+      className="print:hidden min-w-[44px] min-h-[44px] gap-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
       aria-label={`Распечатать маршрут на ${DAY_LABELS[selectedDay]}`}
     >
       <Printer className="h-5 w-5" />

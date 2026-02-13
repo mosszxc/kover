@@ -24,8 +24,8 @@ export function ChangeLog() {
   if (entries.length === 0) {
     return (
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-slate-50">Лог изменений</h2>
-        <p className="text-sm text-slate-500">Нет записей. Действия будут записываться автоматически.</p>
+        <h2 className="text-lg font-semibold text-foreground">Лог изменений</h2>
+        <p className="text-sm text-muted-foreground">Нет записей. Действия будут записываться автоматически.</p>
       </div>
     )
   }
@@ -33,7 +33,7 @@ export function ChangeLog() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-slate-50">Лог изменений</h2>
+        <h2 className="text-lg font-semibold text-foreground">Лог изменений</h2>
         <Button variant="ghost" size="sm" onClick={clearEntries}>
           <Trash2 className="h-3.5 w-3.5" />
           Очистить
@@ -43,7 +43,7 @@ export function ChangeLog() {
         {entries.slice(0, 50).map((entry) => (
           <div
             key={entry.id}
-            className="flex items-start gap-3 rounded-md px-3 py-2 hover:bg-slate-800/50"
+            className="flex items-start gap-3 rounded-md px-3 py-2 hover:bg-accent/50"
           >
             <div className="mt-0.5 shrink-0">
               {entry.type === 'route' ? (
@@ -57,16 +57,16 @@ export function ChangeLog() {
               )}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm text-slate-300">{entry.description}</p>
+              <p className="text-sm text-foreground">{entry.description}</p>
             </div>
-            <span className="shrink-0 text-xs text-slate-500">
+            <span className="shrink-0 text-xs text-muted-foreground">
               {formatTime(entry.timestamp)}
             </span>
           </div>
         ))}
       </div>
       {entries.length > 50 && (
-        <p className="text-center text-xs text-slate-500">
+        <p className="text-center text-xs text-muted-foreground">
           Показано 50 из {entries.length} записей
         </p>
       )}

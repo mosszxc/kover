@@ -13,9 +13,9 @@ const navItems = [
 
 export function Sidebar() {
   return (
-    <aside className="no-print hidden md:flex md:w-60 md:flex-col md:fixed md:inset-y-0 bg-slate-900 border-r border-slate-700">
+    <aside className="no-print hidden md:flex md:w-60 md:flex-col md:fixed md:inset-y-0 bg-card border-r border-border">
       <div className="flex h-14 items-center px-4">
-        <span className="text-lg font-bold text-slate-50">Kover</span>
+        <span className="text-lg font-bold text-foreground">Kover</span>
       </div>
 
       <nav className="flex-1 px-2 py-2 space-y-1">
@@ -28,8 +28,8 @@ export function Sidebar() {
               cn(
                 "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors duration-150 cursor-pointer",
                 isActive
-                  ? "bg-slate-800 text-white"
-                  : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                  ? "bg-muted text-white"
+                  : "text-muted-foreground hover:bg-muted hover:text-white"
               )
             }
           >

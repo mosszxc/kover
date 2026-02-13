@@ -6,7 +6,7 @@ export function Toaster() {
       position="bottom-center"
       toastOptions={{
         className:
-          'bg-slate-800 text-slate-50 border-slate-700',
+          'bg-muted text-foreground border-border',
       }}
     />
   )
