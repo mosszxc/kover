@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { DaySwitcher, DaySummary, RouteSearch, StopList, AddStopDialog, useRouteStore, PrintButton } from '@/modules/routes'
+import { DaySwitcher, DaySummary, RouteSearch, StopList, AddStopDialog, useRouteStore, PrintButton, DriverFilter } from '@/modules/routes'
 import { useClientStore } from '@/modules/clients'
 import { useDriverStore } from '@/modules/drivers'
 import { PrintSheet } from '@/modules/print'
@@ -7,6 +7,7 @@ import { OptimizeRouteDialog } from '@/modules/map'
 
 export function RoutesPage() {
   const [searchQuery, setSearchQuery] = useState('')
+  const [driverFilter, setDriverFilter] = useState<string | 'unassigned' | null>(null)
   const clients = useClientStore((s) => s.clients)
   const allDrivers = useDriverStore((s) => s.drivers)
   const selectedDay = useRouteStore((s) => s.selectedDay)
@@ -35,8 +36,9 @@ export function RoutesPage() {
           <PrintButton />
         </div>
         <DaySummary />
+        <DriverFilter drivers={driverOptions} value={driverFilter} onChange={setDriverFilter} />
         <RouteSearch value={searchQuery} onChange={setSearchQuery} />
-        <StopList searchQuery={searchQuery} drivers={driverOptions} />
+        <StopList searchQuery={searchQuery} drivers={driverOptions} driverFilter={driverFilter} />
         <AddStopDialog clients={clients} />
       </div>
       <PrintSheet stops={activeStops} clients={clients} selectedDay={selectedDay} />
