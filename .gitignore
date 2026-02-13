@@ -36,3 +36,6 @@ Thumbs.db
 
 # Analysis files (generated per-issue in worktrees)
 .analysis.md
+
+# Claude Code
+.claude/

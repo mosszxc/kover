@@ -25,11 +25,9 @@ import {
   AlertDialogTrigger,
 } from '@/shared/ui/alert-dialog'
 import type { DayOfWeek, MatSize } from '@/shared/types'
-import { DAY_LABELS } from '@/shared/types'
+import { DAY_LABELS, MAT_SIZES } from '@/shared/types'
 import { useClientStore } from '../store'
 import type { Client, MatSpec } from '../types'
-
-const MAT_SIZES: MatSize[] = ['180', '150', '60x80', '400', '250']
 const FREQUENCIES = [1, 2, 3, 4, 5] as const
 const ALL_DAYS: DayOfWeek[] = [0, 1, 2, 3, 4]
 

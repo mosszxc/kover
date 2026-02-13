@@ -1,7 +1,7 @@
 import type { DayOfWeek, MatSize } from '@/shared/types'
 import type { RouteStop } from '@/modules/routes'
 import type { Client } from '@/modules/clients'
-import { MAT_AREA } from '@/shared/types'
+import { MAT_AREA, MAT_SIZES } from '@/shared/types'
 
 const DAY_LABELS_FULL: Record<DayOfWeek, string> = {
   0: 'Понедельник',
@@ -11,7 +11,6 @@ const DAY_LABELS_FULL: Record<DayOfWeek, string> = {
   4: 'Пятница',
 }
 
-const MAT_SIZES: MatSize[] = ['180', '150', '60x80', '400', '250']
 
 interface PrintSheetProps {
   stops: RouteStop[]
@@ -103,7 +102,7 @@ export function PrintSheet({ stops, clients, selectedDay }: PrintSheetProps) {
             <td>Итого: {rows.length} точек</td>
             {MAT_SIZES.map((size) => (
               <td key={size}>
-                {totals.mats[size] > 0 ? totals.mats[size] : ''}
+                {(totals.mats[size] ?? 0) > 0 ? totals.mats[size] : ''}
               </td>
             ))}
             <td>{totals.area.toFixed(1)}</td>

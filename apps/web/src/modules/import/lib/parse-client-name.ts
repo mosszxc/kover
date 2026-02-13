@@ -1,7 +1,6 @@
+import { MAT_SIZES } from '@/shared/types'
 import type { MatSize } from '@/shared/types'
 import type { ParsedClient, ParsedMatSpec } from '../types'
-
-const VALID_SIZES: MatSize[] = ['180', '150', '60x80', '400', '250']
 
 /** Map non-standard sizes to valid MatSize */
 const SIZE_ALIASES: Record<string, MatSize> = {
@@ -60,7 +59,7 @@ const BARE_SIZE_RE = /(?<!\d)(180|150|400|250|200|240)(?!\s*[xхXХ×*]\s*\d)(?!
 
 function normalizeSize(raw: string): MatSize | null {
   if (SIZE_ALIASES[raw]) return SIZE_ALIASES[raw]
-  if (VALID_SIZES.includes(raw as MatSize)) return raw as MatSize
+  if (MAT_SIZES.includes(raw as MatSize)) return raw as MatSize
   return null
 }
 
