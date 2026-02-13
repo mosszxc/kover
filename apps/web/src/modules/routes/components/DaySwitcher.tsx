@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { cn } from '@/shared/lib/utils'
-import { type DayOfWeek, DAY_LABELS } from '@/shared/types'
+import { type DayOfWeek, DAY_LABELS, DAY_LABELS_FULL } from '@/shared/types'
 import { useRouteStore } from '../store'
 import { useClientStore } from '@/modules/clients'
 
@@ -41,7 +41,8 @@ export function DaySwitcher() {
             )}
             aria-current={isActive ? 'true' : undefined}
           >
-            {DAY_LABELS[day]}
+            <span className="lg:hidden">{DAY_LABELS[day]}</span>
+            <span className="hidden lg:inline">{DAY_LABELS_FULL[day]}</span>
             {count > 0 && (
               <span
                 className={cn(
