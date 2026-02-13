@@ -12,23 +12,10 @@ import { Check, ChevronDown, ChevronUp, ChevronsUpDown, Search, AlertTriangle, P
 import { toast } from 'sonner'
 import { useClientStore } from '../store'
 import type { Client } from '../types'
-import { DAY_LABELS, MAT_AREA } from '@/shared/types'
-import type { DayOfWeek, MatSize } from '@/shared/types'
+import { DAY_LABELS } from '@/shared/types'
+import type { DayOfWeek } from '@/shared/types'
+import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 import { ClientsFilters, type StatusFilter } from './ClientsFilters'
-
-function formatMats(client: Client): string {
-  const grouped = new Map<string, number>()
-  for (const m of client.mats) {
-    grouped.set(m.size, (grouped.get(m.size) ?? 0) + m.quantity)
-  }
-  return Array.from(grouped.entries())
-    .map(([size, qty]) => `${qty}\u00d7${size}`)
-    .join(', ')
-}
-
-function getClientArea(client: Client): number {
-  return client.mats.reduce((sum, m) => m.quantity * MAT_AREA[m.size] + sum, 0)
-}
 
 interface ClientsTableProps {
   onRowClick?: (client: Client) => void
@@ -40,8 +27,32 @@ interface ClientsTableProps {
 export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, anomalyIds }: ClientsTableProps) {
   const clients = useClientStore((s) => s.clients)
   const updateClient = useClientStore((s) => s.updateClient)
+  const sizes = useMatSizeStore((s) => s.sizes)
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState('')
+
+  const areaMap = useMemo(
+    () => Object.fromEntries(sizes.map((s) => [s.id, s.area])),
+    [sizes],
+  )
+  const labelMap = useMemo(
+    () => Object.fromEntries(sizes.map((s) => [s.id, s.label])),
+    [sizes],
+  )
+
+  function formatMats(client: Client): string {
+    const grouped = new Map<string, number>()
+    for (const m of client.mats) {
+      grouped.set(m.size, (grouped.get(m.size) ?? 0) + m.quantity)
+    }
+    return Array.from(grouped.entries())
+      .map(([size, qty]) => `${qty}\u00d7${labelMap[size] ?? size}`)
+      .join(', ')
+  }
+
+  function getClientArea(client: Client): number {
+    return client.mats.reduce((sum, m) => m.quantity * (areaMap[m.size] ?? 0) + sum, 0)
+  }
 
   const columns = useMemo<ColumnDef<Client>[]>(() => [
     {
@@ -165,10 +176,10 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, anom
         )
       },
     },
-  ], [isClientInRoute, updateClient, onToggleActive, anomalyIds])
+  ], [isClientInRoute, updateClient, onToggleActive, anomalyIds, formatMats, getClientArea])
   const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>([])
   const [selectedFrequency, setSelectedFrequency] = useState<number | null>(null)
-  const [selectedMatSize, setSelectedMatSize] = useState<MatSize | null>(null)
+  const [selectedMatSize, setSelectedMatSize] = useState<string | null>(null)
   const [selectedStatus, setSelectedStatus] = useState<StatusFilter>('all')
 
   const filteredClients = useMemo(() => {

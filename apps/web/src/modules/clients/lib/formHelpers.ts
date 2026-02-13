@@ -1,8 +1,8 @@
-import type { MatSize } from '@/shared/types'
 import type { MatSpec } from '../types'
+import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 
 export interface MatRow {
-  size: MatSize
+  size: string
   quantity: number
   color: string
 }
@@ -13,7 +13,8 @@ export interface FormErrors {
 }
 
 export function emptyMat(): MatRow {
-  return { size: '180', quantity: 1, color: '' }
+  const sizes = useMatSizeStore.getState().sizes
+  return { size: sizes[0]?.id ?? '180', quantity: 1, color: '' }
 }
 
 export function rowsToSpecs(rows: MatRow[]): MatSpec[] {

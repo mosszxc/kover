@@ -1,9 +1,8 @@
-import { MAT_SIZES } from '@/shared/types'
-import type { MatSize } from '@/shared/types'
+import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 import type { ParsedClient, ParsedMatSpec } from '../types'
 
-/** Map non-standard sizes to valid MatSize */
-const SIZE_ALIASES: Record<string, MatSize> = {
+/** Map non-standard sizes to valid size ids */
+const SIZE_ALIASES: Record<string, string> = {
   '200': '180',
   '240': '180',
 }
@@ -57,9 +56,10 @@ const SIZE_PLUS_RE = /(180|150|400|250|200|240)\s*\+\s*(180|150|400|250|200|240)
 // Bare size (no quantity prefix) — matched last as fallback
 const BARE_SIZE_RE = /(?<!\d)(180|150|400|250|200|240)(?!\s*[xхXХ×*]\s*\d)(?!\d)/g
 
-function normalizeSize(raw: string): MatSize | null {
+function normalizeSize(raw: string): string | null {
   if (SIZE_ALIASES[raw]) return SIZE_ALIASES[raw]
-  if (MAT_SIZES.includes(raw as MatSize)) return raw as MatSize
+  const sizeIds = useMatSizeStore.getState().sizes.map((s) => s.id)
+  if (sizeIds.includes(raw)) return raw
   return null
 }
 
@@ -69,7 +69,7 @@ function isSmallMat(w: string, h: string): boolean {
 }
 
 interface MatMatch {
-  size: MatSize
+  size: string
   quantity: number
   start: number
   end: number
@@ -160,7 +160,7 @@ function extractMats(text: string): { mats: ParsedMatSpec[]; matRanges: [number,
   }
 
   // Merge duplicate sizes
-  const merged = new Map<MatSize, number>()
+  const merged = new Map<string, number>()
   for (const mat of matches) {
     merged.set(mat.size, (merged.get(mat.size) || 0) + mat.quantity)
   }

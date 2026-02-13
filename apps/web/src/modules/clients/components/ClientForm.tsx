@@ -131,7 +131,7 @@ export function ClientForm({
               mat={mat}
               index={i}
               canRemove={form.mats.length > 1}
-              onSizeChange={(size) => form.updateMatSize(i, size as import('@/shared/types').MatSize)}
+              onSizeChange={(size) => form.updateMatSize(i, size)}
               onQuantityChange={(qty) => form.updateMatQuantity(i, qty)}
               onColorChange={(color) => form.updateMatColor(i, color)}
               onRemove={() => form.removeMat(i)}

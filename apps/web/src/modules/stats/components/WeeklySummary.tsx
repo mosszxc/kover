@@ -1,8 +1,10 @@
-import { DAY_LABELS, MAT_SIZES } from '@/shared/types'
+import { DAY_LABELS } from '@/shared/types'
+import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 import { useWeeklyStats } from '../hooks/useWeeklyStats'
 
 export function WeeklySummary() {
   const { days, totals } = useWeeklyStats()
+  const sizes = useMatSizeStore((s) => s.sizes)
 
   return (
     <div className="space-y-4">
@@ -18,12 +20,12 @@ export function WeeklySummary() {
               <th className="border-b border-slate-700 px-4 py-3 text-right text-sm font-medium text-slate-400">
                 Точки
               </th>
-              {MAT_SIZES.map((size) => (
+              {sizes.map((s) => (
                 <th
-                  key={size}
+                  key={s.id}
                   className="border-b border-slate-700 px-4 py-3 text-right text-sm font-medium text-slate-400"
                 >
-                  {size}
+                  {s.label}
                 </th>
               ))}
               <th className="border-b border-slate-700 px-4 py-3 text-right text-sm font-medium text-slate-400">
@@ -43,12 +45,12 @@ export function WeeklySummary() {
                 <td className="px-4 py-3 text-right text-sm tabular-nums text-slate-50">
                   {day.stopCount}
                 </td>
-                {MAT_SIZES.map((size) => (
+                {sizes.map((s) => (
                   <td
-                    key={size}
+                    key={s.id}
                     className="px-4 py-3 text-right text-sm tabular-nums text-slate-50"
                   >
-                    {day.matsBySize[size] || ''}
+                    {day.matsBySize[s.id] || ''}
                   </td>
                 ))}
                 <td className="px-4 py-3 text-right text-sm font-semibold tabular-nums text-slate-50">
@@ -65,12 +67,12 @@ export function WeeklySummary() {
               <td className="px-4 py-3 text-right text-sm font-bold tabular-nums text-slate-50">
                 {totals.stopCount}
               </td>
-              {MAT_SIZES.map((size) => (
+              {sizes.map((s) => (
                 <td
-                  key={size}
+                  key={s.id}
                   className="px-4 py-3 text-right text-sm font-bold tabular-nums text-slate-50"
                 >
-                  {totals.matsBySize[size] || ''}
+                  {totals.matsBySize[s.id] || ''}
                 </td>
               ))}
               <td className="px-4 py-3 text-right text-sm font-bold tabular-nums text-slate-50">

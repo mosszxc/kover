@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import type { DayOfWeek, MatSize } from '@/shared/types'
+import type { DayOfWeek } from '@/shared/types'
 import type { MatSpec } from '../types'
 import {
   emptyMat,
@@ -85,7 +85,7 @@ export function useClientForm() {
   }, [])
 
   const updateMatSize = useCallback(
-    (index: number, size: MatSize) => {
+    (index: number, size: string) => {
       updateMat(index, 'size', size)
     },
     [updateMat],

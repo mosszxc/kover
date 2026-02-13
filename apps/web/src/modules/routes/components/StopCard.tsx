@@ -10,9 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/shared/ui/select'
-import type { Client, MatSpec } from '@/modules/clients'
-import { MAT_AREA } from '@/shared/types'
-import { MAT_SIZE_STYLES } from '../constants/matStyles'
+import type { Client } from '@/modules/clients'
+import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 import { useRouteStore } from '../store'
 import { RemoveStopDialog } from './RemoveStopDialog'
 import { TransferStopDialog } from './TransferStopDialog'
@@ -37,12 +36,11 @@ interface StopCardProps {
   onEditClient?: (client: Client) => void
 }
 
-function matArea(mats: MatSpec[]): number {
-  return mats.reduce((sum, m) => sum + m.quantity * (MAT_AREA[m.size] ?? 0), 0)
-}
-
 export function StopCard({ number, client, stopId, isCompleted, driverId, drivers, stopIndex, isFirst, isLast, isDndEnabled = true, isAnomaly = false, onEditClient }: StopCardProps) {
-  const area = matArea(client.mats)
+  const sizes = useMatSizeStore((s) => s.sizes)
+  const areaMap = Object.fromEntries(sizes.map((s) => [s.id, s.area]))
+  const labelMap = Object.fromEntries(sizes.map((s) => [s.id, s.label]))
+  const area = client.mats.reduce((sum, m) => sum + m.quantity * (areaMap[m.size] ?? 0), 0)
   const selectedDay = useRouteStore((s) => s.selectedDay)
   const toggleStopCompleted = useRouteStore((s) => s.toggleStopCompleted)
   const assignDriver = useRouteStore((s) => s.assignDriver)
@@ -199,9 +197,9 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
         {client.mats.map((mat, i) => (
           <span
             key={i}
-            className={`rounded px-1.5 py-0.5 text-xs font-semibold ${MAT_SIZE_STYLES[mat.size].badge}`}
+            className="rounded bg-slate-800 px-1.5 py-0.5 text-xs font-semibold text-slate-300"
           >
-            {mat.size}
+            {labelMap[mat.size] ?? mat.size}
             {mat.quantity > 1 && <span className="opacity-60"> x{mat.quantity}</span>}
           </span>
         ))}

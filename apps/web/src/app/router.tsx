@@ -4,6 +4,7 @@ import { AppLayout } from "@/app/layout/AppLayout"
 import { RoutesPage } from "@/pages/RoutesPage"
 import { ClientsPage } from "@/pages/ClientsPage"
 import { DriversPage } from "@/pages/DriversPage"
+import { SettingsPage } from "@/pages/SettingsPage"
 import { LoadingFallback } from "@/shared/components/LoadingFallback"
 
 const ImportPage = lazy(() =>
@@ -35,6 +36,10 @@ export const router = createBrowserRouter([
       {
         path: "/drivers",
         element: <DriversPage />,
+      },
+      {
+        path: "/settings",
+        element: <SettingsPage />,
       },
       {
         path: "/import",

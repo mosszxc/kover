@@ -1,8 +1,9 @@
 import { X } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
-import { DAY_LABELS, MAT_SIZES } from '@/shared/types'
-import type { DayOfWeek, MatSize } from '@/shared/types'
+import { DAY_LABELS } from '@/shared/types'
+import type { DayOfWeek } from '@/shared/types'
 import { FREQUENCY_OPTIONS, ALL_WORK_DAYS } from '@/shared/constants'
+import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 
 export type StatusFilter = 'all' | 'active' | 'paused'
 
@@ -11,8 +12,8 @@ interface ClientsFiltersProps {
   onDaysChange: (days: DayOfWeek[]) => void
   selectedFrequency: number | null
   onFrequencyChange: (frequency: number | null) => void
-  selectedMatSize: MatSize | null
-  onMatSizeChange: (size: MatSize | null) => void
+  selectedMatSize: string | null
+  onMatSizeChange: (size: string | null) => void
   selectedStatus: StatusFilter
   onStatusChange: (status: StatusFilter) => void
 }
@@ -51,7 +52,9 @@ export function ClientsFilters({
     onFrequencyChange(selectedFrequency === freq ? null : freq)
   }
 
-  function toggleMatSize(size: MatSize) {
+  const matSizes = useMatSizeStore((s) => s.sizes)
+
+  function toggleMatSize(size: string) {
     onMatSizeChange(selectedMatSize === size ? null : size)
   }
 
@@ -107,19 +110,19 @@ export function ClientsFilters({
       {/* Mat size filter */}
       <div className="flex items-center gap-1.5">
         <span className="text-xs font-medium text-slate-500">Коврик:</span>
-        {MAT_SIZES.map((size) => (
+        {matSizes.map((s) => (
           <button
-            key={size}
+            key={s.id}
             type="button"
-            onClick={() => toggleMatSize(size)}
+            onClick={() => toggleMatSize(s.id)}
             className={cn(
               'min-h-[44px] rounded-full px-3 py-1.5 text-sm font-medium tabular-nums transition-colors',
-              selectedMatSize === size
+              selectedMatSize === s.id
                 ? 'bg-blue-600 text-white'
                 : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-300',
             )}
           >
-            {size}
+            {s.label}
           </button>
         ))}
       </div>

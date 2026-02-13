@@ -2,8 +2,7 @@ import { useState, useCallback } from 'react'
 import { Check, X, AlertTriangle } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import type { ParsedClient, ParsedMatSpec } from '../types'
-import { MAT_SIZES } from '@/shared/types'
-import type { MatSize } from '@/shared/types'
+import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 
 interface ImportPreviewProps {
   clients: ParsedClient[]
@@ -18,14 +17,15 @@ function formatMats(mats: ParsedMatSpec[]): string {
 
 function parseMatsString(str: string): ParsedMatSpec[] | null {
   if (!str.trim()) return []
+  const sizeIds = useMatSizeStore.getState().sizes.map((s) => s.id)
   const parts = str.split(',').map((s) => s.trim())
   const result: ParsedMatSpec[] = []
   for (const part of parts) {
     const match = part.match(/^(\d+)\s*[×xхXХ]\s*(.+)$/)
     if (!match || !match[1] || !match[2]) return null
     const size = match[2].trim()
-    if (!MAT_SIZES.includes(size as MatSize)) return null
-    result.push({ size: size as MatSize, quantity: parseInt(match[1]) })
+    if (!sizeIds.includes(size)) return null
+    result.push({ size, quantity: parseInt(match[1]) })
   }
   return result
 }

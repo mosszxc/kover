@@ -1,26 +1,10 @@
 import { MapPin, Ruler, LayoutGrid } from 'lucide-react'
 import { useRouteSummary } from '../hooks/useRouteSummary'
-import type { MatSize } from '@/shared/types'
-
-const MAT_SIZE_LABELS: Record<MatSize, string> = {
-  '180': '180',
-  '150': '150',
-  '60x80': '60×80',
-  '400': '400',
-  '250': '250',
-}
-
-const SIZE_ORDER: MatSize[] = ['400', '250', '180', '150', '60x80']
-
-function formatMats(matsBySize: Partial<Record<MatSize, number>>): string {
-  return SIZE_ORDER
-    .filter((size) => matsBySize[size])
-    .map((size) => `${MAT_SIZE_LABELS[size]}: ${matsBySize[size]} шт`)
-    .join(' | ')
-}
+import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 
 export function DaySummary() {
   const summary = useRouteSummary()
+  const sizes = useMatSizeStore((s) => s.sizes)
 
   if (summary.stopCount === 0) {
     return (
@@ -30,7 +14,10 @@ export function DaySummary() {
     )
   }
 
-  const matsText = formatMats(summary.matsBySize)
+  const matsText = sizes
+    .filter((s) => summary.matsBySize[s.id])
+    .map((s) => `${s.label}: ${summary.matsBySize[s.id]} шт`)
+    .join(' | ')
 
   return (
     <div className="grid grid-cols-3 gap-3">
