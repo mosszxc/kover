@@ -41,7 +41,7 @@ export function RoutesPage() {
         <StopList searchQuery={searchQuery} drivers={driverOptions} driverFilter={driverFilter} />
         <AddStopDialog clients={clients} />
       </div>
-      <PrintSheet stops={activeStops} clients={clients} selectedDay={selectedDay} />
+      <PrintSheet stops={activeStops} clients={clients} selectedDay={selectedDay} drivers={driverOptions} />
     </div>
   )
 }
