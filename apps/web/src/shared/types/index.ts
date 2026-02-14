@@ -1,5 +1,5 @@
-/** Дни недели: ПН=0 ... ПТ=4 */
-export type DayOfWeek = 0 | 1 | 2 | 3 | 4
+/** Дни недели: ПН=0 ... ВС=6 */
+export type DayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6
 
 /** Размеры ковриков — динамические, управляются через matSizeStore */
 export type MatSize = string
@@ -26,6 +26,8 @@ export const DAY_LABELS: Record<DayOfWeek, string> = {
   2: 'СР',
   3: 'ЧТ',
   4: 'ПТ',
+  5: 'СБ',
+  6: 'ВС',
 }
 
 export const DAY_LABELS_FULL: Record<DayOfWeek, string> = {
@@ -34,4 +36,6 @@ export const DAY_LABELS_FULL: Record<DayOfWeek, string> = {
   2: 'Среда',
   3: 'Четверг',
   4: 'Пятница',
+  5: 'Суббота',
+  6: 'Воскресенье',
 }

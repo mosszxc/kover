@@ -16,7 +16,7 @@ export function RoutesPage() {
   const stops = useRouteStore((s) => s.routes.find((r) => r.day === selectedDay)?.stops ?? [])
 
   const driverOptions = useMemo(
-    () => allDrivers.filter((d) => d.isActive).map((d) => ({ id: d.id, name: d.name, workDays: d.workDays ?? [0, 1, 2, 3, 4] as const })),
+    () => allDrivers.filter((d) => d.isActive).map((d) => ({ id: d.id, name: d.name, workDays: d.workDays ?? [0, 1, 2, 3, 4, 5, 6] as const })),
     [allDrivers],
   )
 

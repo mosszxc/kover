@@ -16,7 +16,7 @@ import { DAY_LABELS } from '@/shared/types'
 import { cn } from '@/shared/lib/utils'
 import { useDriverStore } from '../store'
 
-const ALL_DAYS: DayOfWeek[] = [0, 1, 2, 3, 4]
+const ALL_DAYS: DayOfWeek[] = [0, 1, 2, 3, 4, 5, 6]
 
 interface FormErrors {
   name?: string

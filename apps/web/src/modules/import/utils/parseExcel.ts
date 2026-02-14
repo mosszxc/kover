@@ -10,6 +10,8 @@ const DAY_SHEET_NAMES: Record<string, DayOfWeek> = {
   'СР': 2,
   'ЧТ': 3,
   'ПТ': 4,
+  'СБ': 5,
+  'ВС': 6,
 }
 
 function readFileAsArrayBuffer(file: File): Promise<ArrayBuffer> {
@@ -38,7 +40,7 @@ export async function parseExcel(file: File): Promise<ParsedExcel> {
   })
 
   // Extract route sheets (ПН–ПТ)
-  const routesByDay = { 0: [], 1: [], 2: [], 3: [], 4: [] } as Record<DayOfWeek, string[]>
+  const routesByDay = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] } as Record<DayOfWeek, string[]>
 
   for (const [sheetName, day] of Object.entries(DAY_SHEET_NAMES)) {
     const sheet = workbook.Sheets[sheetName]
