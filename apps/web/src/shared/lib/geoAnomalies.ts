@@ -3,6 +3,9 @@ import { haversine, type GeoPoint } from './tsp'
 /** Расстояние (км), при котором пара точек считается подозрительной */
 const PAIR_DISTANCE_THRESHOLD_KM = 15
 
+/** Абсолютный порог (км) от медианного центра — точки дальше всегда аномалии */
+const ABSOLUTE_DISTANCE_THRESHOLD_KM = 25
+
 interface GeoEntity {
   id: string
   lat?: number
@@ -47,13 +50,23 @@ export function detectGeoAnomalies(entities: GeoEntity[]): Set<string> {
     return new Set()
   }
 
-  // 3+ точек: IQR-метод (множитель 3.0, max 10% аномалий)
+  // 3+ точек: IQR-метод + абсолютный порог
   const center = medianCenter(points)
   const distances = points.map((p) => ({
     id: p.id,
     distance: haversine(p, center),
   }))
 
+  const anomalies = new Set<string>()
+
+  // 1. Абсолютный порог — точки дальше 25 км от центра всегда аномалии
+  for (const d of distances) {
+    if (d.distance > ABSOLUTE_DISTANCE_THRESHOLD_KM) {
+      anomalies.add(d.id)
+    }
+  }
+
+  // 2. IQR-метод для более тонкой детекции
   const sorted = [...distances].sort((a, b) => a.distance - b.distance)
   const q1Idx = Math.floor(sorted.length * 0.25)
   const q3Idx = Math.floor(sorted.length * 0.75)
@@ -66,7 +79,6 @@ export function detectGeoAnomalies(entities: GeoEntity[]): Set<string> {
   const maxAnomalies = Math.max(1, Math.floor(points.length * 0.15))
   const limited = candidates.slice(-maxAnomalies)
 
-  const anomalies = new Set<string>()
   for (const d of limited) {
     anomalies.add(d.id)
   }
