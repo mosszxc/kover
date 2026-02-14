@@ -11,7 +11,13 @@ export interface MapStop {
   lng: number
 }
 
-export function useMapData() {
+export interface MapDataResult {
+  stops: MapStop[]
+  totalActive: number
+  withoutCoords: number
+}
+
+export function useMapData(): MapDataResult {
   const routes = useRouteStore((s) => s.routes)
   const selectedDay = useRouteStore((s) => s.selectedDay)
   const clients = useClientStore((s) => s.clients)
@@ -20,13 +26,20 @@ export function useMapData() {
     const clientMap = new Map(clients.map((c) => [c.id, c]))
     const dayRoute = routes.find((r) => r.day === selectedDay)
 
-    if (!dayRoute) return []
+    if (!dayRoute) return { stops: [], totalActive: 0, withoutCoords: 0 }
+
+    let totalActive = 0
+    let withoutCoords = 0
 
     const activeGeoClients = dayRoute.stops
       .map((stop) => {
         const client = clientMap.get(stop.clientId)
         if (!client || !client.isActive || isStopSkipped(stop)) return null
-        if (client.lat == null || client.lng == null) return null
+        totalActive++
+        if (client.lat == null || client.lng == null) {
+          withoutCoords++
+          return null
+        }
         return client
       })
       .filter((c) => c != null)
@@ -49,6 +62,6 @@ export function useMapData() {
       })
     }
 
-    return stops
+    return { stops, totalActive, withoutCoords }
   }, [routes, selectedDay, clients])
 }
