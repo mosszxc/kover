@@ -1,4 +1,4 @@
-import { ChevronUp, ChevronDown, GripVertical, Pencil, TriangleAlert } from 'lucide-react'
+import { ChevronUp, ChevronDown, GripVertical, MapPinOff, Pencil, TriangleAlert } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -42,10 +42,11 @@ interface StopCardProps {
   isLast: boolean
   isDndEnabled?: boolean
   isAnomaly?: boolean
+  isMissingCoords?: boolean
   onEditClient?: (client: Client) => void
 }
 
-export function StopCard({ number, client, stopId, driverId, drivers, stopIndex, isFirst, isLast, isDndEnabled = true, isAnomaly = false, onEditClient }: StopCardProps) {
+export function StopCard({ number, client, stopId, driverId, drivers, stopIndex, isFirst, isLast, isDndEnabled = true, isAnomaly = false, isMissingCoords = false, onEditClient }: StopCardProps) {
   const sizes = useMatSizeStore((s) => s.sizes)
   const areaMap = Object.fromEntries(sizes.map((s) => [s.id, s.area]))
   const labelMap = Object.fromEntries(sizes.map((s) => [s.id, s.label]))
@@ -81,9 +82,11 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
         'flex items-center gap-3 border-l-3 p-3 transition-colors hover:bg-accent',
         isAnomaly
           ? 'border-l-amber-500 bg-amber-500/5'
-          : driverId
-            ? 'border-l-blue-500'
-            : 'border-l-border',
+          : isMissingCoords
+            ? 'border-l-slate-500 bg-slate-500/5'
+            : driverId
+              ? 'border-l-blue-500'
+              : 'border-l-border',
         isDragging && 'z-10 opacity-50 ring-2 ring-blue-500',
       )}
       {...attributes}
@@ -133,6 +136,11 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
+          {isMissingCoords && (
+            <span title="Нет координат — не отображается на карте" className="shrink-0 print:hidden">
+              <MapPinOff className="size-4 text-slate-400" aria-label="Нет координат" />
+            </span>
+          )}
           {isAnomaly && (
             <span title="Далеко от остальных остановок" className="shrink-0 print:hidden">
               <TriangleAlert className="size-4 text-amber-400" aria-label="Далеко от остальных остановок" />

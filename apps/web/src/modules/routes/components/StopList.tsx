@@ -158,6 +158,7 @@ export function StopList({ searchQuery = '', drivers = [], driverFilter = null, 
                   isLast={activeIndex === activeStops.length - 1}
                   isDndEnabled={!isSearching}
                   isAnomaly={anomalies.has(client.id)}
+                  isMissingCoords={client.lat == null || client.lng == null}
                   onEditClient={onEditClient}
                 />
               )
