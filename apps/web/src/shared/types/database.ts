@@ -162,6 +162,48 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_config: {
+        Row: {
+          created_at: string
+          daily_summary_cron: string
+          id: string
+          is_active: boolean
+          notify_daily_summary: boolean
+          notify_new_client: boolean
+          notify_route_complete: boolean
+          telegram_bot_token: string
+          telegram_chat_id: string
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          daily_summary_cron?: string
+          id?: string
+          is_active?: boolean
+          notify_daily_summary?: boolean
+          notify_new_client?: boolean
+          notify_route_complete?: boolean
+          telegram_bot_token: string
+          telegram_chat_id: string
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          daily_summary_cron?: string
+          id?: string
+          is_active?: boolean
+          notify_daily_summary?: boolean
+          notify_new_client?: boolean
+          notify_route_complete?: boolean
+          telegram_bot_token?: string
+          telegram_chat_id?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       route_stops: {
         Row: {
           client_id: string

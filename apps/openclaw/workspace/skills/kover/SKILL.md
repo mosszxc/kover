@@ -294,6 +294,63 @@ curl -s -X DELETE "$SUPABASE_URL/rest/v1/route_stops?id=eq.$STOP_ID" \
 ✅ Назначено 13 остановок на Сергея (было 29, стало 42).
 ```
 
+## Уведомления (Realtime)
+
+Kover использует Supabase Realtime + Edge Functions для уведомлений в Telegram.
+
+### Таблица notification_config
+
+```
+id                    uuid        PK
+telegram_bot_token    text        Токен бота от @BotFather
+telegram_chat_id      text        ID чата для уведомлений
+notify_route_complete boolean     Уведомление при 100% выполнении маршрута
+notify_new_client     boolean     Уведомление при добавлении клиента
+notify_daily_summary  boolean     Утренняя сводка
+daily_summary_cron    text        Cron-расписание (по умолчанию '0 5 * * 1-6' = 08:00 MSK)
+timezone              text        Часовой пояс (по умолчанию Europe/Moscow)
+is_active             boolean     Активность конфига
+```
+
+### Просмотр конфигурации уведомлений
+
+```bash
+curl -s "$SUPABASE_URL/rest/v1/notification_config?select=*" \
+  -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+  -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" | jq .
+```
+
+### Добавить/обновить конфигурацию
+
+```bash
+curl -s -X POST "$SUPABASE_URL/rest/v1/notification_config" \
+  -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+  -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Prefer: return=representation" \
+  -d "{
+    \"telegram_bot_token\": \"$TELEGRAM_BOT_TOKEN\",
+    \"telegram_chat_id\": \"$TELEGRAM_CHAT_ID\",
+    \"notify_route_complete\": true,
+    \"notify_new_client\": true,
+    \"notify_daily_summary\": true
+  }" | jq .
+```
+
+### Автоматические уведомления
+
+| Событие | Триггер | Сообщение |
+|---------|---------|-----------|
+| Маршрут 100% | route_stops UPDATE is_completed=true | "Маршрут Понедельника завершён на 100%" |
+| Новый клиент | clients INSERT | "Новый клиент добавлен: Ленина 10" |
+| Утренняя сводка | pg_cron (08:00 MSK, Пн-Сб) | "Понедельник. 58 остановок, ~141 м²" |
+
+### Realtime в веб-приложении
+
+Веб-приложение подписывается на все таблицы через Supabase Realtime (WebSocket):
+- При изменении записи из бота → Zustand стор обновляется автоматически
+- Подписки: clients, drivers, mat_sizes, route_stops, changelog, service_log, settings
+
 ## Важные правила
 
 1. **Всегда проверяй существование** клиента/водителя перед операцией
