@@ -17,6 +17,9 @@ const StatsPage = lazy(() =>
 const MapPage = lazy(() =>
   import("@/pages/MapPage").then((m) => ({ default: m.MapPage })),
 )
+const DatabasePage = lazy(() =>
+  import("@/pages/DatabasePage").then((m) => ({ default: m.DatabasePage })),
+)
 
 function LazyPage({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<LoadingFallback />}>{children}</Suspense>
@@ -67,6 +70,14 @@ export const router = createBrowserRouter([
         element: (
           <LazyPage>
             <MapPage />
+          </LazyPage>
+        ),
+      },
+      {
+        path: "/database",
+        element: (
+          <LazyPage>
+            <DatabasePage />
           </LazyPage>
         ),
       },
