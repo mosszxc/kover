@@ -21,6 +21,8 @@ import type { MatSizeConfig, DayOfWeek } from '@/shared/types'
 import type { Client } from '@/modules/clients/types'
 import type { Driver } from '@/modules/drivers/types'
 import type { DayRoute } from '@/modules/routes/types'
+import type { ChangeLogEntry } from '@/shared/stores/changelogStore'
+import type { ServiceLogEntry } from '@/shared/stores/serviceLogStore'
 import type { Database } from '@/shared/types/database'
 
 type Row<T extends keyof Database['public']['Tables']> =
@@ -254,5 +256,130 @@ function setupRealtimeSubscriptions(): (() => void)[] {
   )
   if (unsubClients) cleanups.push(unsubClients)
 
+  // Changelog
+  const unsubChangelog = subscribeToTable(
+    changelogAdapter,
+    (item) => {
+      useChangeLogStore.setState((state) => {
+        const entry = item as ChangeLogEntry
+        const exists = state.entries.some((e) => e.id === entry.id)
+        return {
+          entries: exists
+            ? state.entries.map((e) => (e.id === entry.id ? entry : e))
+            : [...state.entries, entry].slice(-200),
+        }
+      })
+    },
+    (id) => {
+      useChangeLogStore.setState((state) => ({
+        entries: state.entries.filter((e) => e.id !== id),
+      }))
+    },
+  )
+  if (unsubChangelog) cleanups.push(unsubChangelog)
+
+  // Service Log
+  const unsubServiceLog = subscribeToTable(
+    serviceLogAdapter,
+    (item) => {
+      useServiceLogStore.setState((state) => {
+        const entry = item as ServiceLogEntry
+        const exists = state.entries.some((e) => e.id === entry.id)
+        return {
+          entries: exists
+            ? state.entries.map((e) => (e.id === entry.id ? entry : e))
+            : [...state.entries, entry],
+        }
+      })
+    },
+    (id) => {
+      useServiceLogStore.setState((state) => ({
+        entries: state.entries.filter((e) => e.id !== id),
+      }))
+    },
+  )
+  if (unsubServiceLog) cleanups.push(unsubServiceLog)
+
+  // Route Stops — re-hydrate full route structure on any change
+  const unsubRouteStops = subscribeToRouteStops()
+  if (unsubRouteStops) cleanups.push(unsubRouteStops)
+
+  // Settings — key/value table
+  const unsubSettings = subscribeToSettings()
+  if (unsubSettings) cleanups.push(unsubSettings)
+
   return cleanups
+}
+
+/**
+ * Подписка на route_stops.
+ * При любом изменении — debounce + полная перезагрузка маршрутов,
+ * т.к. структура нормализованная (day_routes + route_stops).
+ */
+function subscribeToRouteStops(): (() => void) | null {
+  if (!supabase) return null
+
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null
+
+  const channel = supabase
+    .channel('realtime-route_stops')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'route_stops' },
+      () => {
+        // Debounce — batch rapid changes (e.g. drag-and-drop reorder)
+        if (debounceTimer) clearTimeout(debounceTimer)
+        debounceTimer = setTimeout(() => {
+          hydrateRoutes()
+        }, 500)
+      },
+    )
+    .subscribe()
+
+  return () => {
+    if (debounceTimer) clearTimeout(debounceTimer)
+    supabase!.removeChannel(channel)
+  }
+}
+
+/**
+ * Подписка на settings (key/value).
+ */
+function subscribeToSettings(): (() => void) | null {
+  if (!supabase) return null
+
+  const channel = supabase
+    .channel('realtime-settings')
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'settings' },
+      (payload) => applySettingChange(payload.new as Row<'settings'>),
+    )
+    .on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'settings' },
+      (payload) => applySettingChange(payload.new as Row<'settings'>),
+    )
+    .subscribe()
+
+  return () => {
+    supabase!.removeChannel(channel)
+  }
+}
+
+function applySettingChange(row: Row<'settings'>) {
+  const key = row.key
+  const value = row.value
+
+  const settingsKeyMap: Record<string, string> = {
+    geocodeCity: 'geocodeCity',
+    showWeekends: 'showWeekends',
+    fileSyncEnabled: 'fileSyncEnabled',
+    fileSyncFileName: 'fileSyncFileName',
+  }
+
+  const storeKey = settingsKeyMap[key]
+  if (storeKey) {
+    useSettingsStore.setState({ [storeKey]: value })
+  }
 }
