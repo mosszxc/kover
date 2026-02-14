@@ -18,6 +18,8 @@ export interface Client {
   notes: string
   isActive: boolean
   pausedUntil?: string | null
+  workingHoursStart?: string | null
+  workingHoursEnd?: string | null
   createdAt: string
   lat?: number
   lng?: number
@@ -38,6 +40,14 @@ export function formatPausedUntil(date: string): string {
   const months = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек']
   const d = new Date(date + 'T00:00:00')
   return `${d.getDate()} ${months[d.getMonth()]}`
+}
+
+/** Форматирует часы работы клиента (напр. "8:00–17:00") */
+export function formatWorkingHours(client: Client): string | null {
+  if (!client.workingHoursStart && !client.workingHoursEnd) return null
+  const start = client.workingHoursStart ?? '?'
+  const end = client.workingHoursEnd ?? '?'
+  return `${start}–${end}`
 }
 
 /** Количество замен ковриков для конкретного дня (default = 1) */

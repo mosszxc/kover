@@ -1,4 +1,4 @@
-import { ChevronUp, ChevronDown, GripVertical, MapPinOff, Pencil, TriangleAlert } from 'lucide-react'
+import { ChevronUp, ChevronDown, GripVertical, MapPinOff, Pencil, TriangleAlert, Clock } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from '@/shared/ui/select'
 import type { Client } from '@/modules/clients'
-import { getClientReplacements } from '@/modules/clients'
+import { getClientReplacements, formatWorkingHours } from '@/modules/clients'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 import { useMemo } from 'react'
 import { useRouteStore } from '../store'
@@ -149,6 +149,12 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
           <p className="truncate lg:whitespace-normal text-base text-foreground">
             {client.originalName}
           </p>
+          {formatWorkingHours(client) && (
+            <span className="ml-1 inline-flex shrink-0 items-center gap-0.5 text-xs text-muted-foreground">
+              <Clock className="size-3" />
+              {formatWorkingHours(client)}
+            </span>
+          )}
         </div>
         {isAnomaly && onEditClient && (
           <Button

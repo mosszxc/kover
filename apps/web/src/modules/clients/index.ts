@@ -1,5 +1,5 @@
 export type { Client, MatSpec } from './types'
-export { getClientReplacements, isClientPaused, formatPausedUntil } from './types'
+export { getClientReplacements, isClientPaused, formatPausedUntil, formatWorkingHours } from './types'
 export { useClientStore } from './store'
 export { ClientsTable } from './components/ClientsTable'
 export { AddClientDialog } from './components/AddClientDialog'

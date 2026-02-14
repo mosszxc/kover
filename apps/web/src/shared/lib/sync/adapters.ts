@@ -68,6 +68,8 @@ export const clientsAdapter: SyncAdapter<Client, Insert<'clients'>> = {
     paused_until: local.pausedUntil ?? null,
     lat: local.lat ?? null,
     lng: local.lng ?? null,
+    working_hours_start: local.workingHoursStart ?? null,
+    working_hours_end: local.workingHoursEnd ?? null,
     created_at: local.createdAt,
   }),
   toLocal: (remote) => ({
@@ -84,6 +86,8 @@ export const clientsAdapter: SyncAdapter<Client, Insert<'clients'>> = {
     pausedUntil: (remote.paused_until as string) ?? null,
     lat: remote.lat ?? undefined,
     lng: remote.lng ?? undefined,
+    workingHoursStart: remote.working_hours_start ?? null,
+    workingHoursEnd: remote.working_hours_end ?? null,
     createdAt: remote.created_at ?? new Date().toISOString(),
   }),
 }

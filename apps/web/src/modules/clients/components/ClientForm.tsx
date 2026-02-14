@@ -1,4 +1,4 @@
-import { Plus, MapPin, Loader2, Minus } from 'lucide-react'
+import { Plus, MapPin, Loader2, Minus, Clock } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { DAY_LABELS } from '@/shared/types'
 import { useVisibleDays } from '@/shared/hooks/useVisibleDays'
@@ -250,6 +250,32 @@ export function ClientForm({
       {/* === Секция: Дополнительно === */}
       <div className="space-y-3">
         <SectionDivider>Дополнительно</SectionDivider>
+
+        <div>
+          <span className={labelClass}>
+            <Clock className="mr-1 inline size-3.5" />
+            Часы работы
+          </span>
+          <div className="flex items-center gap-2">
+            <input
+              id={`${idPrefix}-hours-start`}
+              type="time"
+              value={form.workingHoursStart}
+              onChange={(e) => form.setWorkingHoursStart(e.target.value)}
+              className={`${inputClass} w-32`}
+              aria-label="Начало работы"
+            />
+            <span className="text-muted-foreground">–</span>
+            <input
+              id={`${idPrefix}-hours-end`}
+              type="time"
+              value={form.workingHoursEnd}
+              onChange={(e) => form.setWorkingHoursEnd(e.target.value)}
+              className={`${inputClass} w-32`}
+              aria-label="Конец работы"
+            />
+          </div>
+        </div>
 
         <div>
           <label htmlFor={`${idPrefix}-notes`} className={labelClass}>
