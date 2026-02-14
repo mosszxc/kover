@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { DayOfWeek } from '@/shared/types'
 import { supabaseSync, serviceLogAdapter } from '@/shared/lib/sync'
+import { generateId } from '@/shared/lib/generateId'
 
 export type ServiceEventType =
   | 'completed'
@@ -52,7 +53,7 @@ export const useServiceLogStore = create<ServiceLogState>()(
         set((state) => {
           const newEntry: ServiceLogEntry = {
             ...entry,
-            id: crypto.randomUUID(),
+            id: generateId(),
             timestamp: new Date().toISOString(),
           }
           const entries = pruneOldEntries([newEntry, ...state.entries])

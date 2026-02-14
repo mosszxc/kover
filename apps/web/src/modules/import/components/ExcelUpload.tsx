@@ -2,7 +2,8 @@ import { useState, useCallback } from 'react'
 import { Upload, FileSpreadsheet, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/shared/ui/button'
-import { parseExcel } from '../utils/parseExcel'
+import { isTauri } from '@/shared/lib/platform'
+import { parseExcel, parseExcelFromBuffer } from '../utils/parseExcel'
 import { parseClientName } from '../lib/parse-client-name'
 import type { ParsedClient } from '../types'
 import type { DayOfWeek } from '@/shared/types'
@@ -18,6 +19,18 @@ export function ExcelUpload({ onParsed }: ExcelUploadProps) {
   const [isDragging, setIsDragging] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
+  const handleParsed = useCallback(
+    (parsed: { masterRows: string[][]; routesByDay: Record<DayOfWeek, string[]> }) => {
+      const clients = parsed.masterRows
+        .map((row) => row[0] ?? '')
+        .filter((name) => name.trim().length > 0)
+        .map((name) => parseClientName(name))
+
+      onParsed({ clients, routesByDay: parsed.routesByDay })
+    },
+    [onParsed],
+  )
+
   const processFile = useCallback(
     async (file: File) => {
       if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
@@ -28,20 +41,35 @@ export function ExcelUpload({ onParsed }: ExcelUploadProps) {
       setIsLoading(true)
       try {
         const parsed = await parseExcel(file)
-        const clients = parsed.masterRows
-          .map((row) => row[0] ?? '')
-          .filter((name) => name.trim().length > 0)
-          .map((name) => parseClientName(name))
-
-        onParsed({ clients, routesByDay: parsed.routesByDay })
+        handleParsed(parsed)
       } catch {
         toast.error('Ошибка при чтении файла')
       } finally {
         setIsLoading(false)
       }
     },
-    [onParsed],
+    [handleParsed],
   )
+
+  const handleTauriOpen = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const { tauriOpenFile } = await import('@/shared/lib/tauri-fs')
+      const result = await tauriOpenFile([
+        { name: 'Excel', extensions: ['xlsx', 'xls'] },
+      ])
+      if (!result) {
+        setIsLoading(false)
+        return
+      }
+      const parsed = parseExcelFromBuffer(result.data)
+      handleParsed(parsed)
+    } catch {
+      toast.error('Ошибка при чтении файла')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [handleParsed])
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
@@ -57,6 +85,12 @@ export function ExcelUpload({ onParsed }: ExcelUploadProps) {
     const file = e.target.files?.[0]
     if (file) processFile(file)
     e.target.value = ''
+  }
+
+  const handleButtonClick = () => {
+    if (isTauri()) {
+      handleTauriOpen()
+    }
   }
 
   if (isLoading) {
@@ -86,20 +120,27 @@ export function ExcelUpload({ onParsed }: ExcelUploadProps) {
       <p className="text-sm text-muted-foreground">
         Перетащите файл .xlsx сюда или выберите вручную
       </p>
-      <label>
-        <Button variant="outline" asChild>
-          <span>
-            <Upload className="h-4 w-4" />
-            Выбрать файл
-          </span>
+      {isTauri() ? (
+        <Button variant="outline" onClick={handleButtonClick}>
+          <Upload className="h-4 w-4" />
+          Выбрать файл
         </Button>
-        <input
-          type="file"
-          accept=".xlsx,.xls"
-          className="hidden"
-          onChange={handleFileChange}
-        />
-      </label>
+      ) : (
+        <label>
+          <Button variant="outline" asChild>
+            <span>
+              <Upload className="h-4 w-4" />
+              Выбрать файл
+            </span>
+          </Button>
+          <input
+            type="file"
+            accept=".xlsx,.xls"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+        </label>
+      )}
     </div>
   )
 }

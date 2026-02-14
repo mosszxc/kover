@@ -1,0 +1,70 @@
+name: Build Desktop
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+concurrency:
+  group: build-desktop-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-windows:
+    name: Build Windows Installer
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: apps/web/src-tauri -> target
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Set version from tag
+        shell: bash
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          cd apps/web/src-tauri
+          sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" tauri.conf.json
+          sed -i "s/^version = \".*\"/version = \"$VERSION\"/" Cargo.toml
+
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          projectPath: apps/web
+          tagName: ${{ github.ref_name }}
+          releaseName: Kover ${{ github.ref_name }}
+          releaseBody: |
+            ## Kover ${{ github.ref_name }}
+
+            ### Установка
+            Скачайте `Kover-Setup-${{ github.ref_name }}.exe` и запустите установщик.
+
+            ### Обновление
+            Если у вас уже установлен Kover — обновление произойдёт автоматически.
+          releaseDraft: false
+          prerelease: false
+          updaterJsonPreferNsis: true

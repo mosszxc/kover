@@ -9,6 +9,7 @@ import type { Client } from '@/modules/clients'
 import type { DayRoute, RouteStop } from '@/modules/routes'
 import type { DayOfWeek } from '@/shared/types'
 import { FileSyncStatus } from '@/shared/components/FileSyncStatus'
+import { generateId } from '@/shared/lib/generateId'
 
 interface ParsedData {
   clients: ParsedClient[]
@@ -33,7 +34,7 @@ function matchRouteEntry(
 
 function buildClients(parsed: ParsedClient[], routesByDay: Record<DayOfWeek, string[]>): Client[] {
   return parsed.map((pc) => {
-    const id = crypto.randomUUID()
+    const id = generateId()
     const days = (Object.entries(routesByDay) as [string, string[]][])
       .filter(([, stops]) =>
         stops.some((s) => {
@@ -71,7 +72,7 @@ function buildRoutes(clients: Client[], routesByDay: Record<DayOfWeek, string[]>
         const clientId = matchRouteEntry(entry, clients)
         if (clientId) {
           stops.push({
-            id: crypto.randomUUID(),
+            id: generateId(),
             clientId,
             position: idx,
             isCompleted: false,

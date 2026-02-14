@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { supabaseSync, changelogAdapter } from '@/shared/lib/sync'
+import { generateId } from '@/shared/lib/generateId'
 
 export interface ChangeLogEntry {
   id: string
@@ -33,7 +34,7 @@ export const useChangeLogStore = create<ChangeLogState>()(
         set((state) => {
           const newEntry: ChangeLogEntry = {
             ...entry,
-            id: crypto.randomUUID(),
+            id: generateId(),
             timestamp: new Date().toISOString(),
           }
           const entries = [newEntry, ...state.entries].slice(0, MAX_ENTRIES)
