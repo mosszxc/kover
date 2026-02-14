@@ -1,4 +1,5 @@
 export type { Client, MatSpec } from './types'
+export { getClientReplacements } from './types'
 export { useClientStore } from './store'
 export { ClientsTable } from './components/ClientsTable'
 export { AddClientDialog } from './components/AddClientDialog'

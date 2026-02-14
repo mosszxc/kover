@@ -15,6 +15,7 @@ interface PopulateOptions {
   mats: MatSpec[]
   frequency: number
   days: DayOfWeek[]
+  dayReplacements?: Partial<Record<DayOfWeek, number>>
   notes: string
 }
 
@@ -24,12 +25,26 @@ export function useClientForm() {
   const [mats, setMats] = useState<MatRow[]>([emptyMat()])
   const [frequency, setFrequencyRaw] = useState(1)
   const [days, setDays] = useState<DayOfWeek[]>([])
+  const [dayReplacements, setDayReplacements] = useState<Partial<Record<DayOfWeek, number>>>({})
   const [notes, setNotes] = useState('')
   const [errors, setErrors] = useState<FormErrors>({})
 
   const setFrequency = useCallback((freq: number) => {
     setFrequencyRaw(freq)
-    setDays((prev) => (prev.length > freq ? prev.sort().slice(0, freq) : prev))
+    setDays((prev) => {
+      if (prev.length > freq) {
+        const trimmed = prev.sort().slice(0, freq)
+        setDayReplacements((dr) => {
+          const next: Partial<Record<DayOfWeek, number>> = {}
+          for (const d of trimmed) {
+            if (dr[d] != null) next[d] = dr[d]
+          }
+          return next
+        })
+        return trimmed
+      }
+      return prev
+    })
   }, [])
 
   const clearError = useCallback((field: keyof FormErrors) => {
@@ -57,12 +72,34 @@ export function useClientForm() {
   const toggleDay = useCallback(
     (day: DayOfWeek) => {
       setDays((prev) => {
-        if (prev.includes(day)) return prev.filter((d) => d !== day)
+        if (prev.includes(day)) {
+          setDayReplacements((dr) => {
+            const next = { ...dr }
+            delete next[day]
+            return next
+          })
+          return prev.filter((d) => d !== day)
+        }
         if (prev.length >= frequency) return prev
         return [...prev, day]
       })
     },
     [frequency],
+  )
+
+  const setDayReplacement = useCallback(
+    (day: DayOfWeek, count: number) => {
+      const clamped = Math.max(1, Math.min(5, count))
+      setDayReplacements((prev) => {
+        if (clamped === 1) {
+          const next = { ...prev }
+          delete next[day]
+          return next
+        }
+        return { ...prev, [day]: clamped }
+      })
+    },
+    [],
   )
 
   const validate = useCallback((): boolean => {
@@ -80,6 +117,7 @@ export function useClientForm() {
     setMats([emptyMat()])
     setFrequencyRaw(1)
     setDays([])
+    setDayReplacements({})
     setNotes('')
     setErrors({})
   }, [])
@@ -90,6 +128,7 @@ export function useClientForm() {
     setMats(specsToRows(opts.mats))
     setFrequencyRaw(opts.frequency)
     setDays([...opts.days])
+    setDayReplacements(opts.dayReplacements ? { ...opts.dayReplacements } : {})
     setNotes(opts.notes)
     setErrors({})
   }, [])
@@ -122,6 +161,7 @@ export function useClientForm() {
     mats,
     frequency,
     days,
+    dayReplacements,
     notes,
     errors,
     // Setters
@@ -138,6 +178,7 @@ export function useClientForm() {
     updateMatColor,
     // Day ops
     toggleDay,
+    setDayReplacement,
     // Form ops
     validate,
     resetForm,

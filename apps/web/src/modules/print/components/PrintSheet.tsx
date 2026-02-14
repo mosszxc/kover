@@ -1,6 +1,7 @@
 import type { DayOfWeek, MatSizeConfig } from '@/shared/types'
 import type { RouteStop } from '@/modules/routes'
 import type { Client } from '@/modules/clients'
+import { getClientReplacements } from '@/modules/clients'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 
 const DAY_LABELS_FULL: Record<DayOfWeek, string> = {
@@ -25,10 +26,11 @@ interface PrintSheetProps {
   drivers?: DriverInfo[]
 }
 
-function getMatQuantity(client: Client, sizeId: string): number {
+function getMatQuantity(client: Client, sizeId: string, day: DayOfWeek): number {
+  const replacements = getClientReplacements(client, day)
   return client.mats
     .filter((m) => m.size === sizeId)
-    .reduce((sum, m) => sum + m.quantity, 0)
+    .reduce((sum, m) => sum + m.quantity, 0) * replacements
 }
 
 function formatDate(): string {
@@ -43,15 +45,16 @@ interface PrintTableProps {
   title: string
   rows: { stop: RouteStop; client: Client | undefined }[]
   sizes: MatSizeConfig[]
+  day: DayOfWeek
 }
 
-function PrintTable({ title, rows, sizes }: PrintTableProps) {
+function PrintTable({ title, rows, sizes, day }: PrintTableProps) {
   const totals = Object.fromEntries(
     sizes.map((s) => [
       s.id,
       rows.reduce((sum, { client }) => {
         if (!client) return sum
-        return sum + getMatQuantity(client, s.id)
+        return sum + getMatQuantity(client, s.id, day)
       }, 0),
     ]),
   ) as Record<string, number>
@@ -77,7 +80,7 @@ function PrintTable({ title, rows, sizes }: PrintTableProps) {
               <td className="num">{index + 1}</td>
               <td>{client?.originalName ?? '—'}</td>
               {sizes.map((s) => {
-                const qty = client ? getMatQuantity(client, s.id) : 0
+                const qty = client ? getMatQuantity(client, s.id, day) : 0
                 return <td key={s.id} className="num">{qty > 0 ? qty : ''}</td>
               })}
               <td className="num">
@@ -121,6 +124,7 @@ export function PrintSheet({ stops, clients, selectedDay, drivers = [] }: PrintS
           title={`${dayLabel}, ${dateStr}`}
           rows={toRows(sortedStops)}
           sizes={sizes}
+          day={selectedDay}
         />
       </div>
     )
@@ -152,6 +156,7 @@ export function PrintSheet({ stops, clients, selectedDay, drivers = [] }: PrintS
             title={`${group.label} — ${dayLabel}, ${dateStr}`}
             rows={toRows(group.stops)}
             sizes={sizes}
+            day={selectedDay}
           />
         </div>
       ))}

@@ -51,6 +51,7 @@ export function EditClientDialog({ client, open, onOpenChange, onDelete }: EditC
         mats: client.mats,
         frequency: client.frequency,
         days: client.days,
+        dayReplacements: client.dayReplacements,
         notes: client.notes,
       })
     }
@@ -77,12 +78,17 @@ export function EditClientDialog({ client, open, onOpenChange, onDelete }: EditC
       }
     }
 
+    const dayReplacements = Object.keys(form.dayReplacements).length > 0
+      ? form.dayReplacements
+      : undefined
+
     const data: Partial<Client> = {
       name: form.name.trim(),
       address: form.address.trim(),
       mats: rowsToSpecs(form.mats),
       frequency: form.frequency,
       days: [...form.days].sort(),
+      dayReplacements,
       notes: form.notes.trim(),
       originalName: buildOriginalName(form.name, form.address, form.mats),
       ...(lat != null && lng != null ? { lat, lng } : {}),
