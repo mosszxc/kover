@@ -25,6 +25,7 @@ interface Client {
   name: string
   address: string
   isActive: boolean
+  pausedUntil?: string | null
 }
 
 interface AddStopDialogProps {
@@ -59,6 +60,7 @@ export function AddStopDialog({ clients }: AddStopDialogProps) {
     () =>
       clients.filter((c) => {
         if (!c.isActive) return false
+        if (c.pausedUntil && c.pausedUntil > new Date().toISOString().slice(0, 10)) return false
         if (currentClientIds.has(c.id)) return false
         if (!query) return true
         return (
