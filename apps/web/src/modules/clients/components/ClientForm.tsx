@@ -1,4 +1,4 @@
-import { Plus, MapPin, Loader2 } from 'lucide-react'
+import { Plus, MapPin, Loader2, Minus } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { ALL_WORK_DAYS } from '@/shared/constants'
 import { DAY_LABELS } from '@/shared/types'
@@ -199,6 +199,52 @@ export function ClientForm({
           </div>
         </div>
       </div>
+
+      {/* === Секция: Количество замен по дням === */}
+      {form.days.length > 1 && (
+        <div className="space-y-3">
+          <SectionDivider>Замены по дням</SectionDivider>
+          <p className="text-xs text-muted-foreground">
+            Сколько раз менять коврики в каждый день обслуживания
+          </p>
+          <div className="flex flex-wrap gap-3">
+            {[...form.days].sort().map((day) => {
+              const count = form.dayReplacements[day] ?? 1
+              return (
+                <div
+                  key={day}
+                  className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2"
+                >
+                  <span className="text-sm font-medium text-foreground">
+                    {DAY_LABELS[day]}
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      disabled={count <= 1}
+                      onClick={() => form.setDayReplacement(day, count - 1)}
+                      className="flex size-7 items-center justify-center rounded border border-border bg-card text-muted-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <Minus className="size-3.5" />
+                    </button>
+                    <span className="w-6 text-center text-sm font-semibold tabular-nums text-foreground">
+                      {count}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={count >= 5}
+                      onClick={() => form.setDayReplacement(day, count + 1)}
+                      className="flex size-7 items-center justify-center rounded border border-border bg-card text-muted-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <Plus className="size-3.5" />
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* === Секция: Дополнительно === */}
       <div className="space-y-3">

@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useRouteStore } from '../store'
-import { useClientStore } from '@/modules/clients'
+import { useClientStore, getClientReplacements } from '@/modules/clients'
 
 export interface DriverSummaryItem {
   driverId: string | null
@@ -27,7 +27,8 @@ export function useDriverSummary(): DriverSummaryItem[] {
       const key = stop.driverId ?? null
       const entry = map.get(key) ?? { stopCount: 0, matCount: 0 }
       entry.stopCount++
-      entry.matCount += client.mats.reduce((sum, m) => sum + m.quantity, 0)
+      const replacements = getClientReplacements(client, selectedDay)
+      entry.matCount += client.mats.reduce((sum, m) => sum + m.quantity, 0) * replacements
       map.set(key, entry)
     }
 

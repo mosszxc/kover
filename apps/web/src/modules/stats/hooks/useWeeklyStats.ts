@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useRouteStore } from '@/modules/routes'
-import { useClientStore } from '@/modules/clients'
+import { useClientStore, getClientReplacements } from '@/modules/clients'
 import type { DayOfWeek } from '@/shared/types'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 
@@ -39,9 +39,11 @@ export function useWeeklyStats(): WeeklyStats {
         if (!client || !client.isActive) continue
 
         stopCount++
+        const replacements = getClientReplacements(client, route.day)
         for (const mat of client.mats) {
-          matsBySize[mat.size] = (matsBySize[mat.size] ?? 0) + mat.quantity
-          totalArea += mat.quantity * (areaMap[mat.size] ?? 0)
+          const qty = mat.quantity * replacements
+          matsBySize[mat.size] = (matsBySize[mat.size] ?? 0) + qty
+          totalArea += qty * (areaMap[mat.size] ?? 0)
         }
       }
 

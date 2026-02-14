@@ -44,6 +44,10 @@ export function AddClientDialog() {
       }
     }
 
+    const dayReplacements = Object.keys(form.dayReplacements).length > 0
+      ? form.dayReplacements
+      : undefined
+
     const newClient: Client = {
       id: generateId(),
       originalName: buildOriginalName(form.name, form.address, form.mats),
@@ -52,6 +56,7 @@ export function AddClientDialog() {
       mats: rowsToSpecs(form.mats),
       frequency: form.frequency,
       days: [...form.days].sort(),
+      dayReplacements,
       notes: form.notes.trim(),
       isActive: true,
       createdAt: new Date().toISOString(),

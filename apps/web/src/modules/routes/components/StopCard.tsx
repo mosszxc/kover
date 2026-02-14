@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/shared/ui/select'
 import type { Client } from '@/modules/clients'
+import { getClientReplacements } from '@/modules/clients'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 import { useMemo } from 'react'
 import { useRouteStore } from '../store'
@@ -49,8 +50,9 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
   const sizes = useMatSizeStore((s) => s.sizes)
   const areaMap = Object.fromEntries(sizes.map((s) => [s.id, s.area]))
   const labelMap = Object.fromEntries(sizes.map((s) => [s.id, s.label]))
-  const area = client.mats.reduce((sum, m) => sum + m.quantity * (areaMap[m.size] ?? 0), 0)
   const selectedDay = useRouteStore((s) => s.selectedDay)
+  const replacements = getClientReplacements(client, selectedDay)
+  const area = client.mats.reduce((sum, m) => sum + m.quantity * (areaMap[m.size] ?? 0), 0) * replacements
   const toggleStopCompleted = useRouteStore((s) => s.toggleStopCompleted)
   const assignDriver = useRouteStore((s) => s.assignDriver)
   const moveStop = useRouteStore((s) => s.moveStop)
@@ -186,6 +188,11 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
       )}
 
       <div className="flex shrink-0 items-center gap-1.5">
+        {replacements > 1 && (
+          <span className="rounded bg-blue-600/20 px-1.5 py-0.5 text-xs font-semibold text-blue-400">
+            {replacements}×
+          </span>
+        )}
         {client.mats.map((mat, i) => (
           <span
             key={i}

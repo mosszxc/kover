@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useRouteStore } from '../store'
-import { useClientStore } from '@/modules/clients'
+import { useClientStore, getClientReplacements } from '@/modules/clients'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 
 export interface RouteSummary {
@@ -33,9 +33,11 @@ export function useRouteSummary(): RouteSummary {
       if (!client || !client.isActive) continue
 
       activeStopCount++
+      const replacements = getClientReplacements(client, selectedDay)
       for (const mat of client.mats) {
-        matsBySize[mat.size] = (matsBySize[mat.size] ?? 0) + mat.quantity
-        totalArea += mat.quantity * (areaMap[mat.size] ?? 0)
+        const qty = mat.quantity * replacements
+        matsBySize[mat.size] = (matsBySize[mat.size] ?? 0) + qty
+        totalArea += qty * (areaMap[mat.size] ?? 0)
       }
     }
 
