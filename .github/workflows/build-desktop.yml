@@ -10,8 +10,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  validate-config:
+    name: Validate Tauri Config
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate tauri.conf.json against schema
+        run: |
+          npm install -g ajv-cli ajv-formats
+          curl -sL "https://raw.githubusercontent.com/tauri-apps/tauri/dev/crates/tauri-config-schema/schema.json" -o /tmp/tauri-schema.json
+          ajv validate -s /tmp/tauri-schema.json -d apps/web/src-tauri/tauri.conf.json --spec=draft2020 -c ajv-formats
+
   build-windows:
     name: Build Windows Installer
+    needs: validate-config
     runs-on: windows-latest
     permissions:
       contents: write
@@ -85,6 +99,7 @@ jobs:
 
   build-macos:
     name: Build macOS (${{ matrix.target }})
+    needs: validate-config
     strategy:
       matrix:
         include:
