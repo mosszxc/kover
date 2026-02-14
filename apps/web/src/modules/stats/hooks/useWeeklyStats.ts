@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useRouteStore } from '@/modules/routes'
+import { useRouteStore, isStopSkipped } from '@/modules/routes'
 import { useClientStore, getClientReplacements } from '@/modules/clients'
 import type { DayOfWeek } from '@/shared/types'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
@@ -36,7 +36,7 @@ export function useWeeklyStats(): WeeklyStats {
 
       for (const stop of route.stops) {
         const client = clientMap.get(stop.clientId)
-        if (!client || !client.isActive) continue
+        if (!client || !client.isActive || isStopSkipped(stop)) continue
 
         stopCount++
         const replacements = getClientReplacements(client, route.day)

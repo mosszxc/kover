@@ -2,9 +2,11 @@ import { useMemo } from 'react'
 import { useRouteStore } from '../store'
 import { useClientStore, getClientReplacements } from '@/modules/clients'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
+import { isStopSkipped } from '../utils'
 
 export interface RouteSummary {
   stopCount: number
+  skippedCount: number
   totalMats: number
   matsBySize: Partial<Record<string, number>>
   totalArea: number
@@ -19,7 +21,7 @@ export function useRouteSummary(): RouteSummary {
   return useMemo(() => {
     const dayRoute = routes.find((r) => r.day === selectedDay)
     if (!dayRoute) {
-      return { stopCount: 0, totalMats: 0, matsBySize: {}, totalArea: 0 }
+      return { stopCount: 0, skippedCount: 0, totalMats: 0, matsBySize: {}, totalArea: 0 }
     }
 
     const clientMap = new Map(clients.map((c) => [c.id, c]))
@@ -29,10 +31,16 @@ export function useRouteSummary(): RouteSummary {
     let totalArea = 0
     let totalMats = 0
     let activeStopCount = 0
+    let skippedCount = 0
 
     for (const stop of dayRoute.stops) {
       const client = clientMap.get(stop.clientId)
       if (!client || !client.isActive) continue
+
+      if (isStopSkipped(stop)) {
+        skippedCount++
+        continue
+      }
 
       activeStopCount++
       const replacements = getClientReplacements(client, selectedDay)
@@ -46,6 +54,7 @@ export function useRouteSummary(): RouteSummary {
 
     return {
       stopCount: activeStopCount,
+      skippedCount,
       totalMats,
       matsBySize,
       totalArea: Math.round(totalArea * 100) / 100,

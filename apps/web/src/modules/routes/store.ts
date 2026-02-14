@@ -4,6 +4,15 @@ import { temporal } from 'zundo'
 import type { DayOfWeek } from '@/shared/types'
 import type { DayRoute, RouteStop } from './types'
 
+function getNextMonday(): string {
+  const now = new Date()
+  const day = now.getDay()
+  // JS: 0=Sun,1=Mon...6=Sat → days until next Mon
+  const daysUntil = day === 0 ? 1 : 8 - day
+  const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + daysUntil)
+  return next.toISOString().slice(0, 10)
+}
+
 interface RouteState {
   routes: DayRoute[]
   selectedDay: DayOfWeek
@@ -11,6 +20,8 @@ interface RouteState {
   addStop: (day: DayOfWeek, stop: RouteStop) => void
   removeStop: (day: DayOfWeek, stopId: string) => void
   removeClientFromAllRoutes: (clientId: string) => void
+  skipStop: (day: DayOfWeek, stopId: string) => void
+  unskipStop: (day: DayOfWeek, stopId: string) => void
   moveStop: (day: DayOfWeek, stopId: string, newPosition: number) => void
   reorderStop: (day: DayOfWeek, from: number, to: number) => void
   reorderAllStops: (day: DayOfWeek, stopIds: string[]) => void
@@ -69,6 +80,32 @@ export const useRouteStore = create<RouteState>()(
             return {
               ...route,
               stops: filtered.map((s, i) => ({ ...s, position: i })),
+            }
+          }),
+        })),
+
+      skipStop: (day, stopId) =>
+        set((state) => ({
+          routes: state.routes.map((route) => {
+            if (route.day !== day) return route
+            return {
+              ...route,
+              stops: route.stops.map((s) =>
+                s.id === stopId ? { ...s, skippedUntil: getNextMonday() } : s,
+              ),
+            }
+          }),
+        })),
+
+      unskipStop: (day, stopId) =>
+        set((state) => ({
+          routes: state.routes.map((route) => {
+            if (route.day !== day) return route
+            return {
+              ...route,
+              stops: route.stops.map((s) =>
+                s.id === stopId ? { ...s, skippedUntil: undefined } : s,
+              ),
             }
           }),
         })),
@@ -219,21 +256,24 @@ export const useRouteStore = create<RouteState>()(
     ),
     {
       name: 'kover-routes',
-      version: 3,
+      version: 4,
       migrate: (persisted: unknown, version: number) => {
         if (version < 2) {
           // v1 had blocks, v2 is flat — force re-seed
           return { routes: initialRoutes, selectedDay: 0 as DayOfWeek }
         }
-        // v2 → v3: add Saturday/Sunday routes if missing
         const state = persisted as { routes: DayRoute[]; selectedDay: DayOfWeek }
-        const existingDays = new Set(state.routes.map((r) => r.day))
-        const routes = [...state.routes]
-        for (const day of [5, 6] as DayOfWeek[]) {
-          if (!existingDays.has(day)) {
-            routes.push({ day, stops: [] })
+        let routes = [...state.routes]
+        if (version < 3) {
+          // v2 → v3: add Saturday/Sunday routes if missing
+          const existingDays = new Set(routes.map((r) => r.day))
+          for (const day of [5, 6] as DayOfWeek[]) {
+            if (!existingDays.has(day)) {
+              routes.push({ day, stops: [] })
+            }
           }
         }
+        // v3 → v4: skippedUntil field is optional, no data migration needed
         return { ...state, routes }
       },
     },

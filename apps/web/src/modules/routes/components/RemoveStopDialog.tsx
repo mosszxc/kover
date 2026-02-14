@@ -1,14 +1,15 @@
+import { useState } from 'react'
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/shared/ui/alert-dialog'
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/shared/ui/dialog'
+import { Button } from '@/shared/ui/button'
 import { X } from 'lucide-react'
 import { DAY_LABELS } from '@/shared/types'
 import type { DayOfWeek } from '@/shared/types'
@@ -22,10 +23,12 @@ interface RemoveStopDialogProps {
 
 export function RemoveStopDialog({ stopId, clientName, day }: RemoveStopDialogProps) {
   const removeStop = useRouteStore((s) => s.removeStop)
+  const skipStop = useRouteStore((s) => s.skipStop)
+  const [open, setOpen] = useState(false)
 
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
         <button
           type="button"
           aria-label={`Убрать ${clientName} из маршрута`}
@@ -33,24 +36,52 @@ export function RemoveStopDialog({ stopId, clientName, day }: RemoveStopDialogPr
         >
           <X className="size-4" />
         </button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Убрать из маршрута?</AlertDialogTitle>
-          <AlertDialogDescription>
-            {clientName} будет убран из маршрута на {DAY_LABELS[day]}. Клиент останется в базе.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Отмена</AlertDialogCancel>
-          <AlertDialogAction
-            variant="destructive"
-            onClick={() => removeStop(day, stopId)}
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Убрать из маршрута?</DialogTitle>
+          <DialogDescription>
+            {clientName} — маршрут на {DAY_LABELS[day]}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-col gap-2">
+          <Button
+            variant="outline"
+            className="justify-start"
+            onClick={() => {
+              skipStop(day, stopId)
+              setOpen(false)
+            }}
           >
-            Убрать
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+            <span className="flex flex-col items-start">
+              <span>Пропустить на эту неделю</span>
+              <span className="text-xs font-normal text-muted-foreground">
+                Вернётся автоматически в следующий {DAY_LABELS[day]}
+              </span>
+            </span>
+          </Button>
+          <Button
+            variant="destructive"
+            className="justify-start"
+            onClick={() => {
+              removeStop(day, stopId)
+              setOpen(false)
+            }}
+          >
+            <span className="flex flex-col items-start">
+              <span>Убрать навсегда</span>
+              <span className="text-xs font-normal text-destructive-foreground/70">
+                Клиент останется в базе, но пропадёт из маршрута
+              </span>
+            </span>
+          </Button>
+        </div>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="ghost">Отмена</Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

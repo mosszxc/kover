@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from 'react'
+import { useMemo, useCallback, useState } from 'react'
 import {
   DndContext,
   closestCenter,
@@ -13,10 +13,13 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
+import { ChevronDown, ChevronRight, Undo2 } from 'lucide-react'
+import { Button } from '@/shared/ui/button'
 import { useRouteStore } from '../store'
 import { useClientStore } from '@/modules/clients'
 import type { Client } from '@/modules/clients'
 import { useGeoAnomalies } from '../hooks/useGeoAnomalies'
+import { isStopSkipped } from '../utils'
 import { StopCard, type DriverOption } from './StopCard'
 
 interface StopListProps {
@@ -67,12 +70,24 @@ export function StopList({ searchQuery = '', drivers = [], driverFilter = null, 
     [dayRoute, selectedDay, reorderStop],
   )
 
-  const activeStops = dayRoute
-    ? dayRoute.stops.filter((stop) => {
-        const client = clientMap.get(stop.clientId)
-        return client?.isActive !== false
-      })
-    : []
+  const unskipStop = useRouteStore((s) => s.unskipStop)
+  const [showSkipped, setShowSkipped] = useState(false)
+
+  const { activeStops, skippedStops } = useMemo(() => {
+    if (!dayRoute) return { activeStops: [], skippedStops: [] }
+    const active: typeof dayRoute.stops = []
+    const skipped: typeof dayRoute.stops = []
+    for (const stop of dayRoute.stops) {
+      const client = clientMap.get(stop.clientId)
+      if (client?.isActive === false) continue
+      if (isStopSkipped(stop)) {
+        skipped.push(stop)
+      } else {
+        active.push(stop)
+      }
+    }
+    return { activeStops: active, skippedStops: skipped }
+  }, [dayRoute, clientMap])
 
   const activeClients = useMemo(
     () => activeStops.map((s) => clientMap.get(s.clientId)).filter(Boolean) as Client[],
@@ -80,7 +95,7 @@ export function StopList({ searchQuery = '', drivers = [], driverFilter = null, 
   )
   const anomalies = useGeoAnomalies(activeClients)
 
-  if (!dayRoute || activeStops.length === 0) {
+  if (!dayRoute || (activeStops.length === 0 && skippedStops.length === 0)) {
     return (
       <div className="py-12 text-center text-sm text-muted-foreground">
         Нет точек на этот день
@@ -107,7 +122,7 @@ export function StopList({ searchQuery = '', drivers = [], driverFilter = null, 
       )
     })
 
-  if (stops.length === 0) {
+  if (stops.length === 0 && skippedStops.length === 0) {
     return (
       <div className="py-12 text-center text-sm text-muted-foreground">
         Ничего не найдено
@@ -118,36 +133,78 @@ export function StopList({ searchQuery = '', drivers = [], driverFilter = null, 
   const stopIds = stops.map(({ stop }) => stop.id)
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragEnd={handleDragEnd}
-    >
-      <SortableContext items={stopIds} strategy={verticalListSortingStrategy}>
-        <div className="space-y-px">
-          {stops.map(({ stop, client, number }) => {
-            if (!client) return null
-            const stopIndex = dayRoute.stops.indexOf(stop)
-            const activeIndex = activeStops.indexOf(stop)
-            return (
-              <StopCard
-                key={stop.id}
-                number={number}
-                client={client}
-                stopId={stop.id}
-                driverId={stop.driverId}
-                drivers={drivers}
-                stopIndex={stopIndex}
-                isFirst={activeIndex === 0}
-                isLast={activeIndex === activeStops.length - 1}
-                isDndEnabled={!isSearching}
-                isAnomaly={anomalies.has(client.id)}
-                onEditClient={onEditClient}
-              />
-            )
-          })}
+    <>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext items={stopIds} strategy={verticalListSortingStrategy}>
+          <div className="space-y-px">
+            {stops.map(({ stop, client, number }) => {
+              if (!client) return null
+              const stopIndex = dayRoute.stops.indexOf(stop)
+              const activeIndex = activeStops.indexOf(stop)
+              return (
+                <StopCard
+                  key={stop.id}
+                  number={number}
+                  client={client}
+                  stopId={stop.id}
+                  driverId={stop.driverId}
+                  drivers={drivers}
+                  stopIndex={stopIndex}
+                  isFirst={activeIndex === 0}
+                  isLast={activeIndex === activeStops.length - 1}
+                  isDndEnabled={!isSearching}
+                  isAnomaly={anomalies.has(client.id)}
+                  onEditClient={onEditClient}
+                />
+              )
+            })}
+          </div>
+        </SortableContext>
+      </DndContext>
+
+      {skippedStops.length > 0 && (
+        <div className="mt-4 print:hidden">
+          <button
+            type="button"
+            onClick={() => setShowSkipped((v) => !v)}
+            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent"
+          >
+            {showSkipped ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
+            Пропущены на этой неделе ({skippedStops.length})
+          </button>
+          {showSkipped && (
+            <div className="mt-1 space-y-px opacity-60">
+              {skippedStops.map((stop) => {
+                const client = clientMap.get(stop.clientId)
+                if (!client) return null
+                return (
+                  <div
+                    key={stop.id}
+                    className="flex items-center gap-3 border-l-3 border-l-border p-3"
+                  >
+                    <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground line-through">
+                      {client.originalName}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="shrink-0 gap-1 text-xs"
+                      onClick={() => unskipStop(selectedDay, stop.id)}
+                    >
+                      <Undo2 className="size-3" />
+                      Вернуть
+                    </Button>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
-      </SortableContext>
-    </DndContext>
+      )}
+    </>
   )
 }
