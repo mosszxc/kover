@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { Phone, User } from 'lucide-react'
+import { DAY_LABELS } from '@/shared/types'
 import { useDriverStore } from '../store'
 import type { Driver } from '../types'
+
+const ALL_DAYS_COUNT = 5
 
 interface DriversListProps {
   onRowClick?: (driver: Driver) => void
@@ -62,6 +65,11 @@ export function DriversList({ onRowClick }: DriversListProps) {
                 <p className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Phone className="h-3 w-3" />
                   {driver.phone}
+                </p>
+              )}
+              {driver.workDays && driver.workDays.length < ALL_DAYS_COUNT && (
+                <p className="text-xs text-muted-foreground">
+                  {driver.workDays.map((d) => DAY_LABELS[d]).join(', ')}
                 </p>
               )}
             </div>

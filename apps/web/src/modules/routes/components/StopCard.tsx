@@ -12,13 +12,22 @@ import {
 } from '@/shared/ui/select'
 import type { Client } from '@/modules/clients'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
+import { useMemo } from 'react'
 import { useRouteStore } from '../store'
 import { RemoveStopDialog } from './RemoveStopDialog'
 import { TransferStopDialog } from './TransferStopDialog'
 
+import type { DayOfWeek } from '@/shared/types'
+import {
+  SelectGroup,
+  SelectLabel,
+  SelectSeparator,
+} from '@/shared/ui/select'
+
 export interface DriverOption {
   id: string
   name: string
+  workDays: DayOfWeek[]
 }
 
 interface StopCardProps {
@@ -168,29 +177,12 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
       </div>
 
       {drivers.length > 0 && (
-        <Select
-          value={driverId ?? '__none__'}
+        <DriverSelect
+          drivers={drivers}
+          selectedDay={selectedDay}
+          driverId={driverId}
           onValueChange={(value) => assignDriver(selectedDay, stopId, value === '__none__' ? null : value)}
-        >
-          <SelectTrigger
-            size="sm"
-            aria-label="Назначить водителя"
-            className={cn(
-              'w-34 shrink-0 cursor-pointer truncate text-xs print:hidden',
-              driverId
-                ? 'border-blue-600/50 bg-blue-950/50 text-blue-300'
-                : 'border-border bg-card text-muted-foreground',
-            )}
-          >
-            <SelectValue placeholder="Водитель" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="__none__">Без водителя</SelectItem>
-            {drivers.map((d) => (
-              <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        />
       )}
 
       <div className="flex shrink-0 items-center gap-1.5">
@@ -221,5 +213,63 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
         day={selectedDay}
       />
     </div>
+  )
+}
+
+interface DriverSelectProps {
+  drivers: DriverOption[]
+  selectedDay: DayOfWeek
+  driverId?: string
+  onValueChange: (value: string) => void
+}
+
+function DriverSelect({ drivers, selectedDay, driverId, onValueChange }: DriverSelectProps) {
+  const { working, notWorking } = useMemo(() => {
+    const w: DriverOption[] = []
+    const nw: DriverOption[] = []
+    for (const d of drivers) {
+      if (d.workDays.includes(selectedDay)) {
+        w.push(d)
+      } else {
+        nw.push(d)
+      }
+    }
+    return { working: w, notWorking: nw }
+  }, [drivers, selectedDay])
+
+  return (
+    <Select value={driverId ?? '__none__'} onValueChange={onValueChange}>
+      <SelectTrigger
+        size="sm"
+        aria-label="Назначить водителя"
+        className={cn(
+          'w-34 shrink-0 cursor-pointer truncate text-xs print:hidden',
+          driverId
+            ? 'border-blue-600/50 bg-blue-950/50 text-blue-300'
+            : 'border-border bg-card text-muted-foreground',
+        )}
+      >
+        <SelectValue placeholder="Водитель" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="__none__">Без водителя</SelectItem>
+        {working.map((d) => (
+          <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+        ))}
+        {notWorking.length > 0 && (
+          <>
+            <SelectSeparator />
+            <SelectGroup>
+              <SelectLabel className="text-xs text-muted-foreground">Не работают сегодня</SelectLabel>
+              {notWorking.map((d) => (
+                <SelectItem key={d.id} value={d.id} className="text-muted-foreground">
+                  {d.name}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </>
+        )}
+      </SelectContent>
+    </Select>
   )
 }

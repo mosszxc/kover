@@ -4,7 +4,10 @@ import { Button } from '@/shared/ui/button'
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from '@/shared/ui/select'
@@ -50,6 +53,19 @@ export function BulkAssignDriverDialog({ drivers, driverFilter }: BulkAssignDriv
     if (!driverFilter || driverFilter === 'unassigned') return null
     return drivers.find((d) => d.id === driverFilter)?.name ?? null
   }, [driverFilter, drivers])
+
+  const { working, notWorking } = useMemo(() => {
+    const w: DriverOption[] = []
+    const nw: DriverOption[] = []
+    for (const d of drivers) {
+      if (d.workDays.includes(selectedDay)) {
+        w.push(d)
+      } else {
+        nw.push(d)
+      }
+    }
+    return { working: w, notWorking: nw }
+  }, [drivers, selectedDay])
 
   const showFilterOption = driverFilter !== null
 
@@ -118,11 +134,24 @@ export function BulkAssignDriverDialog({ drivers, driverFilter }: BulkAssignDriv
                 <SelectValue placeholder="Выберите водителя" />
               </SelectTrigger>
               <SelectContent>
-                {drivers.map((d) => (
+                {working.map((d) => (
                   <SelectItem key={d.id} value={d.id}>
                     {d.name}
                   </SelectItem>
                 ))}
+                {notWorking.length > 0 && (
+                  <>
+                    <SelectSeparator />
+                    <SelectGroup>
+                      <SelectLabel className="text-xs text-muted-foreground">Не работают сегодня</SelectLabel>
+                      {notWorking.map((d) => (
+                        <SelectItem key={d.id} value={d.id} className="text-muted-foreground">
+                          {d.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </>
+                )}
               </SelectContent>
             </Select>
           </div>
