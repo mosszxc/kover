@@ -11,12 +11,14 @@ import {
   DialogTrigger,
 } from '@/shared/ui/dialog'
 import { optimizeRouteAsync, type OptimizationResult } from '@/shared/lib/tsp'
+import { detectGeoAnomalies } from '@/shared/lib/geoAnomalies'
 import { useRouteStore } from '@/modules/routes'
 import { useClientStore } from '@/modules/clients'
 
 export function OptimizeRouteDialog() {
   const [open, setOpen] = useState(false)
   const [result, setResult] = useState<OptimizationResult | null>(null)
+  const [anomalyCount, setAnomalyCount] = useState(0)
   const [loading, setLoading] = useState(false)
 
   const routes = useRouteStore((s) => s.routes)
@@ -27,6 +29,7 @@ export function OptimizeRouteDialog() {
   useEffect(() => {
     if (!open) {
       setResult(null)
+      setAnomalyCount(0)
       return
     }
 
@@ -34,15 +37,32 @@ export function OptimizeRouteDialog() {
     const dayRoute = routes.find((r) => r.day === selectedDay)
     if (!dayRoute) return
 
+    // Определяем аномальные клиенты (далеко от кластера)
+    const activeGeoClients = dayRoute.stops
+      .map((s) => clientMap.get(s.clientId))
+      .filter(
+        (c): c is NonNullable<typeof c> & { lat: number; lng: number } =>
+          c != null && c.isActive && c.lat != null && c.lng != null,
+      )
+    const anomalyClientIds = detectGeoAnomalies(activeGeoClients)
+
     const points = dayRoute.stops
       .filter((stop) => {
         const client = clientMap.get(stop.clientId)
-        return client?.isActive && client.lat != null && client.lng != null
+        return client?.isActive && client.lat != null && client.lng != null && !anomalyClientIds.has(client.id)
       })
       .map((stop) => {
         const client = clientMap.get(stop.clientId)!
         return { id: stop.id, lat: client.lat!, lng: client.lng! }
       })
+
+    // Остановки аномальных клиентов — добавим в конец после оптимизации
+    const anomalyStopIds = dayRoute.stops
+      .filter((stop) => {
+        const client = clientMap.get(stop.clientId)
+        return client?.isActive && client.lat != null && client.lng != null && anomalyClientIds.has(client.id)
+      })
+      .map((stop) => stop.id)
 
     if (points.length < 3) return
 
@@ -51,6 +71,10 @@ export function OptimizeRouteDialog() {
 
     optimizeRouteAsync(points).then((res) => {
       if (!cancelled) {
+        if (anomalyStopIds.length > 0) {
+          res.optimizedIds = [...res.optimizedIds, ...anomalyStopIds]
+        }
+        setAnomalyCount(anomalyStopIds.length)
         setResult(res)
         setLoading(false)
       }
@@ -143,9 +167,15 @@ export function OptimizeRouteDialog() {
             )}
 
             <p className="text-sm text-muted-foreground">
-              Оптимизировано {result.optimizedIds.length} точек с координатами.
+              Оптимизировано {result.optimizedIds.length - anomalyCount} точек с координатами.
               Точки без координат останутся в конце маршрута.
             </p>
+
+            {anomalyCount > 0 && (
+              <p className="text-sm text-amber-400">
+                {anomalyCount} {anomalyCount === 1 ? 'аномальный адрес перемещён' : 'аномальных адреса перемещены'} в конец маршрута.
+              </p>
+            )}
 
             <p className="text-xs text-slate-500">
               Метод: {result.method === 'road' ? 'по дорогам (OSRM)' : 'по прямой (fallback)'}
