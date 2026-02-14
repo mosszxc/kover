@@ -1,6 +1,7 @@
 import { NavLink } from "react-router"
-import { MapPin, Users, BarChart3, Map, Truck, Settings, Ruler, Database } from "lucide-react"
+import { MapPin, Users, BarChart3, Map, Truck, Settings, Ruler, Database, LogOut } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
+import { useAuth } from "@/modules/auth"
 
 const navItems = [
   { to: "/", label: "Маршрут", icon: MapPin },
@@ -14,6 +15,8 @@ const navItems = [
 ] as const
 
 export function Sidebar() {
+  const { logout } = useAuth()
+
   return (
     <aside className="no-print hidden md:flex md:w-60 md:flex-col md:fixed md:inset-y-0 bg-card border-r border-border">
       <div className="flex h-14 items-center px-4">
@@ -40,6 +43,16 @@ export function Sidebar() {
           </NavLink>
         ))}
       </nav>
+
+      <div className="px-2 py-2 border-t border-border">
+        <button
+          onClick={logout}
+          className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-white transition-colors duration-150 cursor-pointer"
+        >
+          <LogOut className="h-5 w-5 shrink-0" />
+          Выйти
+        </button>
+      </div>
     </aside>
   )
 }
