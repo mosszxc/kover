@@ -1,0 +1,16 @@
+{
+  "agent": {
+    "model": "anthropic/claude-sonnet-4-5-20250929"
+  },
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "dmPolicy": "pairing",
+      "groups": {
+        "*": {
+          "requireMention": true
+        }
+      }
+    }
+  }
+}
