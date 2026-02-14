@@ -28,6 +28,11 @@
       "showMenuOnLeftClick": false
     }
   },
+  "plugins": {
+    "notification": {
+      "registerActionTypes": []
+    }
+  },
   "bundle": {
     "active": true,
     "targets": "all",

@@ -9,6 +9,7 @@ use tauri::{
 
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_notification::init())
         .setup(|app| {
             let open = MenuItemBuilder::with_id("open", "Открыть").build(app)?;
             let routes = MenuItemBuilder::with_id("routes", "Маршруты на сегодня").build(app)?;

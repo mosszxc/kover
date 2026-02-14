@@ -15,6 +15,9 @@ interface SettingsState {
   setFileSyncEnabled: (enabled: boolean) => void
   setFileSyncFileName: (name: string) => void
   setLastFileSyncAt: (timestamp: string | null) => void
+
+  notificationsEnabled: boolean
+  setNotificationsEnabled: (enabled: boolean) => void
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -45,6 +48,12 @@ export const useSettingsStore = create<SettingsState>()(
         syncSettingChange('fileSyncFileName', name)
       },
       setLastFileSyncAt: (timestamp) => set({ lastFileSyncAt: timestamp }),
+
+      notificationsEnabled: true,
+      setNotificationsEnabled: (enabled) => {
+        set({ notificationsEnabled: enabled })
+        syncSettingChange('notificationsEnabled', enabled)
+      },
     }),
     { name: 'kover-settings' },
   ),
