@@ -5,6 +5,9 @@ interface SettingsState {
   geocodeCity: string
   setGeocodeCity: (city: string) => void
 
+  showWeekends: boolean
+  setShowWeekends: (show: boolean) => void
+
   fileSyncEnabled: boolean
   fileSyncFileName: string
   lastFileSyncAt: string | null
@@ -18,6 +21,9 @@ export const useSettingsStore = create<SettingsState>()(
     (set) => ({
       geocodeCity: '',
       setGeocodeCity: (city) => set({ geocodeCity: city.trim() }),
+
+      showWeekends: true,
+      setShowWeekends: (show) => set({ showWeekends: show }),
 
       fileSyncEnabled: false,
       fileSyncFileName: '',

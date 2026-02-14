@@ -1,7 +1,7 @@
 import { Plus, MapPin, Loader2, Minus } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
-import { ALL_WORK_DAYS } from '@/shared/constants'
 import { DAY_LABELS } from '@/shared/types'
+import { useVisibleDays } from '@/shared/hooks/useVisibleDays'
 import type { ClientFormState } from '../hooks/useClientForm'
 import { MatRowCard } from './MatRowCard'
 import { FrequencyPills } from './FrequencyPills'
@@ -36,6 +36,7 @@ export function ClientForm({
   onGeocode,
   geocoding,
 }: ClientFormProps) {
+  const visibleDays = useVisibleDays()
   const idPrefix = mode === 'add' ? 'client' : 'edit-client'
 
   return (
@@ -174,7 +175,7 @@ export function ClientForm({
             </span>
           </span>
           <div className="flex gap-2">
-            {ALL_WORK_DAYS.map((day) => {
+            {visibleDays.map((day) => {
               const isSelected = form.days.includes(day)
               const isAtLimit = form.days.length >= form.frequency && !isSelected
               return (

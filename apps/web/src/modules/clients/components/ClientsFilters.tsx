@@ -2,7 +2,8 @@ import { X } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { DAY_LABELS } from '@/shared/types'
 import type { DayOfWeek } from '@/shared/types'
-import { FREQUENCY_OPTIONS, ALL_WORK_DAYS } from '@/shared/constants'
+import { FREQUENCY_OPTIONS } from '@/shared/constants'
+import { useVisibleDays } from '@/shared/hooks/useVisibleDays'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 
 export type StatusFilter = 'all' | 'active' | 'paused'
@@ -34,6 +35,8 @@ export function ClientsFilters({
   selectedStatus,
   onStatusChange,
 }: ClientsFiltersProps) {
+  const visibleDays = useVisibleDays()
+
   const hasFilters =
     selectedDays.length > 0 ||
     selectedFrequency !== null ||
@@ -70,7 +73,7 @@ export function ClientsFilters({
       {/* Day filter */}
       <div className="flex items-center gap-1.5">
         <span className="text-xs font-medium text-muted-foreground">День:</span>
-        {ALL_WORK_DAYS.map((day) => (
+        {visibleDays.map((day) => (
           <button
             key={day}
             type="button"

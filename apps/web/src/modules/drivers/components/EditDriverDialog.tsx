@@ -22,11 +22,10 @@ import {
 } from '@/shared/ui/alert-dialog'
 import type { DayOfWeek } from '@/shared/types'
 import { DAY_LABELS } from '@/shared/types'
+import { useVisibleDays } from '@/shared/hooks/useVisibleDays'
 import { cn } from '@/shared/lib/utils'
 import { useDriverStore } from '../store'
 import type { Driver } from '../types'
-
-const ALL_DAYS: DayOfWeek[] = [0, 1, 2, 3, 4, 5, 6]
 
 interface FormErrors {
   name?: string
@@ -41,17 +40,18 @@ interface EditDriverDialogProps {
 
 export function EditDriverDialog({ driver, open, onOpenChange, onDelete }: EditDriverDialogProps) {
   const updateDriver = useDriverStore((s) => s.updateDriver)
+  const visibleDays = useVisibleDays()
 
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
-  const [workDays, setWorkDays] = useState<DayOfWeek[]>([...ALL_DAYS])
+  const [workDays, setWorkDays] = useState<DayOfWeek[]>([...visibleDays])
   const [errors, setErrors] = useState<FormErrors>({})
 
   useEffect(() => {
     if (open && driver) {
       setName(driver.name)
       setPhone(driver.phone)
-      setWorkDays(driver.workDays ?? [...ALL_DAYS])
+      setWorkDays(driver.workDays ?? [...visibleDays])
       setErrors({})
     }
   }, [open, driver])
@@ -144,7 +144,7 @@ export function EditDriverDialog({ driver, open, onOpenChange, onDelete }: EditD
           <div>
             <span className={labelClass}>Рабочие дни</span>
             <div className="flex gap-1.5">
-              {ALL_DAYS.map((day) => (
+              {visibleDays.map((day) => (
                 <button
                   key={day}
                   type="button"

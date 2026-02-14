@@ -1,10 +1,9 @@
 import { useEffect } from 'react'
 import { cn } from '@/shared/lib/utils'
 import { type DayOfWeek, DAY_LABELS, DAY_LABELS_FULL } from '@/shared/types'
+import { useVisibleDays } from '@/shared/hooks/useVisibleDays'
 import { useRouteStore } from '../store'
 import { useClientStore } from '@/modules/clients'
-
-const DAYS: DayOfWeek[] = [0, 1, 2, 3, 4, 5, 6]
 
 function getTodayAsDay(): DayOfWeek {
   const jsDay = new Date().getDay()
@@ -16,14 +15,22 @@ export function DaySwitcher() {
   const selectedDay = useRouteStore((s) => s.selectedDay)
   const selectDay = useRouteStore((s) => s.selectDay)
   const clients = useClientStore((s) => s.clients)
+  const visibleDays = useVisibleDays()
 
   useEffect(() => {
-    selectDay(getTodayAsDay())
-  }, [selectDay])
+    const today = getTodayAsDay()
+    selectDay(visibleDays.includes(today) ? today : (visibleDays[0] ?? 0))
+  }, [selectDay, visibleDays])
+
+  useEffect(() => {
+    if (!visibleDays.includes(selectedDay)) {
+      selectDay(visibleDays[0] ?? 0)
+    }
+  }, [visibleDays, selectedDay, selectDay])
 
   return (
     <nav className="flex gap-1 print:hidden" aria-label="Дни недели">
-      {DAYS.map((day) => {
+      {visibleDays.map((day) => {
         const isActive = selectedDay === day
         const count = clients.filter((c) => c.isActive && c.days.includes(day)).length
 
