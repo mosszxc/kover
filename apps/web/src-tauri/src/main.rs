@@ -12,6 +12,7 @@ fn main() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_autostart::Builder::new().build())
         .setup(|app| {
             let open = MenuItemBuilder::with_id("open", "Открыть").build(app)?;
             let routes = MenuItemBuilder::with_id("routes", "Маршруты на сегодня").build(app)?;
@@ -77,6 +78,14 @@ fn main() {
                     let _ = window_for_close.hide();
                 }
             });
+
+            // If launched with --minimized, hide window to tray
+            let args: Vec<String> = std::env::args().collect();
+            if args.iter().any(|a| a == "--minimized") {
+                if let Some(window) = app.get_webview_window("main") {
+                    let _ = window.hide();
+                }
+            }
 
             Ok(())
         })
