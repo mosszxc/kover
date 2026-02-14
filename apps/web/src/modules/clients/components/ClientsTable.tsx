@@ -188,6 +188,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
         {rows.map((row) => {
           const client = row.original
           const isAnomaly = anomalyIds?.has(client.id) ?? false
+          const hasNoCoords = client.lat == null || client.lng == null
           const paused = isClientPaused(client)
           const isActive = !paused
           const entries = groupMats(client)
@@ -198,8 +199,13 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
               key={client.id}
               onClick={() => onRowClick?.(client)}
               className={cn(
-                'rounded-lg border border-border px-4 py-3 transition-colors',
+                'rounded-lg border px-4 py-3 transition-colors',
                 onRowClick && 'cursor-pointer',
+                isAnomaly
+                  ? 'border-amber-500/40 bg-amber-500/5'
+                  : hasNoCoords
+                    ? 'border-red-500/30 bg-red-500/5'
+                    : 'border-border',
                 isActive ? 'hover:bg-muted/50' : 'opacity-60 hover:bg-muted/30',
               )}
             >
@@ -209,14 +215,18 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                   <span className="truncate font-medium text-foreground">{client.name}</span>
                   <span className="hidden text-muted-foreground sm:inline">·</span>
                   <span className="hidden min-w-0 items-center gap-1 text-sm text-muted-foreground sm:inline-flex">
-                    <span className="truncate">{client.address}</span>
+                    <span className={cn('truncate', isAnomaly && 'text-amber-400', hasNoCoords && !isAnomaly && 'text-red-400')}>{client.address}</span>
                     {isAnomaly ? (
                       <span title="Далеко от остальных — проверьте адрес">
                         <TriangleAlert className="size-3.5 shrink-0 text-amber-400" />
                       </span>
-                    ) : client.lat != null && client.lng != null ? (
+                    ) : hasNoCoords ? (
+                      <span title="Адрес не геокодирован">
+                        <MapPin className="size-3.5 shrink-0 text-red-400" />
+                      </span>
+                    ) : (
                       <MapPin className="size-3.5 shrink-0 text-green-400" />
-                    ) : null}
+                    )}
                   </span>
                 </div>
                 <div className="flex shrink-0 gap-1">
@@ -249,14 +259,18 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
 
               {/* Mobile: address on second line */}
               <div className="mt-1 flex items-center gap-1 text-sm text-muted-foreground sm:hidden">
-                <span className="truncate">{client.address}</span>
+                <span className={cn('truncate', isAnomaly && 'text-amber-400', hasNoCoords && !isAnomaly && 'text-red-400')}>{client.address}</span>
                 {isAnomaly ? (
                   <span title="Далеко от остальных — проверьте адрес">
                     <TriangleAlert className="size-3.5 shrink-0 text-amber-400" />
                   </span>
-                ) : client.lat != null && client.lng != null ? (
+                ) : hasNoCoords ? (
+                  <span title="Адрес не геокодирован">
+                    <MapPin className="size-3.5 shrink-0 text-red-400" />
+                  </span>
+                ) : (
                   <MapPin className="size-3.5 shrink-0 text-green-400" />
-                ) : null}
+                )}
               </div>
 
               {/* Line 2: mats · area · frequency | status */}
