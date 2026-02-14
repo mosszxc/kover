@@ -4,6 +4,7 @@
   "packageManager": "pnpm@9.15.4",
   "scripts": {
     "dev:web": "turbo run dev --filter=@kover/web",
+    "dev:pb": "turbo run dev --filter=@kover/pocketbase",
     "build": "turbo run build",
     "lint": "turbo run lint"
   },
