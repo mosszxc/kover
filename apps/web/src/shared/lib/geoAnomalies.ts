@@ -4,7 +4,7 @@ import { haversine, type GeoPoint } from './tsp'
 const PAIR_DISTANCE_THRESHOLD_KM = 15
 
 /** Абсолютный порог (км) от медианного центра — точки дальше всегда аномалии */
-const ABSOLUTE_DISTANCE_THRESHOLD_KM = 25
+const ABSOLUTE_DISTANCE_THRESHOLD_KM = 50
 
 interface GeoEntity {
   id: string
