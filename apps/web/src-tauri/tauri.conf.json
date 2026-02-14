@@ -31,6 +31,10 @@
   "plugins": {
     "notification": {
       "registerActionTypes": []
+    },
+    "autostart": {
+      "macosExtraArgs": [],
+      "windowsExtraArgs": []
     }
   },
   "bundle": {
