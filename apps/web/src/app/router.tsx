@@ -20,6 +20,9 @@ const MapPage = lazy(() =>
 const DatabasePage = lazy(() =>
   import("@/pages/DatabasePage").then((m) => ({ default: m.DatabasePage })),
 )
+const GuidePage = lazy(() =>
+  import("@/pages/GuidePage").then((m) => ({ default: m.GuidePage })),
+)
 
 function LazyPage({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<LoadingFallback />}>{children}</Suspense>
@@ -78,6 +81,14 @@ export const router = createBrowserRouter([
             element: (
               <LazyPage>
                 <DatabasePage />
+              </LazyPage>
+            ),
+          },
+          {
+            path: "/guide",
+            element: (
+              <LazyPage>
+                <GuidePage />
               </LazyPage>
             ),
           },
