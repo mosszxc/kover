@@ -320,21 +320,47 @@ Throughput guard: closed/created >= 0.7 за 7 дней. Не прошёл → "
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                                                             │
-│  SPEC_маршруты_v1.md  ← Спецификация продукта:              │
-│    • Модель данных (типы, поля, связи)                     │
-│    • Бизнес-правила                                        │
-│    • User stories                                          │
+│  engineering/tech-spec.md  ← ЕДИНСТВЕННЫЙ источник для:     │
+│    • Схемы БД (таблицы, поля, типы)                        │
+│    • API контракты (endpoints, request/response)            │
+│    • Алгоритмы                                             │
 │                                                             │
 │  design/roadmap.md  ← ЧТО и КОГДА делать                   │
-│    • Итерации, задачи                                      │
+│    • Ссылки на tech spec (НЕ дублирует схемы)              │
 │                                                             │
-│  design-system/kover/MASTER.md  ← КАК выглядит              │
-│    • Цвета, типографика, компоненты                        │
+│  engineering/architecture.md  ← КАК писать код              │
+│    • Архитектура: api → domains → pipelines                │
 │                                                             │
 │  Issues  ← Конкретная задача                                │
-│    • Ссылается на spec и roadmap                           │
+│    • Ссылается на tech spec и roadmap                      │
 │                                                             │
-│  Приоритет: spec > roadmap > issues                        │
+│  Приоритет: tech-spec > roadmap > issues                   │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Миграции БД
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│  ПРАВИЛО: миграция + код = ОДИН PR (атомарно)              │
+│                                                             │
+│  При изменении схемы:                                       │
+│  1. Обновить engineering/tech-spec.md                        │
+│  2. Создать миграцию (apply_migration)                      │
+│  3. Обновить domains/*/repository.py                        │
+│  4. Обновить domains/*/schemas.py                           │
+│                                                             │
+│  Шаблон миграции:                                           │
+│  1. CREATE TABLE                                            │
+│  2. ALTER TABLE ... ENABLE ROW LEVEL SECURITY               │
+│  3. CREATE POLICY (anon + service_role)                     │
+│  4. GRANT TO anon, authenticated, service_role              │
+│                                                             │
+│  ❌ Без GRANT → "permission denied" (42501)                 │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -367,23 +393,30 @@ Throughput guard: closed/created >= 0.7 за 7 дней. Не прошёл → "
 ## Структура проекта
 
 ```
-kover/
+rubick/
 ├── CLAUDE.md              # Инструкции для AI-агента
 ├── VIBE_SYSTEM.md         # Этот документ
-├── SPEC_маршруты_v1.md    # Спецификация продукта
 ├── apps/
+│   ├── api/               # Python backend (FastAPI + Temporal)
+│   │   └── src/
+│   │       ├── api/           # HTTP роутеры
+│   │       ├── domains/       # service + repository + schemas
+│   │       ├── pipelines/     # Temporal workflows
+│   │       ├── core/          # Config, dependencies
+│   │       ├── clients/       # External API clients
+│   │       └── workers/       # Temporal workers
 │   └── web/               # React frontend (Vite + Tailwind v4)
-│       └── src/
-│           ├── components/    # UI компоненты
-│           ├── pages/         # Страницы
-│           ├── store/         # Zustand stores
-│           ├── types/         # TypeScript интерфейсы
-│           ├── data/          # Seed data
-│           └── lib/           # Утилиты
-├── design/
-│   └── roadmap.md         # Итерации и задачи
-├── design-system/
-│   └── kover/MASTER.md    # Дизайн-система
+├── packages/
+│   ├── types/             # Shared TypeScript types
+│   └── shared/            # Shared utilities
+├── docs/
+│   ├── engineering/
+│   │   ├── tech-spec.md       # DB + API source of truth
+│   │   └── architecture.md    # How to write code
+│   ├── design/
+│   │   └── roadmap.md         # What and when
+│   └── product/
+│       └── process-map.md     # Business processes
 ├── scripts/
 │   ├── fix                # Setup worktree for issue
 │   ├── ship               # Commit → PR → merge
@@ -395,7 +428,10 @@ kover/
 ├── .github/
 │   └── workflows/
 │       ├── deploy-production.yml
-│       └── deploy-staging.yml
+│       ├── deploy-staging.yml
+│       ├── lint-migrations.yml
+│       └── schema-validation.yml
+├── supabase/              # Migrations
 ├── turbo.json
 └── pnpm-workspace.yaml
 ```
