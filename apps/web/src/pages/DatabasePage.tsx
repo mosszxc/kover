@@ -5,7 +5,7 @@ import { useClientStore } from '@/modules/clients'
 import { useDriverStore } from '@/modules/drivers'
 import { useRouteStore } from '@/modules/routes'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
-import { useSyncStore, migrateWithProgress } from '@/shared/lib/sync'
+import { useSyncStore, migrateWithProgress, syncWithProgress } from '@/shared/lib/sync'
 import { DAY_LABELS_FULL } from '@/shared/types'
 import type { DayOfWeek } from '@/shared/types'
 
@@ -80,6 +80,10 @@ export function DatabasePage() {
     (...args: Parameters<typeof migrateWithProgress>) => migrateWithProgress(...args),
     [],
   )
+  const handleSync = useCallback(
+    (...args: Parameters<typeof syncWithProgress>) => syncWithProgress(...args),
+    [],
+  )
 
-  return <DatabaseOverview stats={stats} sheets={sheets} isMigrated={isMigrated} onMigrate={handleMigrate} />
+  return <DatabaseOverview stats={stats} sheets={sheets} isMigrated={isMigrated} onMigrate={handleMigrate} onSync={handleSync} />
 }

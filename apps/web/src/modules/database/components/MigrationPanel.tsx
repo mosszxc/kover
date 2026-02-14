@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { Database, CheckCircle2, AlertCircle, Loader2, Upload } from 'lucide-react'
+import { Database, CheckCircle2, AlertCircle, Loader2, Upload, RefreshCw } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import type { MigrationResult, MigrationCollectionResult } from '@/shared/lib/sync'
 
@@ -8,6 +8,9 @@ type MigrationStatus = 'idle' | 'running' | 'done' | 'error'
 interface MigrationPanelProps {
   isMigrated: boolean
   onMigrate: (
+    onProgress: (current: MigrationCollectionResult, index: number, total: number) => void,
+  ) => Promise<MigrationResult>
+  onSync: (
     onProgress: (current: MigrationCollectionResult, index: number, total: number) => void,
   ) => Promise<MigrationResult>
 }
@@ -22,17 +25,19 @@ const COLLECTION_LABELS: Record<string, string> = {
   route_stops: 'Остановки маршрутов',
 }
 
-export function MigrationPanel({ isMigrated, onMigrate }: MigrationPanelProps) {
+export function MigrationPanel({ isMigrated, onMigrate, onSync }: MigrationPanelProps) {
   const [status, setStatus] = useState<MigrationStatus>(isMigrated ? 'done' : 'idle')
   const [result, setResult] = useState<MigrationResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [currentCollection, setCurrentCollection] = useState<string | null>(null)
   const [progress, setProgress] = useState({ current: 0, total: 0 })
+  const [isSyncing, setIsSyncing] = useState(false)
 
   const handleMigrate = useCallback(async () => {
     setStatus('running')
     setError(null)
     setResult(null)
+    setIsSyncing(false)
 
     try {
       const migrationResult = await onMigrate((cur, index, total) => {
@@ -47,6 +52,25 @@ export function MigrationPanel({ isMigrated, onMigrate }: MigrationPanelProps) {
     }
   }, [onMigrate])
 
+  const handleSync = useCallback(async () => {
+    setStatus('running')
+    setError(null)
+    setResult(null)
+    setIsSyncing(true)
+
+    try {
+      const syncResult = await onSync((cur, index, total) => {
+        setCurrentCollection(cur.collection)
+        setProgress({ current: index + 1, total })
+      })
+      setResult(syncResult)
+      setStatus('done')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Неизвестная ошибка')
+      setStatus('error')
+    }
+  }, [onSync])
+
   return (
     <div className="rounded-lg border border-border bg-card p-4">
       <div className="flex items-center gap-3 mb-4">
@@ -56,7 +80,9 @@ export function MigrationPanel({ isMigrated, onMigrate }: MigrationPanelProps) {
         <div>
           <h2 className="text-sm font-medium text-foreground">Миграция в PocketBase</h2>
           <p className="text-xs text-muted-foreground">
-            Одноразовая загрузка данных из localStorage в PocketBase
+            {isMigrated || status === 'done'
+              ? 'Загрузка и актуализация данных из localStorage в PocketBase'
+              : 'Одноразовая загрузка данных из localStorage в PocketBase'}
           </p>
         </div>
       </div>
@@ -73,7 +99,7 @@ export function MigrationPanel({ isMigrated, onMigrate }: MigrationPanelProps) {
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
             <span>
-              Загрузка {progress.current}/{progress.total}
+              {isSyncing ? 'Актуализация' : 'Загрузка'} {progress.current}/{progress.total}
               {currentCollection && ` — ${COLLECTION_LABELS[currentCollection] ?? currentCollection}`}
             </span>
           </div>
@@ -88,9 +114,15 @@ export function MigrationPanel({ isMigrated, onMigrate }: MigrationPanelProps) {
 
       {status === 'done' && (
         <div className="space-y-3">
-          <div className="flex items-center gap-2 text-sm text-green-500">
-            <CheckCircle2 className="h-4 w-4" />
-            <span>Данные загружены в PocketBase</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm text-green-500">
+              <CheckCircle2 className="h-4 w-4" />
+              <span>Данные загружены в PocketBase</span>
+            </div>
+            <Button onClick={handleSync} variant="outline" size="sm" className="gap-2">
+              <RefreshCw className="h-3.5 w-3.5" />
+              Актуализировать
+            </Button>
           </div>
           {result && (
             <div className="space-y-1">
@@ -103,6 +135,7 @@ export function MigrationPanel({ isMigrated, onMigrate }: MigrationPanelProps) {
                     </span>
                     <span className="text-foreground">
                       {c.created > 0 && <span className="text-green-500">{c.created} создано</span>}
+                      {c.updated > 0 && <span className="text-blue-500 ml-2">{c.updated} обновлено</span>}
                       {c.skipped > 0 && (
                         <span className="text-muted-foreground ml-2">{c.skipped} пропущено</span>
                       )}
@@ -114,6 +147,7 @@ export function MigrationPanel({ isMigrated, onMigrate }: MigrationPanelProps) {
                 <span className="text-muted-foreground">Итого</span>
                 <span className="text-foreground">
                   {result.totalCreated} создано
+                  {result.totalUpdated > 0 && `, ${result.totalUpdated} обновлено`}
                   {result.totalSkipped > 0 && `, ${result.totalSkipped} пропущено`}
                   {result.totalFailed > 0 && `, ${result.totalFailed} ошибок`}
                 </span>
@@ -132,7 +166,7 @@ export function MigrationPanel({ isMigrated, onMigrate }: MigrationPanelProps) {
             <AlertCircle className="h-4 w-4" />
             <span>{error}</span>
           </div>
-          <Button onClick={handleMigrate} variant="outline" className="gap-2">
+          <Button onClick={isSyncing ? handleSync : handleMigrate} variant="outline" className="gap-2">
             <Upload className="h-4 w-4" />
             Повторить
           </Button>

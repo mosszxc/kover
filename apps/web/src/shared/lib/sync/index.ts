@@ -1,4 +1,4 @@
-export { registerSync, initSync, destroySync, migrateLocalStorageToPb, migrateWithProgress } from './engine'
+export { registerSync, initSync, destroySync, migrateLocalStorageToPb, migrateWithProgress, syncWithProgress } from './engine'
 export type { MigrationResult, MigrationCollectionResult } from './engine'
 export { registerAllSyncs } from './register'
 export { useSyncStore } from './syncStore'
