@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { supabase, isSupabaseConfigured } from '@/shared/lib/supabase'
+import { notify } from '@/shared/lib/notifications'
 import { useSyncStore } from './syncStore'
 import { fetchAll, subscribeToTable } from './engine'
 import {
@@ -96,11 +97,21 @@ export function useSyncProvider() {
     const handleOnline = () => {
       if (useSyncStore.getState().status === 'offline') {
         setStatus('idle')
+        notify({
+          title: 'Kover',
+          body: 'Соединение восстановлено, данные синхронизируются',
+        })
         // Re-hydrate on reconnect
         hydrate()
       }
     }
-    const handleOffline = () => setStatus('offline')
+    const handleOffline = () => {
+      setStatus('offline')
+      notify({
+        title: 'Kover — Нет соединения',
+        body: 'Работа продолжается в автономном режиме',
+      })
+    }
 
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
@@ -180,6 +191,9 @@ async function hydrateSettings() {
   }
   if (settingsMap.has('fileSyncFileName')) {
     updates.fileSyncFileName = settingsMap.get('fileSyncFileName') as string
+  }
+  if (settingsMap.has('notificationsEnabled')) {
+    updates.notificationsEnabled = settingsMap.get('notificationsEnabled') as boolean
   }
 
   if (Object.keys(updates).length > 0) {
@@ -376,6 +390,7 @@ function applySettingChange(row: Row<'settings'>) {
     showWeekends: 'showWeekends',
     fileSyncEnabled: 'fileSyncEnabled',
     fileSyncFileName: 'fileSyncFileName',
+    notificationsEnabled: 'notificationsEnabled',
   }
 
   const storeKey = settingsKeyMap[key]
