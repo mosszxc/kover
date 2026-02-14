@@ -10,6 +10,7 @@ export interface MatRow {
 export interface FormErrors {
   name?: string
   mats?: string
+  days?: string
 }
 
 export function emptyMat(): MatRow {
@@ -39,9 +40,40 @@ export function buildOriginalName(name: string, address: string, mats: MatRow[])
   return parts.join(' ')
 }
 
-export function validateClientForm(name: string, mats: MatRow[]): FormErrors {
+export function validateClientForm(
+  name: string,
+  mats: MatRow[],
+  days: readonly unknown[] = [],
+  frequency: number = 1,
+): FormErrors {
   const e: FormErrors = {}
   if (!name.trim()) e.name = 'Название обязательно'
   if (mats.length === 0) e.mats = 'Добавьте хотя бы один коврик'
+  if (days.length > 0 && days.length < frequency) {
+    const diff = frequency - days.length
+    e.days = `Выберите ещё ${diff} ${diff === 1 ? 'день' : diff < 5 ? 'дня' : 'дней'}`
+  }
   return e
+}
+
+export function validateField(
+  field: keyof FormErrors,
+  name: string,
+  mats: MatRow[],
+  days: readonly unknown[] = [],
+  frequency: number = 1,
+): string | undefined {
+  switch (field) {
+    case 'name':
+      return !name.trim() ? 'Название обязательно' : undefined
+    case 'mats':
+      return mats.length === 0 ? 'Добавьте хотя бы один коврик' : undefined
+    case 'days': {
+      if (days.length > 0 && days.length < frequency) {
+        const diff = frequency - days.length
+        return `Выберите ещё ${diff} ${diff === 1 ? 'день' : diff < 5 ? 'дня' : 'дней'}`
+      }
+      return undefined
+    }
+  }
 }
