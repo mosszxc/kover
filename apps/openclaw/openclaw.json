@@ -1,6 +1,21 @@
 {
   "agent": {
-    "model": "anthropic/claude-sonnet-4-5-20250929"
+    "model": "openai/gpt-4o"
+  },
+  "tools": {
+    "media": {
+      "audio": {
+        "enabled": true,
+        "maxBytes": 20971520,
+        "timeoutSeconds": 60,
+        "models": [
+          {
+            "provider": "openai",
+            "model": "gpt-4o-mini-transcribe"
+          }
+        ]
+      }
+    }
   },
   "channels": {
     "telegram": {
