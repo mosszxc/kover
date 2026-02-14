@@ -37,7 +37,7 @@
       "windowsExtraArgs": []
     },
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDFFOTE1Q0E3MzNBQUVBMEMKUldRTTZxb3pwMXlSSGdkY1VJZm1Yb2g3VEdadEw3bCtoemNBci9IVnZhZC9MOWdueE1xWmI0aVIK",
+      "pubkey": "RWRL+aOS1eHwaT/bjWQlzEyh7AhpetZyjltSa2/H0BIcCsaNd2kmN0H/",
       "endpoints": [
         "https://github.com/mosszxc/kover/releases/latest/download/latest.json"
       ]
