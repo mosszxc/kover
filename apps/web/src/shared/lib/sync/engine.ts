@@ -46,6 +46,18 @@ export async function initSync(): Promise<void> {
     return
   }
 
+  // Validate auth token server-side before syncing
+  if (pb.authStore.isValid) {
+    try {
+      await pb.collection('users').authRefresh()
+    } catch {
+      console.warn('[sync] Auth token invalid, clearing session')
+      pb.authStore.clear()
+      sync.setStatus('offline')
+      return
+    }
+  }
+
   try {
     // Hydrate all stores from PocketBase
     for (const { adapter, store } of registry) {
@@ -73,6 +85,7 @@ export async function initSync(): Promise<void> {
     initialized = true
   } catch (err) {
     console.error('[sync] Init failed:', err)
+    sync.setStatus('offline')
     sync.setError(err instanceof Error ? err.message : 'Sync init failed')
   }
 }

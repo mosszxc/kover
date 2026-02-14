@@ -1,6 +1,8 @@
 import PocketBase from 'pocketbase'
 
-const PB_URL = import.meta.env.VITE_POCKETBASE_URL || 'http://127.0.0.1:8090'
+// In dev: empty string = same-origin (requests go through Vite proxy)
+// In prod: set VITE_POCKETBASE_URL or use reverse proxy
+const PB_URL = import.meta.env.VITE_POCKETBASE_URL || '/'
 
 export const pb = new PocketBase(PB_URL)
 
