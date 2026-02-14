@@ -1,12 +1,16 @@
-import { useMemo } from 'react'
-import { DatabaseOverview } from '@/modules/database'
+import { useMemo, useCallback } from 'react'
+import { DatabaseOverview, MigrationPanel } from '@/modules/database'
 import type { SheetData, DatabaseStats } from '@/modules/database'
 import { useClientStore } from '@/modules/clients'
 import { useDriverStore } from '@/modules/drivers'
 import { useRouteStore } from '@/modules/routes'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
+import { useSettingsStore } from '@/shared/stores/settingsStore'
+import { useChangeLogStore } from '@/shared/stores/changelogStore'
+import { useServiceLogStore } from '@/shared/stores/serviceLogStore'
 import { DAY_LABELS_FULL } from '@/shared/types'
 import type { DayOfWeek } from '@/shared/types'
+import type { LocalData } from '@/shared/lib/sync'
 
 export function DatabasePage() {
   const clients = useClientStore((s) => s.clients)
@@ -74,5 +78,31 @@ export function DatabasePage() {
     return [clientSheet, driverSheet, routeSheet, matSizeSheet]
   }, [clients, drivers, routes, matSizes])
 
-  return <DatabaseOverview stats={stats} sheets={sheets} />
+  const getLocalData = useCallback((): LocalData => {
+    const settings = useSettingsStore.getState()
+    const changelog = useChangeLogStore.getState().entries
+    const serviceLog = useServiceLogStore.getState().entries
+
+    return {
+      matSizes,
+      settings: {
+        geocodeCity: settings.geocodeCity,
+        showWeekends: settings.showWeekends,
+        fileSyncEnabled: settings.fileSyncEnabled,
+        fileSyncFileName: settings.fileSyncFileName,
+      },
+      drivers,
+      clients,
+      routes,
+      changelog,
+      serviceLog,
+    }
+  }, [matSizes, drivers, clients, routes])
+
+  return (
+    <div className="space-y-6">
+      <DatabaseOverview stats={stats} sheets={sheets} />
+      <MigrationPanel getLocalData={getLocalData} />
+    </div>
+  )
 }
