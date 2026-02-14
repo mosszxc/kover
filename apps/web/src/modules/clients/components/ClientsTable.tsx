@@ -16,6 +16,8 @@ import type { Client } from '../types'
 import { DAY_LABELS } from '@/shared/types'
 import type { DayOfWeek } from '@/shared/types'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
+import { MAT_SIZE_STYLES } from '@/shared/constants'
+import type { MatSize } from '@/shared/types'
 import { ClientsFilters, type StatusFilter } from './ClientsFilters'
 
 interface ClientsTableProps {
@@ -41,14 +43,12 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, anom
     [sizes],
   )
 
-  function formatMats(client: Client): string {
+  function groupMats(client: Client) {
     const grouped = new Map<string, number>()
     for (const m of client.mats) {
       grouped.set(m.size, (grouped.get(m.size) ?? 0) + m.quantity)
     }
     return Array.from(grouped.entries())
-      .map(([size, qty]) => `${qty}\u00d7${labelMap[size] ?? size}`)
-      .join(', ')
   }
 
   function getClientArea(client: Client): number {
@@ -85,7 +85,21 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, anom
       header: 'Коврики',
       accessorFn: (row) => row.mats.reduce((sum, m) => sum + m.quantity, 0),
       cell: ({ row }) => (
-        <span className="tabular-nums">{formatMats(row.original)}</span>
+        <div className="flex flex-wrap gap-1">
+          {groupMats(row.original).map(([size, qty]) => {
+            const style = MAT_SIZE_STYLES[size as MatSize]
+            return (
+              <span
+                key={size}
+                className={`inline-flex items-center rounded px-1.5 py-0.5 text-xs font-semibold tabular-nums ${
+                  style?.badge ?? 'bg-muted text-muted-foreground ring-1 ring-border'
+                }`}
+              >
+                {qty}&times;{labelMap[size] ?? size}
+              </span>
+            )
+          })}
+        </div>
       ),
     },
     {
@@ -179,7 +193,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, anom
         )
       },
     },
-  ], [isClientInRoute, updateClient, onToggleActive, anomalyIds, formatMats, getClientArea])
+  ], [isClientInRoute, updateClient, onToggleActive, anomalyIds, groupMats, getClientArea, labelMap])
   const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>([])
   const [selectedFrequency, setSelectedFrequency] = useState<number | null>(null)
   const [selectedMatSize, setSelectedMatSize] = useState<string | null>(null)
