@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { DaySwitcher, RouteDashboard, RouteSearch, StopList, AddStopDialog, useRouteStore, PrintButton, DriverFilter, BulkAssignDriverDialog, isStopSkipped } from '@/modules/routes'
+import { DaySwitcher, RouteDashboard, RouteSearch, StopList, AddStopDialog, useRouteStore, PrintButton, DriverFilter, BulkAssignDriverDialog, DistributeDriversDialog, isStopSkipped } from '@/modules/routes'
 import { useClientStore, EditClientDialog } from '@/modules/clients'
 import type { Client } from '@/modules/clients'
 import { useDriverStore } from '@/modules/drivers'
@@ -45,6 +45,7 @@ export function RoutesPage() {
         <div className="flex items-center gap-2">
           <DriverFilter drivers={driverOptions} value={driverFilter} onChange={setDriverFilter} />
           <BulkAssignDriverDialog drivers={driverOptions} driverFilter={driverFilter} />
+          <DistributeDriversDialog drivers={driverOptions} clients={clients} />
         </div>
         <RouteSearch value={searchQuery} onChange={setSearchQuery} />
         <StopList searchQuery={searchQuery} drivers={driverOptions} driverFilter={driverFilter} onEditClient={setEditingClient} />
