@@ -5,7 +5,9 @@
   "scripts": {
     "dev:web": "turbo run dev --filter=@kover/web",
     "build": "turbo run build",
-    "lint": "turbo run lint"
+    "lint": "turbo run lint",
+    "tauri:dev": "pnpm --filter @kover/web tauri dev",
+    "tauri:build": "pnpm --filter @kover/web tauri build"
   },
   "devDependencies": {
     "turbo": "^2.3.0"
