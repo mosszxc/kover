@@ -12,6 +12,9 @@ interface DatabaseOverviewProps {
   onMigrate: (
     onProgress: (current: MigrationCollectionResult, index: number, total: number) => void,
   ) => Promise<MigrationResult>
+  onSync: (
+    onProgress: (current: MigrationCollectionResult, index: number, total: number) => void,
+  ) => Promise<MigrationResult>
 }
 
 function StatCard({ icon: Icon, label, value, sub }: {
@@ -36,7 +39,7 @@ function StatCard({ icon: Icon, label, value, sub }: {
   )
 }
 
-export function DatabaseOverview({ stats, sheets, isMigrated, onMigrate }: DatabaseOverviewProps) {
+export function DatabaseOverview({ stats, sheets, isMigrated, onMigrate, onSync }: DatabaseOverviewProps) {
   const handleExport = () => {
     const date = new Date().toISOString().slice(0, 10)
     exportToExcel(sheets, `kover-export-${date}.xlsx`)
@@ -77,7 +80,7 @@ export function DatabaseOverview({ stats, sheets, isMigrated, onMigrate }: Datab
         />
       </div>
 
-      <MigrationPanel isMigrated={isMigrated} onMigrate={onMigrate} />
+      <MigrationPanel isMigrated={isMigrated} onMigrate={onMigrate} onSync={onSync} />
 
       <div className="rounded-lg border border-border bg-card p-4">
         <h2 className="mb-2 text-sm font-medium text-muted-foreground">
