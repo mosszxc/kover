@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 import {
   type ColumnDef,
   type SortingState,
-  flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getSortedRowModel,
@@ -26,6 +25,8 @@ interface ClientsTableProps {
   onToggleActive?: (client: Client) => void
   anomalyIds?: Set<string>
 }
+
+type SortField = 'name' | 'address' | 'mats' | 'area' | 'frequency' | 'days'
 
 export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, anomalyIds }: ClientsTableProps) {
   const clients = useClientStore((s) => s.clients)
@@ -56,146 +57,15 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, anom
   }
 
   const columns = useMemo<ColumnDef<Client>[]>(() => [
-    {
-      accessorKey: 'name',
-      header: 'Название',
-      cell: (info) => info.getValue(),
-    },
-    {
-      accessorKey: 'address',
-      header: 'Адрес',
-      cell: ({ row }) => {
-        const isAnomaly = anomalyIds?.has(row.original.id) ?? false
-        return (
-          <span className="flex items-center gap-1.5">
-            {row.original.address}
-            {isAnomaly ? (
-              <span title="Далеко от остальных — проверьте адрес">
-                <TriangleAlert className="h-3.5 w-3.5 shrink-0 text-amber-400" />
-              </span>
-            ) : row.original.lat != null && row.original.lng != null ? (
-              <MapPin className="h-3.5 w-3.5 shrink-0 text-green-400" />
-            ) : null}
-          </span>
-        )
-      },
-    },
-    {
-      id: 'mats',
-      header: 'Коврики',
-      accessorFn: (row) => row.mats.reduce((sum, m) => sum + m.quantity, 0),
-      cell: ({ row }) => {
-        const entries = groupMats(row.original)
-        return (
-          <span className="text-sm tabular-nums text-foreground">
-            {entries.map(([size, qty], i) => {
-              const style = MAT_SIZE_STYLES[size as MatSize]
-              return (
-                <span key={size}>
-                  {i > 0 && <span className="text-muted-foreground">{' · '}</span>}
-                  <span
-                    className={`mr-0.5 inline-block size-2 rounded-full ${style?.dot ?? 'bg-muted-foreground'}`}
-                  />
-                  {labelMap[size] ?? size}:{'\u00a0'}{qty}
-                </span>
-              )
-            })}
-          </span>
-        )
-      },
-    },
-    {
-      id: 'area',
-      header: 'Метраж',
-      accessorFn: (row) => getClientArea(row),
-      cell: ({ row }) => (
-        <span className="tabular-nums">
-          {getClientArea(row.original).toFixed(1)}
-        </span>
-      ),
-      meta: { hideBelow: 'lg' },
-    },
-    {
-      accessorKey: 'frequency',
-      header: 'Частота',
-      cell: (info) => (
-        <span className="tabular-nums">{info.getValue() as number}</span>
-      ),
-      meta: { hideBelow: 'lg' },
-    },
-    {
-      id: 'days',
-      header: 'Дни',
-      accessorFn: (row) => row.days.length,
-      cell: ({ row }) => (
-        <div className="flex gap-1">
-          {row.original.days
-            .slice()
-            .sort((a, b) => a - b)
-            .map((d) => {
-              const inRoute = isClientInRoute?.(row.original.id, d) ?? false
-              return (
-                <span
-                  key={d}
-                  className={`inline-flex items-center gap-0.5 rounded border px-1.5 py-0.5 text-xs font-semibold ${
-                    inRoute
-                      ? 'border-green-500/30 bg-green-500/20 text-green-400'
-                      : 'border-orange-500/30 bg-orange-500/20 text-orange-400'
-                  }`}
-                >
-                  {inRoute ? (
-                    <Check className="h-3 w-3" />
-                  ) : (
-                    <AlertTriangle className="h-3 w-3" />
-                  )}
-                  {DAY_LABELS[d]}
-                </span>
-              )
-            })}
-        </div>
-      ),
-    },
-    {
-      accessorKey: 'isActive',
-      header: 'Статус',
-      cell: ({ row }) => {
-        const client = row.original
-        const isActive = client.isActive
-        return (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              if (onToggleActive) {
-                onToggleActive(client)
-              } else {
-                updateClient(client.id, { isActive: !isActive })
-              }
-              toast.success(isActive ? 'Клиент на паузе' : 'Клиент активирован', { duration: 2000 })
-            }}
-            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold transition-colors ${
-              isActive
-                ? 'bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30'
-                : 'bg-amber-600/20 text-amber-400 hover:bg-amber-600/30'
-            }`}
-            aria-label={isActive ? 'Поставить на паузу' : 'Активировать'}
-          >
-            {isActive ? (
-              <>
-                <Pause className="size-3" />
-                Активен
-              </>
-            ) : (
-              <>
-                <Play className="size-3" />
-                На паузе
-              </>
-            )}
-          </button>
-        )
-      },
-    },
-  ], [isClientInRoute, updateClient, onToggleActive, anomalyIds, groupMats, getClientArea, labelMap])
+    { accessorKey: 'name', header: 'Название' },
+    { accessorKey: 'address', header: 'Адрес' },
+    { id: 'mats', header: 'Коврики', accessorFn: (row) => row.mats.reduce((sum, m) => sum + m.quantity, 0) },
+    { id: 'area', header: 'Метраж', accessorFn: (row) => getClientArea(row) },
+    { accessorKey: 'frequency', header: 'Частота' },
+    { id: 'days', header: 'Дни', accessorFn: (row) => row.days.length },
+    { accessorKey: 'isActive', header: 'Статус' },
+  ], [getClientArea])
+
   const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>([])
   const [selectedFrequency, setSelectedFrequency] = useState<number | null>(null)
   const [selectedMatSize, setSelectedMatSize] = useState<string | null>(null)
@@ -242,15 +112,31 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, anom
     getFilteredRowModel: getFilteredRowModel(),
   })
 
-  const sortIcon = (columnId: string) => {
-    const sort = sorting.find((s) => s.id === columnId)
-    if (!sort) return <ChevronsUpDown className="size-4 text-muted-foreground" />
-    return sort.desc ? (
-      <ChevronDown className="size-4 text-blue-400" />
-    ) : (
-      <ChevronUp className="size-4 text-blue-400" />
-    )
+  function toggleSort(field: SortField) {
+    setSorting((prev) => {
+      const current = prev.find((s) => s.id === field)
+      if (!current) return [{ id: field, desc: false }]
+      if (!current.desc) return [{ id: field, desc: true }]
+      return []
+    })
   }
+
+  function sortIcon(field: SortField) {
+    const sort = sorting.find((s) => s.id === field)
+    if (!sort) return <ChevronsUpDown className="size-3.5 text-muted-foreground" />
+    return sort.desc
+      ? <ChevronDown className="size-3.5 text-blue-400" />
+      : <ChevronUp className="size-3.5 text-blue-400" />
+  }
+
+  const sortButtons: { field: SortField; label: string }[] = [
+    { field: 'name', label: 'Имя' },
+    { field: 'area', label: 'Метраж' },
+    { field: 'frequency', label: 'Частота' },
+    { field: 'days', label: 'Дни' },
+  ]
+
+  const rows = table.getRowModel().rows
 
   return (
     <div className="space-y-4">
@@ -276,54 +162,157 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, anom
         onStatusChange={setSelectedStatus}
       />
 
-      <div className="overflow-x-auto rounded-lg border border-border">
-        <table className="w-full">
-          <thead className="sticky top-0 z-10 bg-card">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    onClick={header.column.getToggleSortingHandler()}
-                    className={cn(
-                      'cursor-pointer select-none border-b border-border px-4 py-3 text-left text-sm font-medium text-muted-foreground hover:text-accent-foreground',
-                      (header.column.columnDef.meta as { hideBelow?: string })?.hideBelow === 'lg' && 'hidden lg:table-cell',
-                    )}
-                  >
-                    <div className="flex items-center gap-1">
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
-                      {sortIcon(header.id)}
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.map((row, i) => (
-              <tr
-                key={row.id}
-                onClick={() => onRowClick?.(row.original)}
-                className={`border-b border-border ${i % 2 === 1 ? 'bg-card/50' : ''} hover:bg-muted/50 ${onRowClick ? 'cursor-pointer' : ''}`}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <td
-                    key={cell.id}
-                    className={cn(
-                      'min-h-12 px-4 py-3 text-sm text-foreground',
-                      (cell.column.columnDef.meta as { hideBelow?: string })?.hideBelow === 'lg' && 'hidden lg:table-cell',
-                    )}
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+        <span>Сортировка:</span>
+        {sortButtons.map(({ field, label }) => (
+          <button
+            key={field}
+            type="button"
+            onClick={() => toggleSort(field)}
+            className={cn(
+              'inline-flex items-center gap-0.5 rounded-md px-2 py-1 transition-colors hover:bg-muted',
+              sorting.some((s) => s.id === field) && 'bg-muted text-foreground',
+            )}
+          >
+            {label}
+            {sortIcon(field)}
+          </button>
+        ))}
+      </div>
+
+      <div className="space-y-2">
+        {rows.map((row) => {
+          const client = row.original
+          const isAnomaly = anomalyIds?.has(client.id) ?? false
+          const isActive = client.isActive
+          const entries = groupMats(client)
+          const area = getClientArea(client)
+
+          return (
+            <div
+              key={client.id}
+              onClick={() => onRowClick?.(client)}
+              className={cn(
+                'rounded-lg border border-border px-4 py-3 transition-colors',
+                onRowClick && 'cursor-pointer',
+                isActive ? 'hover:bg-muted/50' : 'opacity-60 hover:bg-muted/30',
+              )}
+            >
+              {/* Line 1: name · address | days */}
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="truncate font-medium text-foreground">{client.name}</span>
+                  <span className="hidden text-muted-foreground sm:inline">·</span>
+                  <span className="hidden min-w-0 items-center gap-1 text-sm text-muted-foreground sm:inline-flex">
+                    <span className="truncate">{client.address}</span>
+                    {isAnomaly ? (
+                      <span title="Далеко от остальных — проверьте адрес">
+                        <TriangleAlert className="size-3.5 shrink-0 text-amber-400" />
+                      </span>
+                    ) : client.lat != null && client.lng != null ? (
+                      <MapPin className="size-3.5 shrink-0 text-green-400" />
+                    ) : null}
+                  </span>
+                </div>
+                <div className="flex shrink-0 gap-1">
+                  {client.days
+                    .slice()
+                    .sort((a, b) => a - b)
+                    .map((d) => {
+                      const inRoute = isClientInRoute?.(client.id, d) ?? false
+                      return (
+                        <span
+                          key={d}
+                          className={cn(
+                            'inline-flex items-center gap-0.5 rounded border px-1.5 py-0.5 text-xs font-semibold',
+                            inRoute
+                              ? 'border-green-500/30 bg-green-500/20 text-green-400'
+                              : 'border-orange-500/30 bg-orange-500/20 text-orange-400',
+                          )}
+                        >
+                          {inRoute ? (
+                            <Check className="size-3" />
+                          ) : (
+                            <AlertTriangle className="size-3" />
+                          )}
+                          {DAY_LABELS[d]}
+                        </span>
+                      )
+                    })}
+                </div>
+              </div>
+
+              {/* Mobile: address on second line */}
+              <div className="mt-1 flex items-center gap-1 text-sm text-muted-foreground sm:hidden">
+                <span className="truncate">{client.address}</span>
+                {isAnomaly ? (
+                  <span title="Далеко от остальных — проверьте адрес">
+                    <TriangleAlert className="size-3.5 shrink-0 text-amber-400" />
+                  </span>
+                ) : client.lat != null && client.lng != null ? (
+                  <MapPin className="size-3.5 shrink-0 text-green-400" />
+                ) : null}
+              </div>
+
+              {/* Line 2: mats · area · frequency | status */}
+              <div className="mt-1.5 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-sm tabular-nums text-muted-foreground">
+                  <span className="text-foreground">
+                    {entries.map(([size, qty], i) => {
+                      const style = MAT_SIZE_STYLES[size as MatSize]
+                      return (
+                        <span key={size}>
+                          {i > 0 && <span className="text-muted-foreground">{' · '}</span>}
+                          <span
+                            className={cn('mr-0.5 inline-block size-2 rounded-full', style?.dot ?? 'bg-muted-foreground')}
+                          />
+                          {labelMap[size] ?? size}
+                          {'\u00d7'}
+                          {qty}
+                        </span>
+                      )
+                    })}
+                  </span>
+                  <span className="text-muted-foreground">·</span>
+                  <span>{area.toFixed(1)}{'\u00a0'}м²</span>
+                  <span className="text-muted-foreground">·</span>
+                  <span>{client.frequency}×/нед</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    if (onToggleActive) {
+                      onToggleActive(client)
+                    } else {
+                      updateClient(client.id, { isActive: !isActive })
+                    }
+                    toast.success(isActive ? 'Клиент на паузе' : 'Клиент активирован', { duration: 2000 })
+                  }}
+                  className={cn(
+                    'inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold transition-colors',
+                    isActive
+                      ? 'bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30'
+                      : 'bg-amber-600/20 text-amber-400 hover:bg-amber-600/30',
+                  )}
+                  aria-label={isActive ? 'Поставить на паузу' : 'Активировать'}
+                >
+                  {isActive ? (
+                    <>
+                      <Pause className="size-3" />
+                      Активен
+                    </>
+                  ) : (
+                    <>
+                      <Play className="size-3" />
+                      На паузе
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )
+        })}
       </div>
 
       <p className="text-sm text-muted-foreground">
