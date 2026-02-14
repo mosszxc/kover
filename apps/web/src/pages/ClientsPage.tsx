@@ -12,7 +12,6 @@ export function ClientsPage() {
   const clients = useClientStore((s) => s.clients)
   const deleteClient = useClientStore((s) => s.deleteClient)
   const updateClient = useClientStore((s) => s.updateClient)
-  const removeClientFromAllRoutes = useRouteStore((s) => s.removeClientFromAllRoutes)
   const addStop = useRouteStore((s) => s.addStop)
   const routes = useRouteStore((s) => s.routes)
   const addServiceLog = useServiceLogStore((s) => s.addEntry)
@@ -110,7 +109,6 @@ export function ClientsPage() {
           onOpenChange={(open) => { if (!open) setSelectedClient(null) }}
           onDelete={(id) => {
             deleteClient(id)
-            removeClientFromAllRoutes(id)
             setSelectedClient(null)
           }}
         />
