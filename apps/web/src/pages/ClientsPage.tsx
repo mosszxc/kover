@@ -5,6 +5,7 @@ import type { Client } from '@/modules/clients'
 import type { DayOfWeek } from '@/shared/types'
 import { generateId } from '@/shared/lib/generateId'
 import { detectGeoAnomalies } from '@/shared/lib/geoAnomalies'
+import { useServiceLogStore } from '@/shared/stores/serviceLogStore'
 
 export function ClientsPage() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
@@ -14,6 +15,7 @@ export function ClientsPage() {
   const removeClientFromAllRoutes = useRouteStore((s) => s.removeClientFromAllRoutes)
   const addStop = useRouteStore((s) => s.addStop)
   const routes = useRouteStore((s) => s.routes)
+  const addServiceLog = useServiceLogStore((s) => s.addEntry)
 
   const activeClients = useMemo(() => clients.filter((c) => c.isActive), [clients])
   const anomalyIds = useMemo(() => detectGeoAnomalies(activeClients), [activeClients])
@@ -38,6 +40,11 @@ export function ClientsPage() {
       const newIsActive = !client.isActive
       updateClient(client.id, { isActive: newIsActive })
 
+      const eventType = newIsActive ? 'unpaused' : 'paused' as const
+      for (const day of client.days) {
+        addServiceLog({ clientId: client.id, day, type: eventType })
+      }
+
       if (newIsActive) {
         for (const day of client.days) {
           const route = routes.find((r) => r.day === day)
@@ -53,7 +60,7 @@ export function ClientsPage() {
         }
       }
     },
-    [updateClient, routes, addStop],
+    [updateClient, routes, addStop, addServiceLog],
   )
 
   return (

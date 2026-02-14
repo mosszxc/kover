@@ -16,17 +16,20 @@ import {
 } from '@/shared/ui/dialog'
 import type { DayOfWeek } from '@/shared/types'
 import { DAY_LABELS } from '@/shared/types'
+import { useServiceLogStore } from '@/shared/stores/serviceLogStore'
 import { useRouteStore } from '../store'
 
 const DAYS: DayOfWeek[] = [0, 1, 2, 3, 4, 5, 6]
 
 interface TransferStopDialogProps {
   stopId: string
+  clientId: string
   clientName: string
   day: DayOfWeek
+  driverName?: string
 }
 
-export function TransferStopDialog({ stopId, clientName, day }: TransferStopDialogProps) {
+export function TransferStopDialog({ stopId, clientId, clientName, day, driverName }: TransferStopDialogProps) {
   const [open, setOpen] = useState(false)
   const [targetDay, setTargetDay] = useState<DayOfWeek | null>(null)
   const [position, setPosition] = useState<number>(-1)
@@ -34,6 +37,7 @@ export function TransferStopDialog({ stopId, clientName, day }: TransferStopDial
 
   const routes = useRouteStore((s) => s.routes)
   const transferStop = useRouteStore((s) => s.transferStop)
+  const addServiceLog = useServiceLogStore((s) => s.addEntry)
 
   const targetRoute = targetDay !== null ? routes.find((r) => r.day === targetDay) : null
   const targetStops = targetRoute?.stops ?? []
@@ -42,6 +46,7 @@ export function TransferStopDialog({ stopId, clientName, day }: TransferStopDial
     if (targetDay === null || isTransferring) return
     setIsTransferring(true)
     transferStop(day, targetDay, stopId, position === -1 ? undefined : position)
+    addServiceLog({ clientId, day, type: 'transferred', targetDay, driverName })
     setIsTransferring(false)
     setOpen(false)
     reset()
