@@ -42,6 +42,20 @@ export const useDriverStore = create<DriverState>()(
         },
       },
     ),
-    { name: 'kover-drivers', version: 1 },
+    {
+      name: 'kover-drivers',
+      version: 2,
+      migrate: (persisted: unknown, version: number) => {
+        const state = persisted as Record<string, unknown>
+        if (version < 2) {
+          const drivers = (state.drivers ?? []) as Record<string, unknown>[]
+          state.drivers = drivers.map((d) => ({
+            ...d,
+            workDays: d.workDays ?? [0, 1, 2, 3, 4],
+          }))
+        }
+        return state as unknown as DriverState
+      },
+    },
   ),
 )

@@ -20,8 +20,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/shared/ui/alert-dialog'
+import type { DayOfWeek } from '@/shared/types'
+import { DAY_LABELS } from '@/shared/types'
+import { cn } from '@/shared/lib/utils'
 import { useDriverStore } from '../store'
 import type { Driver } from '../types'
+
+const ALL_DAYS: DayOfWeek[] = [0, 1, 2, 3, 4]
 
 interface FormErrors {
   name?: string
@@ -39,15 +44,23 @@ export function EditDriverDialog({ driver, open, onOpenChange, onDelete }: EditD
 
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
+  const [workDays, setWorkDays] = useState<DayOfWeek[]>([...ALL_DAYS])
   const [errors, setErrors] = useState<FormErrors>({})
 
   useEffect(() => {
     if (open && driver) {
       setName(driver.name)
       setPhone(driver.phone)
+      setWorkDays(driver.workDays ?? [...ALL_DAYS])
       setErrors({})
     }
   }, [open, driver])
+
+  function toggleDay(day: DayOfWeek) {
+    setWorkDays((prev) =>
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day].sort(),
+    )
+  }
 
   function validate(): FormErrors {
     const e: FormErrors = {}
@@ -65,6 +78,7 @@ export function EditDriverDialog({ driver, open, onOpenChange, onDelete }: EditD
     updateDriver(driver.id, {
       name: name.trim(),
       phone: phone.trim(),
+      workDays,
     })
 
     toast.success(`Водитель "${name.trim()}" сохранён`)
@@ -125,6 +139,27 @@ export function EditDriverDialog({ driver, open, onOpenChange, onDelete }: EditD
               placeholder="+7 (999) 123-45-67"
               className={inputClass}
             />
+          </div>
+
+          <div>
+            <span className={labelClass}>Рабочие дни</span>
+            <div className="flex gap-1.5">
+              {ALL_DAYS.map((day) => (
+                <button
+                  key={day}
+                  type="button"
+                  onClick={() => toggleDay(day)}
+                  className={cn(
+                    'flex h-9 w-9 items-center justify-center rounded-md border text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
+                    workDays.includes(day)
+                      ? 'border-blue-500 bg-blue-500/20 text-blue-400'
+                      : 'border-border text-muted-foreground hover:border-ring',
+                  )}
+                >
+                  {DAY_LABELS[day]}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
