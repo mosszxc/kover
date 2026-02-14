@@ -50,6 +50,8 @@ export type Database = {
           original_name: string
           paused_until: string | null
           updated_at: string
+          working_hours_start: string | null
+          working_hours_end: string | null
         }
         Insert: {
           address?: string
@@ -67,6 +69,8 @@ export type Database = {
           original_name?: string
           paused_until?: string | null
           updated_at?: string
+          working_hours_start?: string | null
+          working_hours_end?: string | null
         }
         Update: {
           address?: string
@@ -84,6 +88,8 @@ export type Database = {
           original_name?: string
           paused_until?: string | null
           updated_at?: string
+          working_hours_start?: string | null
+          working_hours_end?: string | null
         }
         Relationships: []
       }

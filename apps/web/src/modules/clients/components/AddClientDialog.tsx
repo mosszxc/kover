@@ -60,6 +60,8 @@ export function AddClientDialog() {
       days: [...form.days].sort(),
       dayReplacements,
       notes: form.notes.trim(),
+      workingHoursStart: form.workingHoursStart || null,
+      workingHoursEnd: form.workingHoursEnd || null,
       isActive: true,
       createdAt: new Date().toISOString(),
       ...(lat != null && lng != null ? { lat, lng } : {}),

@@ -7,12 +7,12 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { Check, ChevronDown, ChevronUp, ChevronsUpDown, Search, AlertTriangle, Pause, Play, MapPin, TriangleAlert, CalendarClock } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, ChevronsUpDown, Search, AlertTriangle, Pause, Play, MapPin, TriangleAlert, CalendarClock, Clock } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { toast } from 'sonner'
 import { useClientStore } from '../store'
 import type { Client } from '../types'
-import { isClientPaused, formatPausedUntil } from '../types'
+import { isClientPaused, formatPausedUntil, formatWorkingHours } from '../types'
 import { PauseClientDialog } from './PauseClientDialog'
 import { DAY_LABELS } from '@/shared/types'
 import type { DayOfWeek } from '@/shared/types'
@@ -296,6 +296,15 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                   <span>{area.toFixed(1)}{'\u00a0'}м²</span>
                   <span className="text-muted-foreground">·</span>
                   <span>{client.frequency}×/нед</span>
+                  {formatWorkingHours(client) && (
+                    <>
+                      <span className="text-muted-foreground">·</span>
+                      <span className="inline-flex items-center gap-0.5">
+                        <Clock className="size-3" />
+                        {formatWorkingHours(client)}
+                      </span>
+                    </>
+                  )}
                 </div>
                 <button
                   type="button"

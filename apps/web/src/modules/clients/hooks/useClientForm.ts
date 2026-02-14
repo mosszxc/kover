@@ -17,6 +17,8 @@ interface PopulateOptions {
   days: DayOfWeek[]
   dayReplacements?: Partial<Record<DayOfWeek, number>>
   notes: string
+  workingHoursStart?: string | null
+  workingHoursEnd?: string | null
 }
 
 export function useClientForm() {
@@ -27,6 +29,8 @@ export function useClientForm() {
   const [days, setDays] = useState<DayOfWeek[]>([])
   const [dayReplacements, setDayReplacements] = useState<Partial<Record<DayOfWeek, number>>>({})
   const [notes, setNotes] = useState('')
+  const [workingHoursStart, setWorkingHoursStart] = useState('')
+  const [workingHoursEnd, setWorkingHoursEnd] = useState('')
   const [errors, setErrors] = useState<FormErrors>({})
 
   const setFrequency = useCallback((freq: number) => {
@@ -119,6 +123,8 @@ export function useClientForm() {
     setDays([])
     setDayReplacements({})
     setNotes('')
+    setWorkingHoursStart('')
+    setWorkingHoursEnd('')
     setErrors({})
   }, [])
 
@@ -130,6 +136,8 @@ export function useClientForm() {
     setDays([...opts.days])
     setDayReplacements(opts.dayReplacements ? { ...opts.dayReplacements } : {})
     setNotes(opts.notes)
+    setWorkingHoursStart(opts.workingHoursStart ?? '')
+    setWorkingHoursEnd(opts.workingHoursEnd ?? '')
     setErrors({})
   }, [])
 
@@ -163,12 +171,16 @@ export function useClientForm() {
     days,
     dayReplacements,
     notes,
+    workingHoursStart,
+    workingHoursEnd,
     errors,
     // Setters
     setName,
     setAddress,
     setFrequency,
     setNotes,
+    setWorkingHoursStart,
+    setWorkingHoursEnd,
     // Mat ops
     addMat,
     removeMat,

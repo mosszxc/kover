@@ -56,6 +56,8 @@ export function EditClientDialog({ client, open, onOpenChange, onDelete }: EditC
         days: client.days,
         dayReplacements: client.dayReplacements,
         notes: client.notes,
+        workingHoursStart: client.workingHoursStart,
+        workingHoursEnd: client.workingHoursEnd,
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -93,6 +95,8 @@ export function EditClientDialog({ client, open, onOpenChange, onDelete }: EditC
       days: [...form.days].sort(),
       dayReplacements,
       notes: form.notes.trim(),
+      workingHoursStart: form.workingHoursStart || null,
+      workingHoursEnd: form.workingHoursEnd || null,
       originalName: buildOriginalName(form.name, form.address, form.mats),
       ...(lat != null && lng != null ? { lat, lng } : {}),
     }
