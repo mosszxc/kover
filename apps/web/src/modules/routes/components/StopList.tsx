@@ -135,7 +135,6 @@ export function StopList({ searchQuery = '', drivers = [], driverFilter = null, 
                 number={number}
                 client={client}
                 stopId={stop.id}
-                isCompleted={stop.isCompleted}
                 driverId={stop.driverId}
                 drivers={drivers}
                 stopIndex={stopIndex}
