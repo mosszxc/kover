@@ -37,6 +37,18 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "copyright": "© 2025 Kover",
+    "shortDescription": "Система управления маршрутами",
+    "longDescription": "Kover — система управления маршрутами доставки ковров. Планирование, диспетчеризация, печать маршрутных листов.",
+    "windows": {
+      "allowDowngrades": false,
+      "nsis": {
+        "installerIcon": "icons/icon.ico",
+        "installMode": "currentUser",
+        "languages": ["Russian", "English"],
+        "startMenuFolder": "Kover"
+      }
+    }
   }
 }
