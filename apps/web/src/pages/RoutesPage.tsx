@@ -6,6 +6,8 @@ import { useDriverStore } from '@/modules/drivers'
 import { PrintSheet } from '@/modules/print'
 import { OptimizeRouteDialog } from '@/modules/map'
 
+const EMPTY_STOPS: never[] = []
+
 export function RoutesPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [driverFilter, setDriverFilter] = useState<string | 'unassigned' | null>(null)
@@ -13,7 +15,7 @@ export function RoutesPage() {
   const clients = useClientStore((s) => s.clients)
   const allDrivers = useDriverStore((s) => s.drivers)
   const selectedDay = useRouteStore((s) => s.selectedDay)
-  const stops = useRouteStore((s) => s.routes.find((r) => r.day === selectedDay)?.stops ?? [])
+  const stops = useRouteStore((s) => s.routes.find((r) => r.day === selectedDay)?.stops ?? EMPTY_STOPS)
 
   const driverOptions = useMemo(
     () => allDrivers.filter((d) => d.isActive).map((d) => ({ id: d.id, name: d.name, workDays: d.workDays ?? [0, 1, 2, 3, 4, 5, 6] as const })),
