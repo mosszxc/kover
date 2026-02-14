@@ -10,6 +10,7 @@ import { useChangeLogger } from "@/shared/hooks/useChangeLogger"
 import { useAutoBackup } from "@/shared/hooks/useAutoBackup"
 import { useFileSync } from "@/shared/hooks/useFileSync"
 import { useClientRouteSync } from "@/shared/hooks/useClientRouteSync"
+import { useClientReactivation } from "@/shared/hooks/useClientReactivation"
 import { useSyncProvider } from "@/shared/lib/sync"
 
 export function AppLayout() {
@@ -17,6 +18,7 @@ export function AppLayout() {
   useAutoBackup()
   useFileSync()
   useClientRouteSync()
+  useClientReactivation()
   useSyncProvider()
 
   return (

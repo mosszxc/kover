@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { ClientsTable, EditClientDialog, AddClientDialog, useClientStore, BatchGeocode, GeocodeSettings, isClientPaused } from '@/modules/clients'
 import { useRouteStore } from '@/modules/routes'
 import type { Client } from '@/modules/clients'
@@ -18,28 +18,6 @@ export function ClientsPage() {
 
   const activeClients = useMemo(() => clients.filter((c) => !isClientPaused(c)), [clients])
   const anomalyIds = useMemo(() => detectGeoAnomalies(activeClients), [activeClients])
-
-  // Авто-реактивация клиентов с истёкшей паузой
-  useEffect(() => {
-    const today = new Date().toISOString().slice(0, 10)
-    const expired = clients.filter((c) => c.pausedUntil && c.pausedUntil <= today && !c.isActive)
-    for (const client of expired) {
-      updateClient(client.id, { isActive: true, pausedUntil: null })
-      // Добавляем обратно в маршруты
-      for (const day of client.days) {
-        const route = routes.find((r) => r.day === day)
-        const alreadyInRoute = route?.stops.some((s) => s.clientId === client.id)
-        if (!alreadyInRoute) {
-          addStop(day, {
-            id: generateId(),
-            clientId: client.id,
-            position: route?.stops.length ?? 0,
-            isCompleted: false,
-          })
-        }
-      }
-    }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps -- only on mount
 
   const routeClientSet = useMemo(() => {
     const set = new Set<string>()
