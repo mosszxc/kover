@@ -91,6 +91,7 @@ export interface OptimizationResult {
   originalDistance: number
   optimizedDistance: number
   savingPercent: number
+  method: 'road' | 'straight-line'
 }
 
 export function optimizeRoute(points: Point[]): OptimizationResult {
@@ -101,6 +102,7 @@ export function optimizeRoute(points: Point[]): OptimizationResult {
       originalDistance: dist,
       optimizedDistance: dist,
       savingPercent: 0,
+      method: 'straight-line',
     }
   }
 
@@ -116,5 +118,15 @@ export function optimizeRoute(points: Point[]): OptimizationResult {
     originalDistance,
     optimizedDistance,
     savingPercent: Math.max(0, savingPercent),
+    method: 'straight-line',
+  }
+}
+
+export async function optimizeRouteAsync(points: Point[]): Promise<OptimizationResult> {
+  try {
+    const { optimizeRouteByRoad } = await import('./osrm')
+    return await optimizeRouteByRoad(points)
+  } catch {
+    return optimizeRoute(points)
   }
 }

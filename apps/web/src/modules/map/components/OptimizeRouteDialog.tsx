@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react'
-import { Route, Check } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Route, Check, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/shared/ui/button'
 import {
@@ -10,24 +10,29 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/shared/ui/dialog'
-import { optimizeRoute } from '@/shared/lib/tsp'
+import { optimizeRouteAsync, type OptimizationResult } from '@/shared/lib/tsp'
 import { useRouteStore } from '@/modules/routes'
 import { useClientStore } from '@/modules/clients'
 
 export function OptimizeRouteDialog() {
   const [open, setOpen] = useState(false)
+  const [result, setResult] = useState<OptimizationResult | null>(null)
+  const [loading, setLoading] = useState(false)
 
   const routes = useRouteStore((s) => s.routes)
   const selectedDay = useRouteStore((s) => s.selectedDay)
   const reorderAllStops = useRouteStore((s) => s.reorderAllStops)
   const clients = useClientStore((s) => s.clients)
 
-  const result = useMemo(() => {
-    if (!open) return null
+  useEffect(() => {
+    if (!open) {
+      setResult(null)
+      return
+    }
 
     const clientMap = new Map(clients.map((c) => [c.id, c]))
     const dayRoute = routes.find((r) => r.day === selectedDay)
-    if (!dayRoute) return null
+    if (!dayRoute) return
 
     const points = dayRoute.stops
       .filter((stop) => {
@@ -39,9 +44,21 @@ export function OptimizeRouteDialog() {
         return { id: stop.id, lat: client.lat!, lng: client.lng! }
       })
 
-    if (points.length < 3) return null
+    if (points.length < 3) return
 
-    return optimizeRoute(points)
+    let cancelled = false
+    setLoading(true)
+
+    optimizeRouteAsync(points).then((res) => {
+      if (!cancelled) {
+        setResult(res)
+        setLoading(false)
+      }
+    })
+
+    return () => {
+      cancelled = true
+    }
   }, [open, routes, selectedDay, clients])
 
   function handleApply() {
@@ -92,6 +109,13 @@ export function OptimizeRouteDialog() {
           <DialogTitle>Оптимизация маршрута</DialogTitle>
         </DialogHeader>
 
+        {loading && (
+          <div className="flex flex-col items-center justify-center gap-2 py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+            <p className="text-sm text-slate-400">Рассчитываем оптимальный маршрут...</p>
+          </div>
+        )}
+
         {result && (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -122,6 +146,10 @@ export function OptimizeRouteDialog() {
               Оптимизировано {result.optimizedIds.length} точек с координатами.
               Точки без координат останутся в конце маршрута.
             </p>
+
+            <p className="text-xs text-slate-500">
+              Метод: {result.method === 'road' ? 'по дорогам (OSRM)' : 'по прямой (fallback)'}
+            </p>
           </div>
         )}
 
@@ -129,7 +157,7 @@ export function OptimizeRouteDialog() {
           <Button variant="outline" onClick={() => setOpen(false)}>
             Отмена
           </Button>
-          <Button onClick={handleApply} disabled={!result || result.savingPercent === 0}>
+          <Button onClick={handleApply} disabled={loading || !result || result.savingPercent === 0}>
             Применить
           </Button>
         </DialogFooter>

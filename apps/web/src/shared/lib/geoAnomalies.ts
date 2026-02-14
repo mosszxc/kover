@@ -1,6 +1,7 @@
 import { haversine, type GeoPoint } from './tsp'
 
-const MIN_POINTS_FOR_DETECTION = 3
+/** Расстояние (км), при котором пара точек считается подозрительной */
+const PAIR_DISTANCE_THRESHOLD_KM = 15
 
 interface GeoEntity {
   id: string
@@ -29,7 +30,7 @@ export function detectGeoAnomalies(entities: GeoEntity[]): Set<string> {
       e.lat != null && e.lng != null,
   )
 
-  if (withCoords.length < MIN_POINTS_FOR_DETECTION) return new Set()
+  if (withCoords.length < 2) return new Set()
 
   const points: GeoPoint[] = withCoords.map((e) => ({
     id: e.id,
@@ -37,6 +38,16 @@ export function detectGeoAnomalies(entities: GeoEntity[]): Set<string> {
     lng: e.lng,
   }))
 
+  // Для 2 точек: если расстояние > порога — обе помечаются
+  if (points.length === 2) {
+    const dist = haversine(points[0]!, points[1]!)
+    if (dist > PAIR_DISTANCE_THRESHOLD_KM) {
+      return new Set(points.map((p) => p.id))
+    }
+    return new Set()
+  }
+
+  // 3+ точек: IQR-метод
   const center = medianCenter(points)
   const distances = points.map((p) => ({
     id: p.id,

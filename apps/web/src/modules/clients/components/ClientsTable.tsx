@@ -84,23 +84,25 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, anom
       id: 'mats',
       header: 'Коврики',
       accessorFn: (row) => row.mats.reduce((sum, m) => sum + m.quantity, 0),
-      cell: ({ row }) => (
-        <div className="flex flex-wrap gap-1">
-          {groupMats(row.original).map(([size, qty]) => {
-            const style = MAT_SIZE_STYLES[size as MatSize]
-            return (
-              <span
-                key={size}
-                className={`inline-flex items-center rounded px-1.5 py-0.5 text-xs font-semibold tabular-nums ${
-                  style?.badge ?? 'bg-muted text-muted-foreground ring-1 ring-border'
-                }`}
-              >
-                {qty}&times;{labelMap[size] ?? size}
-              </span>
-            )
-          })}
-        </div>
-      ),
+      cell: ({ row }) => {
+        const entries = groupMats(row.original)
+        return (
+          <span className="text-sm tabular-nums text-foreground">
+            {entries.map(([size, qty], i) => {
+              const style = MAT_SIZE_STYLES[size as MatSize]
+              return (
+                <span key={size}>
+                  {i > 0 && <span className="text-muted-foreground">{' · '}</span>}
+                  <span
+                    className={`mr-0.5 inline-block size-2 rounded-full ${style?.dot ?? 'bg-muted-foreground'}`}
+                  />
+                  {labelMap[size] ?? size}:{'\u00a0'}{qty}
+                </span>
+              )
+            })}
+          </span>
+        )
+      },
     },
     {
       id: 'area',
