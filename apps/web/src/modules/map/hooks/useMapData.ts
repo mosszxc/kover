@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useRouteStore } from '@/modules/routes'
+import { useRouteStore, isStopSkipped } from '@/modules/routes'
 import { useClientStore } from '@/modules/clients'
 
 export interface MapStop {
@@ -24,7 +24,7 @@ export function useMapData() {
     const stops: MapStop[] = []
     for (const stop of dayRoute.stops) {
       const client = clientMap.get(stop.clientId)
-      if (!client || !client.isActive) continue
+      if (!client || !client.isActive || isStopSkipped(stop)) continue
       if (client.lat == null || client.lng == null) continue
 
       stops.push({

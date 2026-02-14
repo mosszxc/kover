@@ -6,7 +6,7 @@ export function DaySummary() {
   const summary = useRouteSummary()
   const sizes = useMatSizeStore((s) => s.sizes)
 
-  if (summary.stopCount === 0) {
+  if (summary.stopCount === 0 && summary.skippedCount === 0) {
     return (
       <div className="rounded-lg border border-border bg-card/50 p-4 text-center text-sm text-muted-foreground">
         Нет точек на этот день

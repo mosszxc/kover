@@ -1,4 +1,4 @@
-import { MapPin, Ruler, AlertTriangle, User } from 'lucide-react'
+import { MapPin, Ruler, AlertTriangle, User, CirclePause } from 'lucide-react'
 import { useRouteSummary } from '../hooks/useRouteSummary'
 import { useDriverSummary } from '../hooks/useDriverSummary'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
@@ -48,6 +48,16 @@ export function RouteDashboard({ drivers }: RouteDashboardProps) {
           <span className="font-semibold tabular-nums text-foreground">{totalMats}</span>
           <span className="text-muted-foreground">шт всего</span>
         </span>
+        {summary.skippedCount > 0 && (
+          <>
+            <span className="text-border">|</span>
+            <span className="flex items-center gap-1.5">
+              <CirclePause className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="font-semibold tabular-nums text-muted-foreground">{summary.skippedCount}</span>
+              <span className="text-muted-foreground">пропущено</span>
+            </span>
+          </>
+        )}
       </div>
 
       {/* Row 2: Mat sizes — hero section */}

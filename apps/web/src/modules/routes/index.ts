@@ -1,5 +1,6 @@
 export type { DayRoute, RouteStop } from './types'
 export { useRouteStore } from './store'
+export { isStopSkipped } from './utils'
 export { DaySwitcher } from './components/DaySwitcher'
 export { DaySummary } from './components/DaySummary'
 export { RouteDashboard } from './components/RouteDashboard'

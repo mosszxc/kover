@@ -12,7 +12,7 @@ import {
 } from '@/shared/ui/dialog'
 import { optimizeRouteAsync, type OptimizationResult } from '@/shared/lib/tsp'
 import { detectGeoAnomalies } from '@/shared/lib/geoAnomalies'
-import { useRouteStore } from '@/modules/routes'
+import { useRouteStore, isStopSkipped } from '@/modules/routes'
 import { useClientStore } from '@/modules/clients'
 
 export function OptimizeRouteDialog() {
@@ -38,18 +38,22 @@ export function OptimizeRouteDialog() {
     if (!dayRoute) return
 
     // Определяем аномальные клиенты (далеко от кластера)
-    const activeGeoClients = dayRoute.stops
+    const activeStops = dayRoute.stops.filter((s) => {
+      const c = clientMap.get(s.clientId)
+      return c?.isActive && !isStopSkipped(s)
+    })
+    const activeGeoClients = activeStops
       .map((s) => clientMap.get(s.clientId))
       .filter(
         (c): c is NonNullable<typeof c> & { lat: number; lng: number } =>
-          c != null && c.isActive && c.lat != null && c.lng != null,
+          c != null && c.lat != null && c.lng != null,
       )
     const anomalyClientIds = detectGeoAnomalies(activeGeoClients)
 
-    const points = dayRoute.stops
+    const points = activeStops
       .filter((stop) => {
         const client = clientMap.get(stop.clientId)
-        return client?.isActive && client.lat != null && client.lng != null && !anomalyClientIds.has(client.id)
+        return client && client.lat != null && client.lng != null && !anomalyClientIds.has(client.id)
       })
       .map((stop) => {
         const client = clientMap.get(stop.clientId)!
@@ -57,10 +61,10 @@ export function OptimizeRouteDialog() {
       })
 
     // Остановки аномальных клиентов — добавим в конец после оптимизации
-    const anomalyStopIds = dayRoute.stops
+    const anomalyStopIds = activeStops
       .filter((stop) => {
         const client = clientMap.get(stop.clientId)
-        return client?.isActive && client.lat != null && client.lng != null && anomalyClientIds.has(client.id)
+        return client && client.lat != null && client.lng != null && anomalyClientIds.has(client.id)
       })
       .map((stop) => stop.id)
 
@@ -104,11 +108,11 @@ export function OptimizeRouteDialog() {
   const dayRoute = routes.find((r) => r.day === selectedDay)
   const stopCount = dayRoute?.stops.filter((s) => {
     const c = clientMap.get(s.clientId)
-    return c?.isActive
+    return c?.isActive && !isStopSkipped(s)
   }).length ?? 0
   const geocodedCount = dayRoute?.stops.filter((s) => {
     const c = clientMap.get(s.clientId)
-    return c?.isActive && c.lat != null
+    return c?.isActive && !isStopSkipped(s) && c.lat != null
   }).length ?? 0
 
   const canOptimize = geocodedCount >= 3

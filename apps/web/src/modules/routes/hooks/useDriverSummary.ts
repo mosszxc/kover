@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useRouteStore } from '../store'
 import { useClientStore, getClientReplacements } from '@/modules/clients'
+import { isStopSkipped } from '../utils'
 
 export interface DriverSummaryItem {
   driverId: string | null
@@ -22,7 +23,7 @@ export function useDriverSummary(): DriverSummaryItem[] {
 
     for (const stop of dayRoute.stops) {
       const client = clientMap.get(stop.clientId)
-      if (!client || !client.isActive) continue
+      if (!client || !client.isActive || isStopSkipped(stop)) continue
 
       const key = stop.driverId ?? null
       const entry = map.get(key) ?? { stopCount: 0, matCount: 0 }
