@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/shared/ui/dialog'
+import { useSettingsStore } from '@/shared/stores/settingsStore'
 import { useClientStore } from '../store'
 import type { Client } from '../types'
 import { buildOriginalName, rowsToSpecs } from '../lib/formHelpers'
@@ -20,6 +21,7 @@ import { ClientForm } from './ClientForm'
 
 export function AddClientDialog() {
   const addClient = useClientStore((s) => s.addClient)
+  const geocodeCity = useSettingsStore((s) => s.geocodeCity)
 
   const [open, setOpen] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -34,7 +36,7 @@ export function AddClientDialog() {
     let lng: number | undefined
     if (form.address.trim()) {
       try {
-        const result = await geocodeAddress(form.address.trim())
+        const result = await geocodeAddress(form.address.trim(), geocodeCity || undefined)
         if (result) {
           lat = result.lat
           lng = result.lng

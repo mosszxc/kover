@@ -60,10 +60,10 @@ export function detectGeoAnomalies(entities: GeoEntity[]): Set<string> {
   const q1 = sorted[q1Idx]!.distance
   const q3 = sorted[q3Idx]!.distance
   const iqr = q3 - q1
-  const threshold = q3 + 3.0 * iqr
+  const threshold = q3 + 1.5 * iqr
 
   const candidates = sorted.filter((d) => d.distance > threshold)
-  const maxAnomalies = Math.max(1, Math.floor(points.length * 0.1))
+  const maxAnomalies = Math.max(1, Math.floor(points.length * 0.15))
   const limited = candidates.slice(-maxAnomalies)
 
   const anomalies = new Set<string>()
