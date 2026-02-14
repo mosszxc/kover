@@ -13,10 +13,9 @@ import {
 } from '@/shared/ui/dialog'
 import type { DayOfWeek } from '@/shared/types'
 import { DAY_LABELS } from '@/shared/types'
+import { useVisibleDays } from '@/shared/hooks/useVisibleDays'
 import { cn } from '@/shared/lib/utils'
 import { useDriverStore } from '../store'
-
-const ALL_DAYS: DayOfWeek[] = [0, 1, 2, 3, 4, 5, 6]
 
 interface FormErrors {
   name?: string
@@ -24,17 +23,18 @@ interface FormErrors {
 
 export function AddDriverDialog() {
   const addDriver = useDriverStore((s) => s.addDriver)
+  const visibleDays = useVisibleDays()
 
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
-  const [workDays, setWorkDays] = useState<DayOfWeek[]>([...ALL_DAYS])
+  const [workDays, setWorkDays] = useState<DayOfWeek[]>([...visibleDays])
   const [errors, setErrors] = useState<FormErrors>({})
 
   function resetForm() {
     setName('')
     setPhone('')
-    setWorkDays([...ALL_DAYS])
+    setWorkDays([...visibleDays])
     setErrors({})
   }
 
@@ -136,7 +136,7 @@ export function AddDriverDialog() {
           <div>
             <span className={labelClass}>Рабочие дни</span>
             <div className="flex gap-1.5">
-              {ALL_DAYS.map((day) => (
+              {visibleDays.map((day) => (
                 <button
                   key={day}
                   type="button"

@@ -3,6 +3,7 @@ import { useRouteStore, isStopSkipped } from '@/modules/routes'
 import { useClientStore, getClientReplacements } from '@/modules/clients'
 import type { DayOfWeek } from '@/shared/types'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
+import { useVisibleDays } from '@/shared/hooks/useVisibleDays'
 
 export interface DayStat {
   day: DayOfWeek
@@ -24,12 +25,14 @@ export function useWeeklyStats(): WeeklyStats {
   const routes = useRouteStore((s) => s.routes)
   const clients = useClientStore((s) => s.clients)
   const sizes = useMatSizeStore((s) => s.sizes)
+  const visibleDays = useVisibleDays()
 
   return useMemo(() => {
     const clientMap = new Map(clients.map((c) => [c.id, c]))
     const areaMap = Object.fromEntries(sizes.map((s) => [s.id, s.area]))
+    const visibleSet = new Set(visibleDays)
 
-    const days: DayStat[] = routes.map((route) => {
+    const days: DayStat[] = routes.filter((r) => visibleSet.has(r.day)).map((route) => {
       const matsBySize: Partial<Record<string, number>> = {}
       let totalArea = 0
       let stopCount = 0
@@ -67,5 +70,5 @@ export function useWeeklyStats(): WeeklyStats {
     }
 
     return { days, totals }
-  }, [routes, clients, sizes])
+  }, [routes, clients, sizes, visibleDays])
 }
