@@ -77,7 +77,7 @@ function PrintTable({ title, rows, sizes, day }: PrintTableProps) {
         <tbody>
           {rows.map(({ stop, client }, index) => (
             <tr key={stop.id}>
-              <td className="num">{index + 1}</td>
+              <td className="num stop-num">{index + 1}</td>
               <td>{client?.originalName ?? '—'}</td>
               {sizes.map((s) => {
                 const qty = client ? getMatQuantity(client, s.id, day) : 0
