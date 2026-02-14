@@ -5,6 +5,7 @@ import {
   emptyMat,
   specsToRows,
   validateClientForm,
+  validateField as validateFieldHelper,
   type MatRow,
   type FormErrors,
 } from '../lib/formHelpers'
@@ -32,6 +33,7 @@ export function useClientForm() {
   const [workingHoursStart, setWorkingHoursStart] = useState('')
   const [workingHoursEnd, setWorkingHoursEnd] = useState('')
   const [errors, setErrors] = useState<FormErrors>({})
+  const [touched, setTouched] = useState<Partial<Record<keyof FormErrors, boolean>>>({})
 
   const setFrequency = useCallback((freq: number) => {
     setFrequencyRaw(freq)
@@ -54,6 +56,27 @@ export function useClientForm() {
   const clearError = useCallback((field: keyof FormErrors) => {
     setErrors((prev) => ({ ...prev, [field]: undefined }))
   }, [])
+
+  const markTouched = useCallback((field: keyof FormErrors) => {
+    setTouched((prev) => ({ ...prev, [field]: true }))
+  }, [])
+
+  const validateField = useCallback(
+    (field: keyof FormErrors) => {
+      const error = validateFieldHelper(field, name, mats, days, frequency)
+      setErrors((prev) => ({ ...prev, [field]: error }))
+      return !error
+    },
+    [name, mats, days, frequency],
+  )
+
+  const blurField = useCallback(
+    (field: keyof FormErrors) => {
+      markTouched(field)
+      validateField(field)
+    },
+    [markTouched, validateField],
+  )
 
   const addMat = useCallback(() => {
     setMats((prev) => [...prev, emptyMat()])
@@ -87,6 +110,7 @@ export function useClientForm() {
         if (prev.length >= frequency) return prev
         return [...prev, day]
       })
+      setErrors((prev) => ({ ...prev, days: undefined }))
     },
     [frequency],
   )
@@ -107,13 +131,14 @@ export function useClientForm() {
   )
 
   const validate = useCallback((): boolean => {
-    const e = validateClientForm(name, mats)
+    const e = validateClientForm(name, mats, days, frequency)
     if (Object.keys(e).length > 0) {
       setErrors(e)
+      setTouched({ name: true, mats: true, days: true })
       return false
     }
     return true
-  }, [name, mats])
+  }, [name, mats, days, frequency])
 
   const resetForm = useCallback(() => {
     setName('')
@@ -126,6 +151,7 @@ export function useClientForm() {
     setWorkingHoursStart('')
     setWorkingHoursEnd('')
     setErrors({})
+    setTouched({})
   }, [])
 
   const populateForm = useCallback((opts: PopulateOptions) => {
@@ -139,6 +165,7 @@ export function useClientForm() {
     setWorkingHoursStart(opts.workingHoursStart ?? '')
     setWorkingHoursEnd(opts.workingHoursEnd ?? '')
     setErrors({})
+    setTouched({})
   }, [])
 
   const updateMatSize = useCallback(
@@ -174,6 +201,7 @@ export function useClientForm() {
     workingHoursStart,
     workingHoursEnd,
     errors,
+    touched,
     // Setters
     setName,
     setAddress,
@@ -193,6 +221,9 @@ export function useClientForm() {
     setDayReplacement,
     // Form ops
     validate,
+    validateField,
+    blurField,
+    markTouched,
     resetForm,
     populateForm,
     clearError,

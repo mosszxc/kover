@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Plus, Loader2 } from 'lucide-react'
+import { useState, useCallback } from 'react'
+import { Plus, Loader2, ChevronLeft, ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
 import { generateId } from '@/shared/lib/generateId'
 import { geocodeAddress } from '@/shared/lib/geocode'
@@ -13,19 +13,44 @@ import {
   DialogTrigger,
 } from '@/shared/ui/dialog'
 import { useSettingsStore } from '@/shared/stores/settingsStore'
+import { useIsMobile } from '@/shared/hooks/useIsMobile'
 import { useClientStore } from '../store'
 import type { Client } from '../types'
 import { buildOriginalName, rowsToSpecs } from '../lib/formHelpers'
 import { useClientForm } from '../hooks/useClientForm'
-import { ClientForm } from './ClientForm'
+import { ClientForm, TOTAL_STEPS } from './ClientForm'
 
 export function AddClientDialog() {
   const addClient = useClientStore((s) => s.addClient)
   const geocodeCity = useSettingsStore((s) => s.geocodeCity)
+  const isMobile = useIsMobile()
 
   const [open, setOpen] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [wizardStep, setWizardStep] = useState(0)
   const form = useClientForm()
+
+  const isLastStep = wizardStep === TOTAL_STEPS - 1
+
+  const validateCurrentStep = useCallback((): boolean => {
+    switch (wizardStep) {
+      case 0:
+        return form.validateField('name')
+      case 1:
+        return form.validateField('mats')
+      default:
+        return true
+    }
+  }, [wizardStep, form])
+
+  function handleNext() {
+    if (!validateCurrentStep()) return
+    setWizardStep((s) => Math.min(s + 1, TOTAL_STEPS - 1))
+  }
+
+  function handleBack() {
+    setWizardStep((s) => Math.max(s - 1, 0))
+  }
 
   async function handleSave() {
     if (!form.validate()) return
@@ -72,6 +97,7 @@ export function AddClientDialog() {
     setSaving(false)
     setOpen(false)
     form.resetForm()
+    setWizardStep(0)
   }
 
   return (
@@ -79,7 +105,10 @@ export function AddClientDialog() {
       open={open}
       onOpenChange={(v) => {
         setOpen(v)
-        if (!v) form.resetForm()
+        if (!v) {
+          form.resetForm()
+          setWizardStep(0)
+        }
       }}
     >
       <DialogTrigger asChild>
@@ -94,26 +123,61 @@ export function AddClientDialog() {
           <DialogTitle className="text-lg">Новый клиент</DialogTitle>
         </DialogHeader>
 
-        <ClientForm form={form} mode="add" />
+        <ClientForm
+          form={form}
+          mode="add"
+          wizardStep={isMobile ? wizardStep : undefined}
+          onWizardStepChange={isMobile ? setWizardStep : undefined}
+        />
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => setOpen(false)}
-            disabled={saving}
-          >
-            Отмена
-          </Button>
-          <Button onClick={handleSave} disabled={saving}>
-            {saving ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Сохранение...
-              </>
-            ) : (
-              'Сохранить'
-            )}
-          </Button>
+          {isMobile ? (
+            <div className="flex w-full gap-2">
+              {wizardStep > 0 && (
+                <Button variant="outline" onClick={handleBack} className="flex-1">
+                  <ChevronLeft className="h-4 w-4" />
+                  Назад
+                </Button>
+              )}
+              {isLastStep ? (
+                <Button onClick={handleSave} disabled={saving} className="flex-1">
+                  {saving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Сохранение...
+                    </>
+                  ) : (
+                    'Сохранить'
+                  )}
+                </Button>
+              ) : (
+                <Button onClick={handleNext} className="flex-1">
+                  Далее
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          ) : (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => setOpen(false)}
+                disabled={saving}
+              >
+                Отмена
+              </Button>
+              <Button onClick={handleSave} disabled={saving}>
+                {saving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Сохранение...
+                  </>
+                ) : (
+                  'Сохранить'
+                )}
+              </Button>
+            </>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

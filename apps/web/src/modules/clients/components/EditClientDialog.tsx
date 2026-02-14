@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { Trash2, Loader2, ClipboardList, History } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { Trash2, Loader2, ClipboardList, History, ChevronLeft, ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
 import { geocodeAddress } from '@/shared/lib/geocode'
 import { useSettingsStore } from '@/shared/stores/settingsStore'
@@ -22,11 +22,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/shared/ui/alert-dialog'
+import { useIsMobile } from '@/shared/hooks/useIsMobile'
 import { useClientStore } from '../store'
 import type { Client } from '../types'
 import { buildOriginalName, rowsToSpecs } from '../lib/formHelpers'
 import { useClientForm } from '../hooks/useClientForm'
-import { ClientForm } from './ClientForm'
+import { ClientForm, TOTAL_STEPS } from './ClientForm'
 import { ServiceHistory } from './ServiceHistory'
 
 interface EditClientDialogProps {
@@ -39,15 +40,20 @@ interface EditClientDialogProps {
 export function EditClientDialog({ client, open, onOpenChange, onDelete }: EditClientDialogProps) {
   const updateClient = useClientStore((s) => s.updateClient)
   const geocodeCity = useSettingsStore((s) => s.geocodeCity)
+  const isMobile = useIsMobile()
 
   const [saving, setSaving] = useState(false)
   const [geocoding, setGeocoding] = useState(false)
   const [tab, setTab] = useState<'data' | 'history'>('data')
+  const [wizardStep, setWizardStep] = useState(0)
   const form = useClientForm()
+
+  const isLastStep = wizardStep === TOTAL_STEPS - 1
 
   useEffect(() => {
     if (open && client) {
       setTab('data')
+      setWizardStep(0)
       form.populateForm({
         name: client.name,
         address: client.address,
@@ -62,6 +68,26 @@ export function EditClientDialog({ client, open, onOpenChange, onDelete }: EditC
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, client])
+
+  const validateCurrentStep = useCallback((): boolean => {
+    switch (wizardStep) {
+      case 0:
+        return form.validateField('name')
+      case 1:
+        return form.validateField('mats')
+      default:
+        return true
+    }
+  }, [wizardStep, form])
+
+  function handleNext() {
+    if (!validateCurrentStep()) return
+    setWizardStep((s) => Math.min(s + 1, TOTAL_STEPS - 1))
+  }
+
+  function handleBack() {
+    setWizardStep((s) => Math.max(s - 1, 0))
+  }
 
   async function handleSave() {
     if (!form.validate()) return
@@ -176,6 +202,8 @@ export function EditClientDialog({ client, open, onOpenChange, onDelete }: EditC
             coordinates={coordinates}
             onGeocode={handleGeocode}
             geocoding={geocoding}
+            wizardStep={isMobile ? wizardStep : undefined}
+            onWizardStepChange={isMobile ? setWizardStep : undefined}
           />
         ) : (
           <ServiceHistory clientId={client.id} />
@@ -205,25 +233,53 @@ export function EditClientDialog({ client, open, onOpenChange, onDelete }: EditC
             </AlertDialogContent>
           </AlertDialog>
 
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={saving}
-            >
-              Отмена
-            </Button>
-            <Button onClick={handleSave} disabled={saving}>
-              {saving ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Сохранение...
-                </>
-              ) : (
-                'Сохранить'
+          {isMobile ? (
+            <div className="flex gap-2">
+              {wizardStep > 0 && (
+                <Button variant="outline" onClick={handleBack} size="sm">
+                  <ChevronLeft className="h-4 w-4" />
+                  Назад
+                </Button>
               )}
-            </Button>
-          </div>
+              {isLastStep ? (
+                <Button onClick={handleSave} disabled={saving} size="sm">
+                  {saving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Сохранение...
+                    </>
+                  ) : (
+                    'Сохранить'
+                  )}
+                </Button>
+              ) : (
+                <Button onClick={handleNext} size="sm">
+                  Далее
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={saving}
+              >
+                Отмена
+              </Button>
+              <Button onClick={handleSave} disabled={saving}>
+                {saving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Сохранение...
+                  </>
+                ) : (
+                  'Сохранить'
+                )}
+              </Button>
+            </div>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
