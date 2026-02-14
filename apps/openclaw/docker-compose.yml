@@ -1,0 +1,44 @@
+services:
+  openclaw:
+    image: openclaw/openclaw:latest
+    container_name: kover-openclaw
+    restart: unless-stopped
+    ports:
+      - "18789:18789"
+    volumes:
+      - ./openclaw.json:/root/.openclaw/openclaw.json:ro
+      - ./workspace:/root/.openclaw/workspace
+      - openclaw-data:/root/.openclaw/data
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+    depends_on:
+      pocketbase:
+        condition: service_healthy
+    networks:
+      - kover
+
+  pocketbase:
+    image: ghcr.io/muchobien/pocketbase:latest
+    container_name: kover-pocketbase
+    restart: unless-stopped
+    ports:
+      - "8090:8090"
+    volumes:
+      - pb-data:/pb/pb_data
+      - ../pocketbase/pb_migrations:/pb/pb_migrations:ro
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8090/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - kover
+
+volumes:
+  openclaw-data:
+  pb-data:
+
+networks:
+  kover:
+    driver: bridge
