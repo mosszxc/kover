@@ -3,6 +3,23 @@ import { Plus, Pencil, Trash2, Check, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/shared/ui/button'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/shared/ui/alert-dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/shared/ui/select'
 import type { MatSizeConfig } from '@/shared/types'
 
 interface EditingState {
@@ -13,9 +30,11 @@ interface EditingState {
 
 interface MatSizeSettingsProps {
   isSizeUsed: (sizeId: string) => boolean
+  getClientsUsing: (sizeId: string) => number
+  onDeleteAndReplace: (oldSizeId: string, newSizeId: string) => void
 }
 
-export function MatSizeSettings({ isSizeUsed }: MatSizeSettingsProps) {
+export function MatSizeSettings({ isSizeUsed, getClientsUsing, onDeleteAndReplace }: MatSizeSettingsProps) {
   const sizes = useMatSizeStore((s) => s.sizes)
   const addSize = useMatSizeStore((s) => s.addSize)
   const updateSize = useMatSizeStore((s) => s.updateSize)
@@ -25,6 +44,8 @@ export function MatSizeSettings({ isSizeUsed }: MatSizeSettingsProps) {
   const [adding, setAdding] = useState(false)
   const [newLabel, setNewLabel] = useState('')
   const [newArea, setNewArea] = useState('')
+  const [deletingSize, setDeletingSize] = useState<MatSizeConfig | null>(null)
+  const [replacementSizeId, setReplacementSizeId] = useState<string>('')
 
   function handleStartEdit(size: MatSizeConfig) {
     setEditing({ id: size.id, label: size.label, area: String(size.area) })
@@ -45,11 +66,21 @@ export function MatSizeSettings({ isSizeUsed }: MatSizeSettingsProps) {
 
   function handleDelete(size: MatSizeConfig) {
     if (isSizeUsed(size.id)) {
-      toast.error(`Размер «${size.label}» используется клиентами и не может быть удалён`)
+      setDeletingSize(size)
+      setReplacementSizeId('')
       return
     }
     removeSize(size.id)
     toast.success(`Размер «${size.label}» удалён`)
+  }
+
+  function handleConfirmDeleteAndReplace() {
+    if (!deletingSize || !replacementSizeId) return
+    onDeleteAndReplace(deletingSize.id, replacementSizeId)
+    const replacementLabel = sizes.find((s) => s.id === replacementSizeId)?.label ?? replacementSizeId
+    toast.success(`Размер «${deletingSize.label}» удалён, клиенты переведены на «${replacementLabel}»`)
+    setDeletingSize(null)
+    setReplacementSizeId('')
   }
 
   function handleAdd() {
@@ -76,6 +107,12 @@ export function MatSizeSettings({ isSizeUsed }: MatSizeSettingsProps) {
 
   const inputClass =
     'h-9 rounded-md border border-slate-700 bg-slate-900 px-2 text-sm text-slate-50 placeholder:text-slate-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-colors'
+
+  const availableReplacements = deletingSize
+    ? sizes.filter((s) => s.id !== deletingSize.id)
+    : []
+
+  const clientsUsingCount = deletingSize ? getClientsUsing(deletingSize.id) : 0
 
   return (
     <div className="space-y-4">
@@ -118,7 +155,6 @@ export function MatSizeSettings({ isSizeUsed }: MatSizeSettingsProps) {
           <tbody>
             {sizes.map((size, i) => {
               const isEditing = editing?.id === size.id
-              const used = isSizeUsed(size.id)
 
               if (isEditing) {
                 return (
@@ -197,10 +233,8 @@ export function MatSizeSettings({ isSizeUsed }: MatSizeSettingsProps) {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-slate-400 hover:text-red-400"
-                        disabled={used}
                         onClick={() => handleDelete(size)}
                         aria-label={`Удалить ${size.label}`}
-                        title={used ? 'Используется клиентами' : `Удалить ${size.label}`}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -278,6 +312,43 @@ export function MatSizeSettings({ isSizeUsed }: MatSizeSettingsProps) {
           </tbody>
         </table>
       </div>
+
+      <AlertDialog open={!!deletingSize} onOpenChange={(open) => { if (!open) { setDeletingSize(null); setReplacementSizeId('') } }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Удалить размер «{deletingSize?.label}»?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Этот размер используется у {clientsUsingCount}{' '}
+              {clientsUsingCount === 1 ? 'клиента' : clientsUsingCount < 5 ? 'клиентов' : 'клиентов'}.
+              Выберите размер-замену — он будет автоматически назначен всем затронутым клиентам.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-2">
+            <Select value={replacementSizeId} onValueChange={setReplacementSizeId}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Выберите размер-замену" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableReplacements.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {s.label} ({s.area} м²)
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Отмена</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={!replacementSizeId}
+              onClick={handleConfirmDeleteAndReplace}
+            >
+              Удалить и заменить
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
