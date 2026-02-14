@@ -7,11 +7,13 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { Check, ChevronDown, ChevronUp, ChevronsUpDown, Search, AlertTriangle, Pause, Play, MapPin, TriangleAlert } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, ChevronsUpDown, Search, AlertTriangle, Pause, Play, MapPin, TriangleAlert, CalendarClock } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { toast } from 'sonner'
 import { useClientStore } from '../store'
 import type { Client } from '../types'
+import { isClientPaused, formatPausedUntil } from '../types'
+import { PauseClientDialog } from './PauseClientDialog'
 import { DAY_LABELS } from '@/shared/types'
 import type { DayOfWeek } from '@/shared/types'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
@@ -23,17 +25,19 @@ interface ClientsTableProps {
   onRowClick?: (client: Client) => void
   isClientInRoute?: (clientId: string, day: DayOfWeek) => boolean
   onToggleActive?: (client: Client) => void
+  onPauseClient?: (client: Client, pausedUntil: string | null) => void
   anomalyIds?: Set<string>
 }
 
 type SortField = 'name' | 'address' | 'mats' | 'area' | 'frequency' | 'days'
 
-export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, anomalyIds }: ClientsTableProps) {
+export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPauseClient, anomalyIds }: ClientsTableProps) {
   const clients = useClientStore((s) => s.clients)
   const updateClient = useClientStore((s) => s.updateClient)
   const sizes = useMatSizeStore((s) => s.sizes)
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState('')
+  const [pauseDialogClient, setPauseDialogClient] = useState<Client | null>(null)
 
   const areaMap = useMemo(
     () => Object.fromEntries(sizes.map((s) => [s.id, s.area])),
@@ -74,9 +78,9 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, anom
   const filteredClients = useMemo(() => {
     let result = clients
     if (selectedStatus === 'active') {
-      result = result.filter((c) => c.isActive)
+      result = result.filter((c) => !isClientPaused(c))
     } else if (selectedStatus === 'paused') {
-      result = result.filter((c) => !c.isActive)
+      result = result.filter((c) => isClientPaused(c))
     }
     if (selectedDays.length > 0) {
       result = result.filter((c) =>
@@ -184,7 +188,8 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, anom
         {rows.map((row) => {
           const client = row.original
           const isAnomaly = anomalyIds?.has(client.id) ?? false
-          const isActive = client.isActive
+          const paused = isClientPaused(client)
+          const isActive = !paused
           const entries = groupMats(client)
           const area = getClientArea(client)
 
@@ -282,12 +287,18 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, anom
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation()
-                    if (onToggleActive) {
-                      onToggleActive(client)
+                    if (isActive) {
+                      // Активен → открыть диалог паузы
+                      setPauseDialogClient(client)
                     } else {
-                      updateClient(client.id, { isActive: !isActive })
+                      // На паузе → активировать
+                      if (onToggleActive) {
+                        onToggleActive({ ...client, isActive: false })
+                      } else {
+                        updateClient(client.id, { isActive: true, pausedUntil: null })
+                      }
+                      toast.success('Клиент активирован', { duration: 2000 })
                     }
-                    toast.success(isActive ? 'Клиент на паузе' : 'Клиент активирован', { duration: 2000 })
                   }}
                   className={cn(
                     'inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold transition-colors',
@@ -301,6 +312,11 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, anom
                     <>
                       <Pause className="size-3" />
                       Активен
+                    </>
+                  ) : client.pausedUntil ? (
+                    <>
+                      <CalendarClock className="size-3" />
+                      До {formatPausedUntil(client.pausedUntil)}
                     </>
                   ) : (
                     <>
@@ -318,6 +334,28 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, anom
       <p className="text-sm text-muted-foreground">
         Показано {table.getFilteredRowModel().rows.length} из {clients.length} клиентов
       </p>
+
+      {pauseDialogClient && (
+        <PauseClientDialog
+          open={!!pauseDialogClient}
+          onOpenChange={(open) => { if (!open) setPauseDialogClient(null) }}
+          clientName={pauseDialogClient.name}
+          onPause={(pausedUntil) => {
+            if (onPauseClient) {
+              onPauseClient(pauseDialogClient, pausedUntil)
+            } else {
+              updateClient(pauseDialogClient.id, { isActive: false, pausedUntil })
+            }
+            toast.success(
+              pausedUntil
+                ? `Клиент на паузе до ${formatPausedUntil(pausedUntil)}`
+                : 'Клиент на паузе',
+              { duration: 2000 },
+            )
+            setPauseDialogClient(null)
+          }}
+        />
+      )}
     </div>
   )
 }

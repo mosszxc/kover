@@ -1,5 +1,5 @@
-import { useCallback, useMemo, useState } from 'react'
-import { ClientsTable, EditClientDialog, AddClientDialog, useClientStore, BatchGeocode, GeocodeSettings } from '@/modules/clients'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { ClientsTable, EditClientDialog, AddClientDialog, useClientStore, BatchGeocode, GeocodeSettings, isClientPaused } from '@/modules/clients'
 import { useRouteStore } from '@/modules/routes'
 import type { Client } from '@/modules/clients'
 import type { DayOfWeek } from '@/shared/types'
@@ -17,8 +17,30 @@ export function ClientsPage() {
   const routes = useRouteStore((s) => s.routes)
   const addServiceLog = useServiceLogStore((s) => s.addEntry)
 
-  const activeClients = useMemo(() => clients.filter((c) => c.isActive), [clients])
+  const activeClients = useMemo(() => clients.filter((c) => !isClientPaused(c)), [clients])
   const anomalyIds = useMemo(() => detectGeoAnomalies(activeClients), [activeClients])
+
+  // Авто-реактивация клиентов с истёкшей паузой
+  useEffect(() => {
+    const today = new Date().toISOString().slice(0, 10)
+    const expired = clients.filter((c) => c.pausedUntil && c.pausedUntil <= today && !c.isActive)
+    for (const client of expired) {
+      updateClient(client.id, { isActive: true, pausedUntil: null })
+      // Добавляем обратно в маршруты
+      for (const day of client.days) {
+        const route = routes.find((r) => r.day === day)
+        const alreadyInRoute = route?.stops.some((s) => s.clientId === client.id)
+        if (!alreadyInRoute) {
+          addStop(day, {
+            id: generateId(),
+            clientId: client.id,
+            position: route?.stops.length ?? 0,
+            isCompleted: false,
+          })
+        }
+      }
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps -- only on mount
 
   const routeClientSet = useMemo(() => {
     const set = new Set<string>()
@@ -37,30 +59,37 @@ export function ClientsPage() {
 
   const handleToggleActive = useCallback(
     (client: Client) => {
-      const newIsActive = !client.isActive
-      updateClient(client.id, { isActive: newIsActive })
+      // Вызывается при активации (из паузы)
+      updateClient(client.id, { isActive: true, pausedUntil: null })
 
-      const eventType = newIsActive ? 'unpaused' : 'paused' as const
       for (const day of client.days) {
-        addServiceLog({ clientId: client.id, day, type: eventType })
+        addServiceLog({ clientId: client.id, day, type: 'unpaused' })
       }
 
-      if (newIsActive) {
-        for (const day of client.days) {
-          const route = routes.find((r) => r.day === day)
-          const alreadyInRoute = route?.stops.some((s) => s.clientId === client.id)
-          if (!alreadyInRoute) {
-            addStop(day, {
-              id: generateId(),
-              clientId: client.id,
-              position: route?.stops.length ?? 0,
-              isCompleted: false,
-            })
-          }
+      for (const day of client.days) {
+        const route = routes.find((r) => r.day === day)
+        const alreadyInRoute = route?.stops.some((s) => s.clientId === client.id)
+        if (!alreadyInRoute) {
+          addStop(day, {
+            id: generateId(),
+            clientId: client.id,
+            position: route?.stops.length ?? 0,
+            isCompleted: false,
+          })
         }
       }
     },
     [updateClient, routes, addStop, addServiceLog],
+  )
+
+  const handlePauseClient = useCallback(
+    (client: Client, pausedUntil: string | null) => {
+      updateClient(client.id, { isActive: false, pausedUntil })
+      for (const day of client.days) {
+        addServiceLog({ clientId: client.id, day, type: 'paused' })
+      }
+    },
+    [updateClient, addServiceLog],
   )
 
   return (
@@ -73,7 +102,7 @@ export function ClientsPage() {
           <AddClientDialog />
         </div>
       </div>
-      <ClientsTable onRowClick={setSelectedClient} isClientInRoute={isClientInRoute} onToggleActive={handleToggleActive} anomalyIds={anomalyIds} />
+      <ClientsTable onRowClick={setSelectedClient} isClientInRoute={isClientInRoute} onToggleActive={handleToggleActive} onPauseClient={handlePauseClient} anomalyIds={anomalyIds} />
       {selectedClient && (
         <EditClientDialog
           client={selectedClient}
