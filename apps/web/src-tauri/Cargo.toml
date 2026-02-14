@@ -1,8 +1,9 @@
 [package]
 name = "kover"
 version = "0.1.0"
-description = "Kover — Route Management System"
-authors = ["kover"]
+description = "Kover — система управления маршрутами"
+authors = ["Kover Team"]
+license = "MIT"
 edition = "2021"
 
 [build-dependencies]
