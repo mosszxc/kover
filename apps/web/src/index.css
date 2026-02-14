@@ -131,7 +131,7 @@
 
 @page {
   size: A4 portrait;
-  margin: 8mm 7mm;
+  margin: 15mm;
 }
 
 @media print {
@@ -153,8 +153,8 @@
     background: white !important;
     color: black !important;
     font-family: Arial, Helvetica, sans-serif !important;
-    font-size: 9pt !important;
-    line-height: 1.2 !important;
+    font-size: 14pt !important;
+    line-height: 1.3 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
@@ -171,10 +171,10 @@
 
   /* ── Header ── */
   .print-header {
-    font-size: 12pt !important;
+    font-size: 18pt !important;
     font-weight: bold !important;
     color: black !important;
-    margin: 0 0 4pt 0 !important;
+    margin: 0 0 6pt 0 !important;
     break-after: avoid;
   }
 
@@ -195,9 +195,9 @@
   .print-table th,
   .print-table td {
     border: 0.5pt solid #333;
-    padding: 1.5pt 3pt;
-    font-size: 8pt;
-    line-height: 1.2;
+    padding: 3pt 5pt;
+    font-size: 14pt;
+    line-height: 1.3;
     color: black;
     vertical-align: middle;
   }
@@ -206,7 +206,7 @@
     font-weight: bold;
     background: #ddd !important;
     text-align: center;
-    padding: 2pt 3pt;
+    padding: 4pt 5pt;
   }
 
   .print-table tr {
@@ -221,7 +221,7 @@
   .print-table tfoot td {
     border-top: 1.5pt solid black;
     font-weight: bold;
-    font-size: 8pt;
+    font-size: 14pt;
     font-variant-numeric: tabular-nums;
   }
 
@@ -236,10 +236,15 @@
     text-align: left;
   }
 
-  /* Checkbox — compact */
+  .print-table td.stop-num {
+    font-size: 16pt;
+    font-weight: bold;
+  }
+
+  /* Checkbox */
   .print-checkbox {
-    width: 7mm;
-    height: 7mm;
+    width: 15mm;
+    height: 15mm;
     border: 1pt solid black;
     display: inline-block;
     vertical-align: middle;
