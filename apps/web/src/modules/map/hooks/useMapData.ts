@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useRouteStore, isStopSkipped } from '@/modules/routes'
 import { useClientStore } from '@/modules/clients'
+import { detectGeoAnomalies } from '@/shared/lib/geoAnomalies'
 
 export interface MapStop {
   position: number
@@ -21,11 +22,23 @@ export function useMapData() {
 
     if (!dayRoute) return []
 
+    const activeGeoClients = dayRoute.stops
+      .map((stop) => {
+        const client = clientMap.get(stop.clientId)
+        if (!client || !client.isActive || isStopSkipped(stop)) return null
+        if (client.lat == null || client.lng == null) return null
+        return client
+      })
+      .filter((c) => c != null)
+
+    const anomalyIds = detectGeoAnomalies(activeGeoClients)
+
     const stops: MapStop[] = []
     for (const stop of dayRoute.stops) {
       const client = clientMap.get(stop.clientId)
       if (!client || !client.isActive || isStopSkipped(stop)) continue
       if (client.lat == null || client.lng == null) continue
+      if (anomalyIds.has(client.id)) continue
 
       stops.push({
         position: stops.length + 1,
