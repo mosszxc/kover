@@ -19,6 +19,7 @@ export function OptimizeRouteDialog() {
   const [open, setOpen] = useState(false)
   const [result, setResult] = useState<OptimizationResult | null>(null)
   const [anomalyCount, setAnomalyCount] = useState(0)
+  const [noCoordCount, setNoCoordCount] = useState(0)
   const [loading, setLoading] = useState(false)
 
   const routes = useRouteStore((s) => s.routes)
@@ -30,6 +31,7 @@ export function OptimizeRouteDialog() {
     if (!open) {
       setResult(null)
       setAnomalyCount(0)
+      setNoCoordCount(0)
       return
     }
 
@@ -60,11 +62,19 @@ export function OptimizeRouteDialog() {
         return { id: stop.id, lat: client.lat!, lng: client.lng! }
       })
 
-    // Остановки аномальных клиентов — добавим в конец после оптимизации
+    // Остановки аномальных клиентов — добавим после точек без координат
     const anomalyStopIds = activeStops
       .filter((stop) => {
         const client = clientMap.get(stop.clientId)
         return client && client.lat != null && client.lng != null && anomalyClientIds.has(client.id)
+      })
+      .map((stop) => stop.id)
+
+    // Остановки без координат
+    const noCoordStopIds = activeStops
+      .filter((stop) => {
+        const client = clientMap.get(stop.clientId)
+        return client && (client.lat == null || client.lng == null)
       })
       .map((stop) => stop.id)
 
@@ -75,10 +85,10 @@ export function OptimizeRouteDialog() {
 
     optimizeRouteAsync(points).then((res) => {
       if (!cancelled) {
-        if (anomalyStopIds.length > 0) {
-          res.optimizedIds = [...res.optimizedIds, ...anomalyStopIds]
-        }
+        // Порядок: оптимизированные → без координат → аномалии
+        res.optimizedIds = [...res.optimizedIds, ...noCoordStopIds, ...anomalyStopIds]
         setAnomalyCount(anomalyStopIds.length)
+        setNoCoordCount(noCoordStopIds.length)
         setResult(res)
         setLoading(false)
       }
@@ -171,13 +181,18 @@ export function OptimizeRouteDialog() {
             )}
 
             <p className="text-sm text-muted-foreground">
-              Оптимизировано {result.optimizedIds.length - anomalyCount} точек с координатами.
-              Точки без координат останутся в конце маршрута.
+              Оптимизировано {result.optimizedIds.length - anomalyCount - noCoordCount} точек с координатами.
             </p>
+
+            {noCoordCount > 0 && (
+              <p className="text-sm text-slate-400">
+                {noCoordCount} {noCoordCount === 1 ? 'точка без координат перемещена' : noCoordCount < 5 ? 'точки без координат перемещены' : 'точек без координат перемещены'} в конец маршрута.
+              </p>
+            )}
 
             {anomalyCount > 0 && (
               <p className="text-sm text-amber-400">
-                {anomalyCount} {anomalyCount === 1 ? 'аномальный адрес перемещён' : 'аномальных адреса перемещены'} в конец маршрута.
+                {anomalyCount} {anomalyCount === 1 ? 'аномальный адрес перемещён' : anomalyCount < 5 ? 'аномальных адреса перемещены' : 'аномальных адресов перемещены'} в конец маршрута.
               </p>
             )}
 

@@ -47,7 +47,7 @@ export function detectGeoAnomalies(entities: GeoEntity[]): Set<string> {
     return new Set()
   }
 
-  // 3+ точек: IQR-метод
+  // 3+ точек: IQR-метод (множитель 3.0, max 10% аномалий)
   const center = medianCenter(points)
   const distances = points.map((p) => ({
     id: p.id,
@@ -60,13 +60,15 @@ export function detectGeoAnomalies(entities: GeoEntity[]): Set<string> {
   const q1 = sorted[q1Idx]!.distance
   const q3 = sorted[q3Idx]!.distance
   const iqr = q3 - q1
-  const threshold = q3 + 1.5 * iqr
+  const threshold = q3 + 3.0 * iqr
+
+  const candidates = sorted.filter((d) => d.distance > threshold)
+  const maxAnomalies = Math.max(1, Math.floor(points.length * 0.1))
+  const limited = candidates.slice(-maxAnomalies)
 
   const anomalies = new Set<string>()
-  for (const d of distances) {
-    if (d.distance > threshold) {
-      anomalies.add(d.id)
-    }
+  for (const d of limited) {
+    anomalies.add(d.id)
   }
 
   return anomalies
