@@ -19,6 +19,7 @@
     "idb-keyval": "^6.2.2",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.474.0",
+    "pocketbase": "^0.26.8",
     "radix-ui": "^1.4.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
