@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowRightLeft, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import {
   Select,
@@ -27,10 +27,11 @@ interface TransferStopDialogProps {
   clientName: string
   day: DayOfWeek
   driverName?: string
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }
 
-export function TransferStopDialog({ stopId, clientId, clientName, day, driverName }: TransferStopDialogProps) {
-  const [open, setOpen] = useState(false)
+export function TransferStopDialog({ stopId, clientId, clientName, day, driverName, open, onOpenChange }: TransferStopDialogProps) {
   const [targetDay, setTargetDay] = useState<DayOfWeek | null>(null)
   const [position, setPosition] = useState<number>(-1)
   const [isTransferring, setIsTransferring] = useState(false)
@@ -48,7 +49,7 @@ export function TransferStopDialog({ stopId, clientId, clientName, day, driverNa
     transferStop(day, targetDay, stopId, position === -1 ? undefined : position)
     addServiceLog({ clientId, day, type: 'transferred', targetDay, driverName })
     setIsTransferring(false)
-    setOpen(false)
+    onOpenChange(false)
     reset()
   }
 
@@ -58,16 +59,7 @@ export function TransferStopDialog({ stopId, clientId, clientName, day, driverNa
   }
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) reset() }}>
-      <button
-        type="button"
-        aria-label="Перенести в другой день"
-        onClick={() => setOpen(true)}
-        className="flex size-6 min-h-[44px] min-w-[44px] items-center justify-center rounded text-muted-foreground transition-colors hover:text-blue-500 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 print:hidden"
-      >
-        <ArrowRightLeft className="size-4" />
-      </button>
-
+    <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) reset() }}>
       <DialogContent className="sm:max-w-[400px]">
         <DialogHeader>
           <DialogTitle>Перенести {clientName}</DialogTitle>
@@ -117,7 +109,7 @@ export function TransferStopDialog({ stopId, clientId, clientName, day, driverNa
           )}
 
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => { setOpen(false); reset() }} disabled={isTransferring}>
+            <Button variant="outline" onClick={() => { onOpenChange(false); reset() }} disabled={isTransferring}>
               Отмена
             </Button>
             <Button disabled={targetDay === null || isTransferring} onClick={handleTransfer}>

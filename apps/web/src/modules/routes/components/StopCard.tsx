@@ -1,4 +1,4 @@
-import { ChevronUp, ChevronDown, GripVertical, MapPinOff, Pencil, TriangleAlert, Clock } from 'lucide-react'
+import { ChevronUp, ChevronDown, GripVertical, MapPinOff, Pencil, TriangleAlert, Clock, MoreHorizontal, ArrowRightLeft, X } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -10,10 +10,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/shared/ui/select'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/shared/ui/dropdown-menu'
 import type { Client } from '@/modules/clients'
 import { getClientReplacements, formatWorkingHours } from '@/modules/clients'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouteStore } from '../store'
 import { RemoveStopDialog } from './RemoveStopDialog'
 import { TransferStopDialog } from './TransferStopDialog'
@@ -56,6 +63,9 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
   const assignDriver = useRouteStore((s) => s.assignDriver)
   const moveStop = useRouteStore((s) => s.moveStop)
 
+  const [removeOpen, setRemoveOpen] = useState(false)
+  const [transferOpen, setTransferOpen] = useState(false)
+
   const {
     attributes,
     listeners,
@@ -74,12 +84,14 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
     transition: transition ?? undefined,
   }
 
+  const driverName = drivers.find((d) => d.id === driverId)?.name
+
   return (
     <div
       ref={setNodeRef}
       style={style}
       className={cn(
-        'flex items-center gap-3 border-l-3 p-3 transition-colors hover:bg-accent',
+        'group flex items-center gap-3 border-l-3 p-3 transition-colors hover:bg-accent',
         isAnomaly
           ? 'border-l-amber-500 bg-amber-500/5'
           : isMissingCoords
@@ -97,38 +109,11 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
           ref={setActivatorNodeRef}
           {...listeners}
           aria-label="Перетащить для изменения порядка"
-          className="flex size-6 shrink-0 cursor-grab items-center justify-center rounded transition-colors hover:bg-accent active:cursor-grabbing focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 print:hidden"
+          className="flex size-6 shrink-0 cursor-grab items-center justify-center rounded opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 print:hidden"
         >
           <GripVertical className="size-5 text-muted-foreground" />
         </button>
       )}
-
-      <div className="flex shrink-0 flex-col">
-        {!isFirst ? (
-          <button
-            type="button"
-            aria-label="Переместить вверх"
-            onClick={() => moveStop(selectedDay, stopId, stopIndex - 1)}
-            className="flex size-6 items-center justify-center rounded transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-          >
-            <ChevronUp className="size-5 text-muted-foreground" />
-          </button>
-        ) : (
-          <div className="size-6" />
-        )}
-        {!isLast ? (
-          <button
-            type="button"
-            aria-label="Переместить вниз"
-            onClick={() => moveStop(selectedDay, stopId, stopIndex + 1)}
-            className="flex size-6 items-center justify-center rounded transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-          >
-            <ChevronDown className="size-5 text-muted-foreground" />
-          </button>
-        ) : (
-          <div className="size-6" />
-        )}
-      </div>
 
       <span className="w-8 shrink-0 text-center text-sm tabular-nums text-muted-foreground">
         {number}
@@ -202,12 +187,50 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
         {area.toFixed(1)} м²
       </span>
 
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            aria-label="Действия с остановкой"
+            className="flex size-6 min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 print:hidden"
+          >
+            <MoreHorizontal className="size-4" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {!isFirst && (
+            <DropdownMenuItem onClick={() => moveStop(selectedDay, stopId, stopIndex - 1)}>
+              <ChevronUp className="size-4" />
+              Переместить вверх
+            </DropdownMenuItem>
+          )}
+          {!isLast && (
+            <DropdownMenuItem onClick={() => moveStop(selectedDay, stopId, stopIndex + 1)}>
+              <ChevronDown className="size-4" />
+              Переместить вниз
+            </DropdownMenuItem>
+          )}
+          {(!isFirst || !isLast) && <DropdownMenuSeparator />}
+          <DropdownMenuItem onClick={() => setTransferOpen(true)}>
+            <ArrowRightLeft className="size-4" />
+            Перенести в другой день
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem variant="destructive" onClick={() => setRemoveOpen(true)}>
+            <X className="size-4" />
+            Убрать из маршрута
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
       <TransferStopDialog
         stopId={stopId}
         clientId={client.id}
         clientName={client.originalName}
         day={selectedDay}
-        driverName={drivers.find((d) => d.id === driverId)?.name}
+        driverName={driverName}
+        open={transferOpen}
+        onOpenChange={setTransferOpen}
       />
 
       <RemoveStopDialog
@@ -215,7 +238,9 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
         clientId={client.id}
         clientName={client.originalName}
         day={selectedDay}
-        driverName={drivers.find((d) => d.id === driverId)?.name}
+        driverName={driverName}
+        open={removeOpen}
+        onOpenChange={setRemoveOpen}
       />
     </div>
   )

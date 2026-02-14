@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import {
   Dialog,
   DialogClose,
@@ -7,10 +6,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/shared/ui/dialog'
 import { Button } from '@/shared/ui/button'
-import { X } from 'lucide-react'
 import { DAY_LABELS } from '@/shared/types'
 import type { DayOfWeek } from '@/shared/types'
 import { useServiceLogStore } from '@/shared/stores/serviceLogStore'
@@ -22,25 +19,17 @@ interface RemoveStopDialogProps {
   clientName: string
   day: DayOfWeek
   driverName?: string
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }
 
-export function RemoveStopDialog({ stopId, clientId, clientName, day, driverName }: RemoveStopDialogProps) {
+export function RemoveStopDialog({ stopId, clientId, clientName, day, driverName, open, onOpenChange }: RemoveStopDialogProps) {
   const removeStop = useRouteStore((s) => s.removeStop)
   const skipStop = useRouteStore((s) => s.skipStop)
   const addServiceLog = useServiceLogStore((s) => s.addEntry)
-  const [open, setOpen] = useState(false)
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <button
-          type="button"
-          aria-label={`Убрать ${clientName} из маршрута`}
-          className="flex size-6 min-h-[44px] min-w-[44px] items-center justify-center rounded text-muted-foreground transition-colors hover:text-red-500 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 print:hidden"
-        >
-          <X className="size-4" />
-        </button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Убрать из маршрута?</DialogTitle>
@@ -55,7 +44,7 @@ export function RemoveStopDialog({ stopId, clientId, clientName, day, driverName
             onClick={() => {
               skipStop(day, stopId)
               addServiceLog({ clientId, day, type: 'skipped', driverName })
-              setOpen(false)
+              onOpenChange(false)
             }}
           >
             <span className="flex flex-col items-start">
@@ -71,7 +60,7 @@ export function RemoveStopDialog({ stopId, clientId, clientName, day, driverName
             onClick={() => {
               removeStop(day, stopId)
               addServiceLog({ clientId, day, type: 'removed', driverName })
-              setOpen(false)
+              onOpenChange(false)
             }}
           >
             <span className="flex flex-col items-start">
