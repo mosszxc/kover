@@ -4,7 +4,7 @@ import { DAY_LABELS } from '@/shared/types'
 import { useDriverStore } from '../store'
 import type { Driver } from '../types'
 
-const ALL_DAYS_COUNT = 5
+const ALL_DAYS_COUNT = 7
 
 interface DriversListProps {
   onRowClick?: (driver: Driver) => void

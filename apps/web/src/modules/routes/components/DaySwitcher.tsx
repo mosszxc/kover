@@ -4,13 +4,12 @@ import { type DayOfWeek, DAY_LABELS, DAY_LABELS_FULL } from '@/shared/types'
 import { useRouteStore } from '../store'
 import { useClientStore } from '@/modules/clients'
 
-const DAYS: DayOfWeek[] = [0, 1, 2, 3, 4]
+const DAYS: DayOfWeek[] = [0, 1, 2, 3, 4, 5, 6]
 
 function getTodayAsDay(): DayOfWeek {
   const jsDay = new Date().getDay()
-  // JS: 0=Sun, 1=Mon ... 6=Sat → DayOfWeek: 0=Mon ... 4=Fri
-  if (jsDay >= 1 && jsDay <= 5) return (jsDay - 1) as DayOfWeek
-  return 0 // weekends → Monday
+  // JS: 0=Sun, 1=Mon ... 6=Sat → DayOfWeek: 0=Mon ... 6=Sun
+  return (jsDay === 0 ? 6 : jsDay - 1) as DayOfWeek
 }
 
 export function DaySwitcher() {

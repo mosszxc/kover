@@ -51,7 +51,7 @@ export const useDriverStore = create<DriverState>()(
           const drivers = (state.drivers ?? []) as Record<string, unknown>[]
           state.drivers = drivers.map((d) => ({
             ...d,
-            workDays: d.workDays ?? [0, 1, 2, 3, 4],
+            workDays: d.workDays ?? [0, 1, 2, 3, 4, 5, 6],
           }))
         }
         return state as unknown as DriverState

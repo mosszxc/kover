@@ -27,6 +27,8 @@ const initialRoutes: DayRoute[] = [
   { day: 2, stops: [] },
   { day: 3, stops: [] },
   { day: 4, stops: [] },
+  { day: 5, stops: [] },
+  { day: 6, stops: [] },
 ]
 
 export const useRouteStore = create<RouteState>()(
@@ -217,10 +219,22 @@ export const useRouteStore = create<RouteState>()(
     ),
     {
       name: 'kover-routes',
-      version: 2,
-      migrate: () => {
-        // v1 had blocks, v2 is flat — force re-seed
-        return { routes: initialRoutes, selectedDay: 0 as DayOfWeek }
+      version: 3,
+      migrate: (persisted: unknown, version: number) => {
+        if (version < 2) {
+          // v1 had blocks, v2 is flat — force re-seed
+          return { routes: initialRoutes, selectedDay: 0 as DayOfWeek }
+        }
+        // v2 → v3: add Saturday/Sunday routes if missing
+        const state = persisted as { routes: DayRoute[]; selectedDay: DayOfWeek }
+        const existingDays = new Set(state.routes.map((r) => r.day))
+        const routes = [...state.routes]
+        for (const day of [5, 6] as DayOfWeek[]) {
+          if (!existingDays.has(day)) {
+            routes.push({ day, stops: [] })
+          }
+        }
+        return { ...state, routes }
       },
     },
   ),

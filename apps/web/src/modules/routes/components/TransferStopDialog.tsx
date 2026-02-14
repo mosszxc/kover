@@ -18,7 +18,7 @@ import type { DayOfWeek } from '@/shared/types'
 import { DAY_LABELS } from '@/shared/types'
 import { useRouteStore } from '../store'
 
-const DAYS: DayOfWeek[] = [0, 1, 2, 3, 4]
+const DAYS: DayOfWeek[] = [0, 1, 2, 3, 4, 5, 6]
 
 interface TransferStopDialogProps {
   stopId: string
@@ -71,7 +71,7 @@ export function TransferStopDialog({ stopId, clientName, day }: TransferStopDial
         <div className="space-y-4">
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">Выберите день</p>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               {DAYS.filter((d) => d !== day).map((d) => (
                 <button
                   key={d}
