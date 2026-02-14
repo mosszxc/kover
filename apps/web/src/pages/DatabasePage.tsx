@@ -1,10 +1,11 @@
-import { useMemo } from 'react'
+import { useMemo, useCallback } from 'react'
 import { DatabaseOverview } from '@/modules/database'
 import type { SheetData, DatabaseStats } from '@/modules/database'
 import { useClientStore } from '@/modules/clients'
 import { useDriverStore } from '@/modules/drivers'
 import { useRouteStore } from '@/modules/routes'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
+import { useSyncStore, migrateWithProgress } from '@/shared/lib/sync'
 import { DAY_LABELS_FULL } from '@/shared/types'
 import type { DayOfWeek } from '@/shared/types'
 
@@ -74,5 +75,11 @@ export function DatabasePage() {
     return [clientSheet, driverSheet, routeSheet, matSizeSheet]
   }, [clients, drivers, routes, matSizes])
 
-  return <DatabaseOverview stats={stats} sheets={sheets} />
+  const isMigrated = useSyncStore((s) => s.isMigrated)
+  const handleMigrate = useCallback(
+    (...args: Parameters<typeof migrateWithProgress>) => migrateWithProgress(...args),
+    [],
+  )
+
+  return <DatabaseOverview stats={stats} sheets={sheets} isMigrated={isMigrated} onMigrate={handleMigrate} />
 }
