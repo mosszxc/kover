@@ -191,29 +191,87 @@ function diffAndSync(
 
 /** One-time migration: push all localStorage data to PocketBase */
 export async function migrateLocalStorageToPb(): Promise<void> {
+  await migrateWithProgress()
+}
+
+export interface MigrationCollectionResult {
+  collection: string
+  created: number
+  skipped: number
+  failed: number
+  total: number
+}
+
+export interface MigrationResult {
+  collections: MigrationCollectionResult[]
+  totalCreated: number
+  totalSkipped: number
+  totalFailed: number
+}
+
+/**
+ * One-time migration with per-collection progress reporting.
+ * Returns detailed results per collection.
+ */
+export async function migrateWithProgress(
+  onProgress?: (current: MigrationCollectionResult, index: number, total: number) => void,
+): Promise<MigrationResult> {
   const sync = useSyncStore.getState()
-  if (sync.isMigrated) return
 
   const reachable = await isPbReachable()
-  if (!reachable) throw new Error('PocketBase not reachable')
+  if (!reachable) throw new Error('PocketBase недоступен')
 
-  for (const { adapter, store } of registry) {
+  const collections: MigrationCollectionResult[] = []
+
+  for (let i = 0; i < registry.length; i++) {
+    const entry = registry[i]!
+    const { adapter, store } = entry
     const records = adapter.toRecords(store.getState())
-    if (records.length === 0) continue
+
+    const result: MigrationCollectionResult = {
+      collection: adapter.collection,
+      created: 0,
+      skipped: 0,
+      failed: 0,
+      total: records.length,
+    }
+
+    if (records.length === 0) {
+      collections.push(result)
+      onProgress?.(result, i, registry.length)
+      continue
+    }
 
     // Check if collection already has data
     const existing = await pb.collection(adapter.collection).getFullList({ fields: 'id' })
-    if (existing.length > 0) continue
+    if (existing.length > 0) {
+      result.skipped = records.length
+      collections.push(result)
+      onProgress?.(result, i, registry.length)
+      continue
+    }
 
     for (const record of records) {
       const body = adapter.toBody(record)
       try {
         await pb.collection(adapter.collection).create({ id: record.id, ...body })
+        result.created++
       } catch (err) {
         console.error(`[sync] Migration create ${adapter.collection}/${record.id} failed:`, err)
+        result.failed++
       }
     }
+
+    collections.push(result)
+    onProgress?.(result, i, registry.length)
   }
 
   sync.setMigrated(true)
+
+  return {
+    collections,
+    totalCreated: collections.reduce((s, c) => s + c.created, 0),
+    totalSkipped: collections.reduce((s, c) => s + c.skipped, 0),
+    totalFailed: collections.reduce((s, c) => s + c.failed, 0),
+  }
 }
