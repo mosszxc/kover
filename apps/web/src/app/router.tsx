@@ -7,7 +7,6 @@ import { DriversPage } from "@/pages/DriversPage"
 import { SettingsPage } from "@/pages/SettingsPage"
 import { MatSizesPage } from "@/pages/MatSizesPage"
 import { LoadingFallback } from "@/shared/components/LoadingFallback"
-import { AuthGuard, LoginPage } from "@/modules/auth"
 
 const ImportPage = lazy(() =>
   import("@/pages/ImportPage").then((m) => ({ default: m.ImportPage })),
@@ -28,72 +27,63 @@ function LazyPage({ children }: { children: React.ReactNode }) {
 
 export const router = createBrowserRouter([
   {
-    path: "/login",
-    element: <LoginPage />,
-  },
-  {
-    element: <AuthGuard />,
+    element: <AppLayout />,
     children: [
       {
-        element: <AppLayout />,
-        children: [
-          {
-            path: "/",
-            element: <RoutesPage />,
-          },
-          {
-            path: "/clients",
-            element: <ClientsPage />,
-          },
-          {
-            path: "/drivers",
-            element: <DriversPage />,
-          },
-          {
-            path: "/mat-sizes",
-            element: <MatSizesPage />,
-          },
-          {
-            path: "/settings",
-            element: <SettingsPage />,
-          },
-          {
-            path: "/import",
-            element: (
-              <LazyPage>
-                <ImportPage />
-              </LazyPage>
-            ),
-          },
-          {
-            path: "/stats",
-            element: (
-              <LazyPage>
-                <StatsPage />
-              </LazyPage>
-            ),
-          },
-          {
-            path: "/map",
-            element: (
-              <LazyPage>
-                <MapPage />
-              </LazyPage>
-            ),
-          },
-          {
-            path: "/database",
-            element: (
-              <LazyPage>
-                <DatabasePage />
-              </LazyPage>
-            ),
-          },
-          {
-            path: "*",
-            element: <Navigate to="/" replace />,
-          },
-        ],
+        path: "/",
+        element: <RoutesPage />,
+      },
+      {
+        path: "/clients",
+        element: <ClientsPage />,
+      },
+      {
+        path: "/drivers",
+        element: <DriversPage />,
+      },
+      {
+        path: "/mat-sizes",
+        element: <MatSizesPage />,
+      },
+      {
+        path: "/settings",
+        element: <SettingsPage />,
+      },
+      {
+        path: "/import",
+        element: (
+          <LazyPage>
+            <ImportPage />
+          </LazyPage>
+        ),
+      },
+      {
+        path: "/stats",
+        element: (
+          <LazyPage>
+            <StatsPage />
+          </LazyPage>
+        ),
+      },
+      {
+        path: "/map",
+        element: (
+          <LazyPage>
+            <MapPage />
+          </LazyPage>
+        ),
+      },
+      {
+        path: "/database",
+        element: (
+          <LazyPage>
+            <DatabasePage />
+          </LazyPage>
+        ),
+      },
+      {
+        path: "*",
+        element: <Navigate to="/" replace />,
       },
     ],
   },

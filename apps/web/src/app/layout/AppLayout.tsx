@@ -9,7 +9,6 @@ import { LoadingFallback } from "@/shared/components/LoadingFallback"
 import { useChangeLogger } from "@/shared/hooks/useChangeLogger"
 import { useAutoBackup } from "@/shared/hooks/useAutoBackup"
 import { useFileSync } from "@/shared/hooks/useFileSync"
-import { SyncMigrationDialog } from "@/shared/components/SyncMigrationDialog"
 
 export function AppLayout() {
   useChangeLogger()
@@ -33,7 +32,6 @@ export function AppLayout() {
       </div>
 
       <BottomTabs />
-      <SyncMigrationDialog />
       <Toaster />
     </div>
   )
