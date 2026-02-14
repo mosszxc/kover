@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { DaySwitcher, DaySummary, DriverSummary, RouteSearch, StopList, AddStopDialog, useRouteStore, PrintButton, DriverFilter, BulkAssignDriverDialog } from '@/modules/routes'
+import { DaySwitcher, RouteDashboard, RouteSearch, StopList, AddStopDialog, useRouteStore, PrintButton, DriverFilter, BulkAssignDriverDialog } from '@/modules/routes'
 import { useClientStore, EditClientDialog } from '@/modules/clients'
 import type { Client } from '@/modules/clients'
 import { useDriverStore } from '@/modules/drivers'
@@ -34,13 +34,14 @@ export function RoutesPage() {
   return (
     <div>
       <div className="space-y-4 print:hidden">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <DaySwitcher />
-          <OptimizeRouteDialog />
-          <PrintButton />
+          <div className="flex items-center gap-2 ml-auto">
+            <OptimizeRouteDialog />
+            <PrintButton />
+          </div>
         </div>
-        <DaySummary />
-        <DriverSummary drivers={driverOptions} />
+        <RouteDashboard drivers={driverOptions} />
         <div className="flex items-center gap-2">
           <DriverFilter drivers={driverOptions} value={driverFilter} onChange={setDriverFilter} />
           <BulkAssignDriverDialog drivers={driverOptions} driverFilter={driverFilter} />

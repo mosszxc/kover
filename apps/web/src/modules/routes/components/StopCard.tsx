@@ -1,4 +1,4 @@
-import { Check, ChevronUp, ChevronDown, GripVertical, Pencil, TriangleAlert } from 'lucide-react'
+import { ChevronUp, ChevronDown, GripVertical, Pencil, TriangleAlert } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -35,7 +35,6 @@ interface StopCardProps {
   number: number
   client: Client
   stopId: string
-  isCompleted: boolean
   driverId?: string
   drivers: DriverOption[]
   stopIndex: number
@@ -46,14 +45,13 @@ interface StopCardProps {
   onEditClient?: (client: Client) => void
 }
 
-export function StopCard({ number, client, stopId, isCompleted, driverId, drivers, stopIndex, isFirst, isLast, isDndEnabled = true, isAnomaly = false, onEditClient }: StopCardProps) {
+export function StopCard({ number, client, stopId, driverId, drivers, stopIndex, isFirst, isLast, isDndEnabled = true, isAnomaly = false, onEditClient }: StopCardProps) {
   const sizes = useMatSizeStore((s) => s.sizes)
   const areaMap = Object.fromEntries(sizes.map((s) => [s.id, s.area]))
   const labelMap = Object.fromEntries(sizes.map((s) => [s.id, s.label]))
   const selectedDay = useRouteStore((s) => s.selectedDay)
   const replacements = getClientReplacements(client, selectedDay)
   const area = client.mats.reduce((sum, m) => sum + m.quantity * (areaMap[m.size] ?? 0), 0) * replacements
-  const toggleStopCompleted = useRouteStore((s) => s.toggleStopCompleted)
   const assignDriver = useRouteStore((s) => s.assignDriver)
   const moveStop = useRouteStore((s) => s.moveStop)
 
@@ -86,7 +84,6 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
           : driverId
             ? 'border-l-blue-500'
             : 'border-l-border',
-        isCompleted && 'opacity-60',
         isDragging && 'z-10 opacity-50 ring-2 ring-blue-500',
       )}
       {...attributes}
@@ -102,20 +99,6 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
           <GripVertical className="size-5 text-muted-foreground" />
         </button>
       )}
-
-      <button
-        type="button"
-        aria-label={isCompleted ? 'Отметить как невыполненное' : 'Отметить как выполненное'}
-        onClick={() => toggleStopCompleted(selectedDay, stopId)}
-        className={cn(
-          'flex size-6 shrink-0 items-center justify-center rounded border transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 print:hidden',
-          isCompleted
-            ? 'border-green-500 bg-green-500 text-white'
-            : 'border-border bg-transparent hover:border-ring',
-        )}
-      >
-        {isCompleted && <Check className="size-4" />}
-      </button>
 
       <div className="flex shrink-0 flex-col">
         {!isFirst ? (
@@ -155,10 +138,7 @@ export function StopCard({ number, client, stopId, isCompleted, driverId, driver
               <TriangleAlert className="size-4 text-amber-400" aria-label="Далеко от остальных остановок" />
             </span>
           )}
-          <p className={cn(
-            'truncate lg:whitespace-normal text-base text-foreground',
-            isCompleted && 'line-through',
-          )}>
+          <p className="truncate lg:whitespace-normal text-base text-foreground">
             {client.originalName}
           </p>
         </div>
