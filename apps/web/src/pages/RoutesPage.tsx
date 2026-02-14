@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { DaySwitcher, DaySummary, RouteSearch, StopList, AddStopDialog, useRouteStore, PrintButton, DriverFilter, BulkAssignDriverDialog } from '@/modules/routes'
+import { DaySwitcher, DaySummary, DriverSummary, RouteSearch, StopList, AddStopDialog, useRouteStore, PrintButton, DriverFilter, BulkAssignDriverDialog } from '@/modules/routes'
 import { useClientStore, EditClientDialog } from '@/modules/clients'
 import type { Client } from '@/modules/clients'
 import { useDriverStore } from '@/modules/drivers'
@@ -38,6 +38,7 @@ export function RoutesPage() {
           <PrintButton />
         </div>
         <DaySummary />
+        <DriverSummary drivers={driverOptions} />
         <div className="flex items-center gap-2">
           <DriverFilter drivers={driverOptions} value={driverFilter} onChange={setDriverFilter} />
           <BulkAssignDriverDialog drivers={driverOptions} driverFilter={driverFilter} />
