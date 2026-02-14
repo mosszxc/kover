@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Trash2, Loader2 } from 'lucide-react'
+import { Trash2, Loader2, ClipboardList, History } from 'lucide-react'
 import { toast } from 'sonner'
 import { geocodeAddress } from '@/shared/lib/geocode'
 import { useSettingsStore } from '@/shared/stores/settingsStore'
@@ -27,6 +27,7 @@ import type { Client } from '../types'
 import { buildOriginalName, rowsToSpecs } from '../lib/formHelpers'
 import { useClientForm } from '../hooks/useClientForm'
 import { ClientForm } from './ClientForm'
+import { ServiceHistory } from './ServiceHistory'
 
 interface EditClientDialogProps {
   client: Client
@@ -41,10 +42,12 @@ export function EditClientDialog({ client, open, onOpenChange, onDelete }: EditC
 
   const [saving, setSaving] = useState(false)
   const [geocoding, setGeocoding] = useState(false)
+  const [tab, setTab] = useState<'data' | 'history'>('data')
   const form = useClientForm()
 
   useEffect(() => {
     if (open && client) {
+      setTab('data')
       form.populateForm({
         name: client.name,
         address: client.address,
@@ -134,17 +137,47 @@ export function EditClientDialog({ client, open, onOpenChange, onDelete }: EditC
           <DialogTitle className="text-lg">
             Редактирование: {client.name}
           </DialogTitle>
+          <div className="flex gap-1 pt-2">
+            <button
+              type="button"
+              onClick={() => setTab('data')}
+              className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                tab === 'data'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+              }`}
+            >
+              <ClipboardList className="h-3.5 w-3.5" />
+              Данные
+            </button>
+            <button
+              type="button"
+              onClick={() => setTab('history')}
+              className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                tab === 'history'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+              }`}
+            >
+              <History className="h-3.5 w-3.5" />
+              История
+            </button>
+          </div>
         </DialogHeader>
 
-        <ClientForm
-          form={form}
-          mode="edit"
-          coordinates={coordinates}
-          onGeocode={handleGeocode}
-          geocoding={geocoding}
-        />
+        {tab === 'data' ? (
+          <ClientForm
+            form={form}
+            mode="edit"
+            coordinates={coordinates}
+            onGeocode={handleGeocode}
+            geocoding={geocoding}
+          />
+        ) : (
+          <ServiceHistory clientId={client.id} />
+        )}
 
-        <DialogFooter className="flex-row justify-between sm:justify-between">
+        <DialogFooter className={`flex-row justify-between sm:justify-between ${tab === 'history' ? 'hidden' : ''}`}>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="destructive">

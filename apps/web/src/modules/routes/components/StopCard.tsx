@@ -190,14 +190,18 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
 
       <TransferStopDialog
         stopId={stopId}
+        clientId={client.id}
         clientName={client.originalName}
         day={selectedDay}
+        driverName={drivers.find((d) => d.id === driverId)?.name}
       />
 
       <RemoveStopDialog
         stopId={stopId}
+        clientId={client.id}
         clientName={client.originalName}
         day={selectedDay}
+        driverName={drivers.find((d) => d.id === driverId)?.name}
       />
     </div>
   )

@@ -13,17 +13,21 @@ import { Button } from '@/shared/ui/button'
 import { X } from 'lucide-react'
 import { DAY_LABELS } from '@/shared/types'
 import type { DayOfWeek } from '@/shared/types'
+import { useServiceLogStore } from '@/shared/stores/serviceLogStore'
 import { useRouteStore } from '../store'
 
 interface RemoveStopDialogProps {
   stopId: string
+  clientId: string
   clientName: string
   day: DayOfWeek
+  driverName?: string
 }
 
-export function RemoveStopDialog({ stopId, clientName, day }: RemoveStopDialogProps) {
+export function RemoveStopDialog({ stopId, clientId, clientName, day, driverName }: RemoveStopDialogProps) {
   const removeStop = useRouteStore((s) => s.removeStop)
   const skipStop = useRouteStore((s) => s.skipStop)
+  const addServiceLog = useServiceLogStore((s) => s.addEntry)
   const [open, setOpen] = useState(false)
 
   return (
@@ -50,6 +54,7 @@ export function RemoveStopDialog({ stopId, clientName, day }: RemoveStopDialogPr
             className="justify-start"
             onClick={() => {
               skipStop(day, stopId)
+              addServiceLog({ clientId, day, type: 'skipped', driverName })
               setOpen(false)
             }}
           >
@@ -65,6 +70,7 @@ export function RemoveStopDialog({ stopId, clientName, day }: RemoveStopDialogPr
             className="justify-start"
             onClick={() => {
               removeStop(day, stopId)
+              addServiceLog({ clientId, day, type: 'removed', driverName })
               setOpen(false)
             }}
           >
