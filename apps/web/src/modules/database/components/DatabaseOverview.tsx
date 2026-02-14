@@ -31,9 +31,9 @@ function StatCard({ icon: Icon, label, value, sub }: {
 }
 
 export function DatabaseOverview({ stats, sheets }: DatabaseOverviewProps) {
-  const handleExport = () => {
+  const handleExport = async () => {
     const date = new Date().toISOString().slice(0, 10)
-    exportToExcel(sheets, `kover-export-${date}.xlsx`)
+    await exportToExcel(sheets, `kover-export-${date}.xlsx`)
   }
 
   return (

@@ -1,4 +1,4 @@
-import { read, utils } from 'xlsx'
+import { read, utils, type WorkBook } from 'xlsx'
 import type { DayOfWeek } from '@/shared/types'
 import type { ParsedExcel } from '../types'
 
@@ -23,11 +23,7 @@ function readFileAsArrayBuffer(file: File): Promise<ArrayBuffer> {
   })
 }
 
-export async function parseExcel(file: File): Promise<ParsedExcel> {
-  const buffer = await readFileAsArrayBuffer(file)
-  const workbook = read(buffer, { type: 'array' })
-
-  // Extract master sheet rows
+function parseWorkbook(workbook: WorkBook): ParsedExcel {
   const masterSheet = workbook.Sheets[MASTER_SHEET]
   if (!masterSheet) {
     throw new Error(`Лист «${MASTER_SHEET}» не найден в файле`)
@@ -39,7 +35,6 @@ export async function parseExcel(file: File): Promise<ParsedExcel> {
     raw: false,
   })
 
-  // Extract route sheets (ПН–ПТ)
   const routesByDay = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] } as Record<DayOfWeek, string[]>
 
   for (const [sheetName, day] of Object.entries(DAY_SHEET_NAMES)) {
@@ -52,11 +47,19 @@ export async function parseExcel(file: File): Promise<ParsedExcel> {
       raw: false,
     })
 
-    // Each row is a stop — collect first non-empty cell as identifier
     routesByDay[day] = rows
       .map((row) => row.find((cell) => cell.trim() !== '') ?? '')
       .filter((value) => value !== '')
   }
 
   return { masterRows, routesByDay }
+}
+
+export function parseExcelFromBuffer(buffer: ArrayBuffer | Uint8Array): ParsedExcel {
+  return parseWorkbook(read(buffer, { type: 'array' }))
+}
+
+export async function parseExcel(file: File): Promise<ParsedExcel> {
+  const buffer = await readFileAsArrayBuffer(file)
+  return parseWorkbook(read(buffer, { type: 'array' }))
 }
