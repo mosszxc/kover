@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { temporal } from 'zundo'
 import type { Client } from './types'
+import { supabaseSync, clientsAdapter } from '@/shared/lib/sync'
 
 interface ClientState {
   clients: Client[]
@@ -14,6 +15,12 @@ interface ClientState {
 export const useClientStore = create<ClientState>()(
   persist(
     temporal(
+      supabaseSync(
+        {
+          adapter: clientsAdapter,
+          getItems: (state) => (state as ClientState).clients,
+          itemsKey: 'clients',
+        },
       (set) => ({
         clients: [],
 
@@ -34,6 +41,7 @@ export const useClientStore = create<ClientState>()(
 
         seedClients: (clients) => set({ clients }),
       }),
+      ),
       {
         limit: 20,
         partialize: (state) => {

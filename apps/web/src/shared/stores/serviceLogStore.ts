@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { DayOfWeek } from '@/shared/types'
+import { supabaseSync, serviceLogAdapter } from '@/shared/lib/sync'
 
 export type ServiceEventType =
   | 'completed'
@@ -38,6 +39,12 @@ function pruneOldEntries(entries: ServiceLogEntry[]): ServiceLogEntry[] {
 
 export const useServiceLogStore = create<ServiceLogState>()(
   persist(
+    supabaseSync(
+      {
+        adapter: serviceLogAdapter,
+        getItems: (state) => (state as ServiceLogState).entries,
+        itemsKey: 'entries',
+      },
     (set, get) => ({
       entries: [],
 
@@ -55,6 +62,7 @@ export const useServiceLogStore = create<ServiceLogState>()(
       getClientHistory: (clientId) =>
         get().entries.filter((e) => e.clientId === clientId),
     }),
+    ),
     { name: 'kover-service-log' },
   ),
 )

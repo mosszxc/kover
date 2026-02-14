@@ -1,0 +1,13 @@
+export { useSyncProvider } from './SyncProvider'
+export { useSyncStore } from './syncStore'
+export { supabaseSync } from './supabaseSync'
+export { migrateToSupabase } from './migrate'
+export type { LocalData } from './migrate'
+export type { SyncStatus, MigrationProgress, MigrationResult } from './types'
+export {
+  matSizesAdapter,
+  driversAdapter,
+  clientsAdapter,
+  changelogAdapter,
+  serviceLogAdapter,
+} from './adapters'

@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { temporal } from 'zundo'
 import type { Driver } from './types'
+import { supabaseSync, driversAdapter } from '@/shared/lib/sync'
 
 interface DriverState {
   drivers: Driver[]
@@ -14,6 +15,12 @@ interface DriverState {
 export const useDriverStore = create<DriverState>()(
   persist(
     temporal(
+      supabaseSync(
+        {
+          adapter: driversAdapter,
+          getItems: (state) => (state as DriverState).drivers,
+          itemsKey: 'drivers',
+        },
       (set) => ({
         drivers: [],
 
@@ -34,6 +41,7 @@ export const useDriverStore = create<DriverState>()(
 
         seedDrivers: (drivers) => set({ drivers }),
       }),
+      ),
       {
         limit: 20,
         partialize: (state) => {

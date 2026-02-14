@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { syncSettingChange } from '@/shared/lib/sync/settingsSync'
 
 interface SettingsState {
   geocodeCity: string
@@ -20,16 +21,29 @@ export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
       geocodeCity: '',
-      setGeocodeCity: (city) => set({ geocodeCity: city.trim() }),
+      setGeocodeCity: (city) => {
+        const trimmed = city.trim()
+        set({ geocodeCity: trimmed })
+        syncSettingChange('geocodeCity', trimmed)
+      },
 
       showWeekends: true,
-      setShowWeekends: (show) => set({ showWeekends: show }),
+      setShowWeekends: (show) => {
+        set({ showWeekends: show })
+        syncSettingChange('showWeekends', show)
+      },
 
       fileSyncEnabled: false,
       fileSyncFileName: '',
       lastFileSyncAt: null,
-      setFileSyncEnabled: (enabled) => set({ fileSyncEnabled: enabled }),
-      setFileSyncFileName: (name) => set({ fileSyncFileName: name }),
+      setFileSyncEnabled: (enabled) => {
+        set({ fileSyncEnabled: enabled })
+        syncSettingChange('fileSyncEnabled', enabled)
+      },
+      setFileSyncFileName: (name) => {
+        set({ fileSyncFileName: name })
+        syncSettingChange('fileSyncFileName', name)
+      },
       setLastFileSyncAt: (timestamp) => set({ lastFileSyncAt: timestamp }),
     }),
     { name: 'kover-settings' },

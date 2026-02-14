@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { supabaseSync, changelogAdapter } from '@/shared/lib/sync'
 
 export interface ChangeLogEntry {
   id: string
@@ -19,6 +20,12 @@ const MAX_ENTRIES = 200
 
 export const useChangeLogStore = create<ChangeLogState>()(
   persist(
+    supabaseSync(
+      {
+        adapter: changelogAdapter,
+        getItems: (state) => (state as ChangeLogState).entries,
+        itemsKey: 'entries',
+      },
     (set) => ({
       entries: [],
 
@@ -35,6 +42,7 @@ export const useChangeLogStore = create<ChangeLogState>()(
 
       clearEntries: () => set({ entries: [] }),
     }),
+    ),
     { name: 'kover-changelog' },
   ),
 )

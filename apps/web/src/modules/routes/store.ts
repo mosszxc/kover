@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware'
 import { temporal } from 'zundo'
 import type { DayOfWeek } from '@/shared/types'
 import type { DayRoute, RouteStop } from './types'
+import { syncRouteChanges } from '@/shared/lib/sync/routeSync'
 
 function getNextMonday(): string {
   const now = new Date()
@@ -279,3 +280,10 @@ export const useRouteStore = create<RouteState>()(
     },
   ),
 )
+
+// Write-through sync для routes → Supabase (day_routes + route_stops)
+useRouteStore.subscribe((state, prevState) => {
+  if (state.routes !== prevState.routes) {
+    syncRouteChanges(prevState.routes, state.routes)
+  }
+})

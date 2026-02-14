@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { MatSizeConfig } from '@/shared/types'
 import { DEFAULT_MAT_SIZES } from '@/shared/types'
+import { supabaseSync, matSizesAdapter } from '@/shared/lib/sync'
 
 interface MatSizeState {
   sizes: MatSizeConfig[]
@@ -12,6 +13,12 @@ interface MatSizeState {
 
 export const useMatSizeStore = create<MatSizeState>()(
   persist(
+    supabaseSync(
+      {
+        adapter: matSizesAdapter,
+        getItems: (state) => (state as MatSizeState).sizes,
+        itemsKey: 'sizes',
+      },
     (set) => ({
       sizes: DEFAULT_MAT_SIZES,
 
@@ -32,6 +39,7 @@ export const useMatSizeStore = create<MatSizeState>()(
           sizes: state.sizes.filter((s) => s.id !== id),
         })),
     }),
+    ),
     { name: 'kover-mat-sizes' },
   ),
 )
