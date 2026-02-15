@@ -1,4 +1,4 @@
-name: Build Desktop
+name: Build Release
 
 on:
   push:
@@ -6,10 +6,50 @@ on:
       - 'v*.*.*'
 
 concurrency:
-  group: build-desktop-${{ github.ref }}
+  group: build-release-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  build-pwa:
+    name: Build PWA
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build web app
+        run: pnpm build
+        env:
+          NODE_ENV: production
+
+      - name: Create PWA archive
+        run: |
+          cd apps/web/dist
+          zip -r ../../../Kover-PWA-${{ github.ref_name }}.zip .
+
+      - name: Upload PWA to release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ github.ref_name }}" \
+            "Kover-PWA-${{ github.ref_name }}.zip" \
+            --clobber
+
+
   build-windows:
     name: Build Windows Installer
     runs-on: windows-latest
@@ -52,7 +92,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ''
         with:
           projectPath: apps/web
           tagName: ${{ github.ref_name }}
@@ -60,11 +99,16 @@ jobs:
           releaseBody: |
             ## Kover ${{ github.ref_name }}
 
-            ### Установка
+            ### Windows (Desktop)
             Скачайте `Kover-Setup-${{ github.ref_name }}.exe` и запустите установщик.
-
-            ### Обновление
             Если у вас уже установлен Kover — обновление произойдёт автоматически.
+
+            ### macOS (Desktop)
+            Скачайте `.dmg` файл для вашей архитектуры (Apple Silicon / Intel).
+
+            ### PWA (Web)
+            `Kover-PWA-${{ github.ref_name }}.zip` — статическая сборка для самостоятельного хостинга.
+            Разверните на любом веб-сервере. Поддерживает установку как приложение и работу offline.
 
             ### KoverBot (Telegram AI-бот)
             - `KoverBot-install.bat` — установка бота на Windows 11 (WSL2)
@@ -133,7 +177,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ''
         with:
           projectPath: apps/web
           tagName: ${{ github.ref_name }}
