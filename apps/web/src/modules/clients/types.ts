@@ -1,5 +1,16 @@
 import type { DayOfWeek, MatSize } from '@/shared/types'
 
+export const CLIENT_CATEGORIES = [
+  { value: 'restaurant', label: 'Ресторан' },
+  { value: 'office', label: 'Офис' },
+  { value: 'shop', label: 'Магазин' },
+  { value: 'production', label: 'Производство' },
+  { value: 'hotel', label: 'Гостиница' },
+  { value: 'other', label: 'Другое' },
+] as const
+
+export type ClientCategory = (typeof CLIENT_CATEGORIES)[number]['value']
+
 export interface MatSpec {
   size: MatSize
   quantity: number
@@ -30,6 +41,7 @@ export interface Client {
   contactName?: string | null
   contactPhone?: string | null
   customMonthlyPrice?: number | null
+  category?: ClientCategory
   createdAt: string
   lat?: number
   lng?: number

@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import type { DayOfWeek } from '@/shared/types'
-import type { MatSpec } from '../types'
+import type { MatSpec, ClientCategory } from '../types'
 import {
   emptyMat,
   specsToRows,
@@ -23,6 +23,7 @@ interface PopulateOptions {
   contactName?: string | null
   contactPhone?: string | null
   customMonthlyPrice?: number | null
+  category?: ClientCategory
 }
 
 export function useClientForm() {
@@ -33,6 +34,7 @@ export function useClientForm() {
   const [days, setDays] = useState<DayOfWeek[]>([])
   const [dayReplacements, setDayReplacements] = useState<Partial<Record<DayOfWeek, number>>>({})
   const [notes, setNotes] = useState('')
+  const [category, setCategory] = useState<ClientCategory | ''>('')
   const [workingHoursStart, setWorkingHoursStart] = useState('')
   const [workingHoursEnd, setWorkingHoursEnd] = useState('')
   const [contactName, setContactName] = useState('')
@@ -154,6 +156,7 @@ export function useClientForm() {
     setDays([])
     setDayReplacements({})
     setNotes('')
+    setCategory('')
     setWorkingHoursStart('')
     setWorkingHoursEnd('')
     setContactName('')
@@ -171,6 +174,7 @@ export function useClientForm() {
     setDays([...opts.days])
     setDayReplacements(opts.dayReplacements ? { ...opts.dayReplacements } : {})
     setNotes(opts.notes)
+    setCategory(opts.category ?? '')
     setWorkingHoursStart(opts.workingHoursStart ?? '')
     setWorkingHoursEnd(opts.workingHoursEnd ?? '')
     setContactName(opts.contactName ?? '')
@@ -210,6 +214,7 @@ export function useClientForm() {
     days,
     dayReplacements,
     notes,
+    category,
     workingHoursStart,
     workingHoursEnd,
     contactName,
@@ -222,6 +227,7 @@ export function useClientForm() {
     setAddress,
     setFrequency,
     setNotes,
+    setCategory,
     setWorkingHoursStart,
     setWorkingHoursEnd,
     setContactName,

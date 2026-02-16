@@ -1,6 +1,8 @@
 import { Plus, MapPin, Loader2, Minus, Clock, User, Phone, Banknote } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { DAY_LABELS } from '@/shared/types'
+import { CLIENT_CATEGORIES } from '../types'
+import type { ClientCategory } from '../types'
 import { useVisibleDays } from '@/shared/hooks/useVisibleDays'
 import { useIsMobile } from '@/shared/hooks/useIsMobile'
 import type { ClientFormState } from '../hooks/useClientForm'
@@ -127,6 +129,25 @@ function BasicSection({
             Координаты определятся автоматически при сохранении
           </p>
         )}
+      </div>
+
+      <div>
+        <label htmlFor={`${idPrefix}-category`} className={labelClass}>
+          Категория
+        </label>
+        <select
+          id={`${idPrefix}-category`}
+          value={form.category}
+          onChange={(e) => form.setCategory(e.target.value as ClientCategory | '')}
+          className={inputClass}
+        >
+          <option value="">Не указана</option>
+          {CLIENT_CATEGORIES.map((cat) => (
+            <option key={cat.value} value={cat.value}>
+              {cat.label}
+            </option>
+          ))}
+        </select>
       </div>
 
       {mode === 'edit' && (

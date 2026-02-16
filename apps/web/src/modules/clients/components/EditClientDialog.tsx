@@ -75,6 +75,7 @@ export function EditClientDialog({ client, open, onOpenChange, onDelete }: EditC
         contactName: client.contactName,
         contactPhone: client.contactPhone,
         customMonthlyPrice: client.customMonthlyPrice,
+        category: client.category,
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -137,6 +138,7 @@ export function EditClientDialog({ client, open, onOpenChange, onDelete }: EditC
       contactName: form.contactName.trim() || null,
       contactPhone: form.contactPhone.trim() || null,
       customMonthlyPrice: form.customMonthlyPrice ? parseFloat(form.customMonthlyPrice) : null,
+      category: form.category || undefined,
       originalName: buildOriginalName(form.name, form.address, form.mats),
       ...(lat != null && lng != null ? { lat, lng } : {}),
     }
