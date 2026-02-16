@@ -1,4 +1,4 @@
-import { Plus, MapPin, Loader2, Minus, Clock, User, Phone } from 'lucide-react'
+import { Plus, MapPin, Loader2, Minus, Clock, User, Phone, Banknote } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { DAY_LABELS } from '@/shared/types'
 import { useVisibleDays } from '@/shared/hooks/useVisibleDays'
@@ -353,6 +353,25 @@ function ScheduleSection({ form }: { form: ClientFormState }) {
             placeholder="Например: +7 900 123-45-67"
             className={inputClass}
           />
+        </div>
+
+        <div>
+          <span className={labelClass}>
+            <Banknote className="mr-1 inline size-3.5" />
+            Фиксированная цена (₽/мес)
+          </span>
+          <input
+            type="number"
+            min="0"
+            step="100"
+            value={form.customMonthlyPrice}
+            onChange={(e) => form.setCustomMonthlyPrice(e.target.value)}
+            placeholder="Автоматически из ковриков"
+            className={inputClass}
+          />
+          <p className="mt-1 text-xs text-muted-foreground">
+            Если задана — используется вместо расчёта из ковриков
+          </p>
         </div>
 
         <div>

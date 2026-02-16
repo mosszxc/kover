@@ -87,6 +87,9 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
   const WEEKS_PER_MONTH = 4.33
 
   function getClientMonthlyRevenue(client: Client): number {
+    if (client.customMonthlyPrice != null && client.customMonthlyPrice > 0) {
+      return client.customMonthlyPrice
+    }
     const costPerVisit = getClientCost(client)
     return Math.round(costPerVisit * client.frequency * WEEKS_PER_MONTH * 100) / 100
   }

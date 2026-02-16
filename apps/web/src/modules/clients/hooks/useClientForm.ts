@@ -22,6 +22,7 @@ interface PopulateOptions {
   workingHoursEnd?: string | null
   contactName?: string | null
   contactPhone?: string | null
+  customMonthlyPrice?: number | null
 }
 
 export function useClientForm() {
@@ -36,6 +37,7 @@ export function useClientForm() {
   const [workingHoursEnd, setWorkingHoursEnd] = useState('')
   const [contactName, setContactName] = useState('')
   const [contactPhone, setContactPhone] = useState('')
+  const [customMonthlyPrice, setCustomMonthlyPrice] = useState('')
   const [errors, setErrors] = useState<FormErrors>({})
   const [touched, setTouched] = useState<Partial<Record<keyof FormErrors, boolean>>>({})
 
@@ -156,6 +158,7 @@ export function useClientForm() {
     setWorkingHoursEnd('')
     setContactName('')
     setContactPhone('')
+    setCustomMonthlyPrice('')
     setErrors({})
     setTouched({})
   }, [])
@@ -172,6 +175,7 @@ export function useClientForm() {
     setWorkingHoursEnd(opts.workingHoursEnd ?? '')
     setContactName(opts.contactName ?? '')
     setContactPhone(opts.contactPhone ?? '')
+    setCustomMonthlyPrice(opts.customMonthlyPrice != null ? String(opts.customMonthlyPrice) : '')
     setErrors({})
     setTouched({})
   }, [])
@@ -210,6 +214,7 @@ export function useClientForm() {
     workingHoursEnd,
     contactName,
     contactPhone,
+    customMonthlyPrice,
     errors,
     touched,
     // Setters
@@ -221,6 +226,7 @@ export function useClientForm() {
     setWorkingHoursEnd,
     setContactName,
     setContactPhone,
+    setCustomMonthlyPrice,
     // Mat ops
     addMat,
     removeMat,
