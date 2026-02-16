@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useBriefing, RouteCard, AlertsList, ReturningClients, WornMatsList, QuickLinks } from '@/modules/briefing'
+import { DebtAging } from '@/modules/stats'
 import { useRouteStore } from '@/modules/routes'
 import { useClientStore } from '@/modules/clients'
 import { usePaymentStore } from '@/modules/payments'
@@ -52,6 +53,7 @@ export function BriefingPage() {
       <h1 className="text-2xl font-bold text-foreground">Сегодня</h1>
       <RouteCard route={briefing.route} todayLabel={briefing.todayLabel} />
       <AlertsList alerts={briefing.alerts} />
+      <DebtAging />
       <ReturningClients clients={briefing.returningClients} />
       <WornMatsList mats={briefing.wornMats} />
       <QuickLinks />
