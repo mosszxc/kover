@@ -6,5 +6,7 @@ export interface Driver {
   phone: string
   isActive: boolean
   workDays: DayOfWeek[]
+  vehicleName?: string | null
+  vehicleCapacity?: number | null
   createdAt: string
 }

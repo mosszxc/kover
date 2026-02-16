@@ -8,6 +8,7 @@ export interface DriverSummaryItem {
   driverId: string | null
   stopCount: number
   matCount: number
+  totalArea: number
   totalCost: number
 }
 
@@ -23,19 +24,21 @@ export function useDriverSummary(): DriverSummaryItem[] {
 
     const clientMap = new Map(clients.map((c) => [c.id, c]))
     const priceMap = Object.fromEntries(sizes.map((s) => [s.id, s.rentalPrice]))
-    const map = new Map<string | null, { stopCount: number; matCount: number; totalCost: number }>()
+    const areaMap = Object.fromEntries(sizes.map((s) => [s.id, s.area]))
+    const map = new Map<string | null, { stopCount: number; matCount: number; totalArea: number; totalCost: number }>()
 
     for (const stop of dayRoute.stops) {
       const client = clientMap.get(stop.clientId)
       if (!client || !client.isActive || isStopSkipped(stop)) continue
 
       const key = stop.driverId ?? null
-      const entry = map.get(key) ?? { stopCount: 0, matCount: 0, totalCost: 0 }
+      const entry = map.get(key) ?? { stopCount: 0, matCount: 0, totalArea: 0, totalCost: 0 }
       entry.stopCount++
       const replacements = getClientReplacements(client, selectedDay)
       for (const mat of client.mats) {
         const qty = mat.quantity * replacements
         entry.matCount += qty
+        entry.totalArea += qty * (areaMap[mat.size] ?? 0)
         entry.totalCost += qty * (priceMap[mat.size] ?? 0)
       }
       map.set(key, entry)
@@ -46,6 +49,7 @@ export function useDriverSummary(): DriverSummaryItem[] {
       result.push({
         driverId,
         ...data,
+        totalArea: Math.round(data.totalArea * 100) / 100,
         totalCost: Math.round(data.totalCost * 100) / 100,
       })
     }

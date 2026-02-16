@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus } from 'lucide-react'
+import { Plus, Truck } from 'lucide-react'
 import { toast } from 'sonner'
 import { generateId } from '@/shared/lib/generateId'
 import { Button } from '@/shared/ui/button'
@@ -28,12 +28,16 @@ export function AddDriverDialog() {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
+  const [vehicleName, setVehicleName] = useState('')
+  const [vehicleCapacity, setVehicleCapacity] = useState('')
   const [workDays, setWorkDays] = useState<DayOfWeek[]>([...visibleDays])
   const [errors, setErrors] = useState<FormErrors>({})
 
   function resetForm() {
     setName('')
     setPhone('')
+    setVehicleName('')
+    setVehicleCapacity('')
     setWorkDays([...visibleDays])
     setErrors({})
   }
@@ -63,6 +67,8 @@ export function AddDriverDialog() {
       phone: phone.trim(),
       isActive: true,
       workDays,
+      vehicleName: vehicleName.trim() || null,
+      vehicleCapacity: vehicleCapacity ? parseFloat(vehicleCapacity) : null,
       createdAt: new Date().toISOString(),
     })
 
@@ -131,6 +137,35 @@ export function AddDriverDialog() {
               placeholder="+7 (999) 123-45-67"
               className={inputClass}
             />
+          </div>
+
+          <div>
+            <span className={labelClass}>
+              <Truck className="mr-1 inline size-3.5" />
+              Транспорт
+            </span>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={vehicleName}
+                onChange={(e) => setVehicleName(e.target.value)}
+                placeholder="Например: Газель"
+                className={`${inputClass} flex-1`}
+              />
+              <div className="relative">
+                <input
+                  type="number"
+                  min="0"
+                  step="10"
+                  value={vehicleCapacity}
+                  onChange={(e) => setVehicleCapacity(e.target.value)}
+                  placeholder="м²"
+                  className={`${inputClass} w-28 pr-8`}
+                  aria-label="Грузоподъёмность в м²"
+                />
+                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">м²</span>
+              </div>
+            </div>
           </div>
 
           <div>
