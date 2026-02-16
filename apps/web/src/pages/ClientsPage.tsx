@@ -14,6 +14,9 @@ import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 const WEEKS_PER_MONTH = 4.33
 
 function getMonthlyRevenue(client: Client, priceMap: Record<string, number>): number {
+  if (client.customMonthlyPrice != null && client.customMonthlyPrice > 0) {
+    return client.customMonthlyPrice
+  }
   const costPerVisit = client.mats.reduce((sum, m) => sum + m.quantity * (priceMap[m.size] ?? 0), 0)
   return Math.round(costPerVisit * client.frequency * WEEKS_PER_MONTH * 100) / 100
 }

@@ -22,6 +22,7 @@ export interface Client {
   workingHoursEnd?: string | null
   contactName?: string | null
   contactPhone?: string | null
+  customMonthlyPrice?: number | null
   createdAt: string
   lat?: number
   lng?: number

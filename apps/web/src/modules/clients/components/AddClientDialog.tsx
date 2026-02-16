@@ -91,6 +91,7 @@ export function AddClientDialog() {
       workingHoursEnd: form.workingHoursEnd || null,
       contactName: form.contactName.trim() || null,
       contactPhone: form.contactPhone.trim() || null,
+      customMonthlyPrice: form.customMonthlyPrice ? parseFloat(form.customMonthlyPrice) : null,
       isActive: true,
       createdAt: new Date().toISOString(),
       ...(lat != null && lng != null ? { lat, lng } : {}),
