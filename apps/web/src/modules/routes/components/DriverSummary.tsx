@@ -1,5 +1,6 @@
-import { AlertTriangle, MapPin, LayoutGrid, User } from 'lucide-react'
+import { AlertTriangle, MapPin, LayoutGrid, User, Banknote } from 'lucide-react'
 import { useDriverSummary } from '../hooks/useDriverSummary'
+import type { DriverSummaryItem } from '../hooks/useDriverSummary'
 import type { DriverOption } from './StopCard'
 
 interface DriverSummaryProps {
@@ -14,6 +15,7 @@ export function DriverSummary({ drivers }: DriverSummaryProps) {
   const driverMap = new Map(drivers.map((d) => [d.id, d.name]))
   const unassigned = items.find((i) => i.driverId === null)
   const assigned = items.filter((i) => i.driverId !== null)
+  const hasCosts = items.some((i) => i.totalCost > 0)
 
   return (
     <div className="space-y-1.5">
@@ -26,16 +28,7 @@ export function DriverSummary({ drivers }: DriverSummaryProps) {
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium text-amber-400">Нераспределённые</p>
-              <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <MapPin className="h-3 w-3" />
-                  {unassigned.stopCount}
-                </span>
-                <span className="flex items-center gap-1">
-                  <LayoutGrid className="h-3 w-3" />
-                  {unassigned.matCount} шт
-                </span>
-              </div>
+              <DriverStats item={unassigned} hasCosts={hasCosts} />
             </div>
           </div>
         )}
@@ -51,20 +44,32 @@ export function DriverSummary({ drivers }: DriverSummaryProps) {
               <p className="truncate text-sm font-medium text-foreground">
                 {driverMap.get(item.driverId!) ?? 'Неизвестный'}
               </p>
-              <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <MapPin className="h-3 w-3" />
-                  {item.stopCount}
-                </span>
-                <span className="flex items-center gap-1">
-                  <LayoutGrid className="h-3 w-3" />
-                  {item.matCount} шт
-                </span>
-              </div>
+              <DriverStats item={item} hasCosts={hasCosts} />
             </div>
           </div>
         ))}
       </div>
+    </div>
+  )
+}
+
+function DriverStats({ item, hasCosts }: { item: DriverSummaryItem; hasCosts: boolean }) {
+  return (
+    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+      <span className="flex items-center gap-1">
+        <MapPin className="h-3 w-3" />
+        {item.stopCount}
+      </span>
+      <span className="flex items-center gap-1">
+        <LayoutGrid className="h-3 w-3" />
+        {item.matCount} шт
+      </span>
+      {hasCosts && (
+        <span className="flex items-center gap-1 text-green-400">
+          <Banknote className="h-3 w-3" />
+          {item.totalCost} ₽
+        </span>
+      )}
     </div>
   )
 }
