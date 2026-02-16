@@ -6,6 +6,7 @@ import { exportToExcel } from '../lib/exportExcel'
 interface DatabaseOverviewProps {
   stats: DatabaseStats
   sheets: SheetData[]
+  importButton?: React.ReactNode
 }
 
 function StatCard({ icon: Icon, label, value, sub }: {
@@ -30,7 +31,7 @@ function StatCard({ icon: Icon, label, value, sub }: {
   )
 }
 
-export function DatabaseOverview({ stats, sheets }: DatabaseOverviewProps) {
+export function DatabaseOverview({ stats, sheets, importButton }: DatabaseOverviewProps) {
   const handleExport = async () => {
     const date = new Date().toISOString().slice(0, 10)
     await exportToExcel(sheets, `kover-export-${date}.xlsx`)
@@ -40,10 +41,13 @@ export function DatabaseOverview({ stats, sheets }: DatabaseOverviewProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">База данных</h1>
-        <Button onClick={handleExport} className="gap-2">
-          <Download className="h-4 w-4" />
-          Выгрузить в Excel
-        </Button>
+        <div className="flex items-center gap-2">
+          {importButton}
+          <Button onClick={handleExport} className="gap-2">
+            <Download className="h-4 w-4" />
+            Выгрузить в Excel
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">

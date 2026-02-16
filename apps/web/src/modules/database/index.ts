@@ -1,3 +1,5 @@
 export { DatabaseOverview } from './components/DatabaseOverview'
 export { MigrationPanel } from './components/MigrationPanel'
+export { ImportExcelDialog } from './components/ImportExcelDialog'
+export type { ImportData } from './lib/importExcel'
 export type { SheetData, DatabaseStats } from './types'
