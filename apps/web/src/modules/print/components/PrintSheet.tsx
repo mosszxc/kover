@@ -59,6 +59,15 @@ function PrintTable({ title, rows, sizes, day }: PrintTableProps) {
     ]),
   ) as Record<string, number>
 
+  const totalArea = rows.reduce((sum, { client }) => {
+    if (!client) return sum
+    const replacements = getClientReplacements(client, day)
+    return sum + client.mats.reduce((s, m) => {
+      const sizeConfig = sizes.find((sz) => sz.id === m.size)
+      return s + m.quantity * replacements * (sizeConfig?.area ?? 0)
+    }, 0)
+  }, 0)
+
   return (
     <>
       <h1 className="print-header">{title}</h1>
@@ -94,7 +103,7 @@ function PrintTable({ title, rows, sizes, day }: PrintTableProps) {
         <tfoot>
           <tr>
             <td className="num" />
-            <td>Итого: {rows.length} точек</td>
+            <td>Итого: {rows.length} точек / {Math.round(totalArea * 100) / 100} м²</td>
             <td />
             {sizes.map((s) => (
               <td key={s.id} className="num">
