@@ -3,6 +3,7 @@ import { ClientsTable, EditClientDialog, AddClientDialog, useClientStore, BatchG
 import type { PaymentInfo } from '@/modules/clients'
 import { useRouteStore } from '@/modules/routes'
 import { usePaymentStore, useClientPaymentStatus, RecordPaymentDialog, getCurrentPeriod } from '@/modules/payments'
+import { InvoiceSettingsDialog, GenerateInvoicesDialog } from '@/modules/invoices'
 import type { Client } from '@/modules/clients'
 import type { DayOfWeek } from '@/shared/types'
 import { generateId } from '@/shared/lib/generateId'
@@ -139,6 +140,8 @@ export function ClientsPage() {
         <h1 className="text-2xl font-bold text-foreground">Клиенты</h1>
         <div className="flex items-center gap-2">
           <CostSettingsDialog />
+          <InvoiceSettingsDialog />
+          <GenerateInvoicesDialog clients={clients} sizes={sizes} />
           <GeocodeSettings />
           <BatchGeocode />
           <AddClientDialog />
