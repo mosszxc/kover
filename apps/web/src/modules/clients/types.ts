@@ -42,6 +42,8 @@ export interface Client {
   contactPhone?: string | null
   customMonthlyPrice?: number | null
   category?: ClientCategory
+  contractNumber?: string | null
+  contractDate?: string | null
   createdAt: string
   lat?: number
   lng?: number

@@ -93,6 +93,8 @@ export function AddClientDialog() {
       contactPhone: form.contactPhone.trim() || null,
       customMonthlyPrice: form.customMonthlyPrice ? parseFloat(form.customMonthlyPrice) : null,
       ...(form.category ? { category: form.category } : {}),
+      contractNumber: form.contractNumber.trim() || null,
+      contractDate: form.contractDate || null,
       isActive: true,
       createdAt: new Date().toISOString(),
       ...(lat != null && lng != null ? { lat, lng } : {}),

@@ -16,6 +16,7 @@ export interface InvoiceData {
   period: string
   clientName: string
   clientAddress: string
+  contractNumber?: string | null
   mats: MatLine[]
   customTotal?: number
 }
@@ -47,6 +48,7 @@ function buildInvoiceSheet(invoice: InvoiceData, settings: InvoiceSettings) {
 
   rows.push(['Покупатель:', invoice.clientName])
   if (invoice.clientAddress) rows.push(['Адрес:', invoice.clientAddress])
+  if (invoice.contractNumber) rows.push(['Договор:', invoice.contractNumber])
   rows.push(['Период:', invoice.period])
   rows.push([])
 

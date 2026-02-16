@@ -187,7 +187,8 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
       const query = filterValue.toLowerCase()
       return (
         row.original.name.toLowerCase().includes(query) ||
-        row.original.address.toLowerCase().includes(query)
+        row.original.address.toLowerCase().includes(query) ||
+        (row.original.contractNumber?.toLowerCase().includes(query) ?? false)
       )
     },
     getCoreRowModel: getCoreRowModel(),
