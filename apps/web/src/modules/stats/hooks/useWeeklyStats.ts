@@ -10,6 +10,7 @@ export interface DayStat {
   stopCount: number
   matsBySize: Partial<Record<string, number>>
   totalArea: number
+  totalCost: number
 }
 
 export interface WeeklyStats {
@@ -18,7 +19,9 @@ export interface WeeklyStats {
     stopCount: number
     matsBySize: Partial<Record<string, number>>
     totalArea: number
+    totalCost: number
   }
+  hasPrices: boolean
 }
 
 export function useWeeklyStats(): WeeklyStats {
@@ -30,11 +33,14 @@ export function useWeeklyStats(): WeeklyStats {
   return useMemo(() => {
     const clientMap = new Map(clients.map((c) => [c.id, c]))
     const areaMap = Object.fromEntries(sizes.map((s) => [s.id, s.area]))
+    const priceMap = Object.fromEntries(sizes.map((s) => [s.id, s.rentalPrice]))
     const visibleSet = new Set(visibleDays)
+    const hasPrices = sizes.some((s) => s.rentalPrice > 0)
 
     const days: DayStat[] = routes.filter((r) => visibleSet.has(r.day)).map((route) => {
       const matsBySize: Partial<Record<string, number>> = {}
       let totalArea = 0
+      let totalCost = 0
       let stopCount = 0
 
       for (const stop of route.stops) {
@@ -47,6 +53,7 @@ export function useWeeklyStats(): WeeklyStats {
           const qty = mat.quantity * replacements
           matsBySize[mat.size] = (matsBySize[mat.size] ?? 0) + qty
           totalArea += qty * (areaMap[mat.size] ?? 0)
+          totalCost += qty * (priceMap[mat.size] ?? 0)
         }
       }
 
@@ -55,6 +62,7 @@ export function useWeeklyStats(): WeeklyStats {
         stopCount,
         matsBySize,
         totalArea: Math.round(totalArea * 100) / 100,
+        totalCost: Math.round(totalCost * 100) / 100,
       }
     })
 
@@ -67,8 +75,9 @@ export function useWeeklyStats(): WeeklyStats {
         return acc
       }, {}),
       totalArea: Math.round(days.reduce((s, d) => s + d.totalArea, 0) * 100) / 100,
+      totalCost: Math.round(days.reduce((s, d) => s + d.totalCost, 0) * 100) / 100,
     }
 
-    return { days, totals }
+    return { days, totals, hasPrices }
   }, [routes, clients, sizes, visibleDays])
 }
