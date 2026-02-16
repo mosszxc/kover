@@ -6,6 +6,12 @@ export interface MatSpec {
   color?: string
 }
 
+export interface ClientNote {
+  id: string
+  text: string
+  createdAt: string
+}
+
 export interface Client {
   id: string
   originalName: string
@@ -16,6 +22,7 @@ export interface Client {
   days: DayOfWeek[]
   dayReplacements?: Partial<Record<DayOfWeek, number>>
   notes: string
+  clientNotes?: ClientNote[]
   isActive: boolean
   pausedUntil?: string | null
   workingHoursStart?: string | null

@@ -1,4 +1,4 @@
-export type { Client, MatSpec } from './types'
+export type { Client, MatSpec, ClientNote } from './types'
 export type { PaymentInfo } from './components/ClientsTable'
 export { getClientReplacements, isClientPaused, formatPausedUntil, formatWorkingHours } from './types'
 export { useClientStore } from './store'
