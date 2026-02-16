@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import type { MapStop } from '../hooks/useMapData'
+import { useRouteGeometry } from '../hooks/useRouteGeometry'
 
 // Fix default marker icon issue with bundlers
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png'
@@ -57,7 +58,8 @@ interface RouteMapProps {
 const DEFAULT_CENTER: [number, number] = [54.99, 73.37] // Omsk
 
 export function RouteMap({ stops }: RouteMapProps) {
-  const polylinePositions = stops.map((s): [number, number] => [s.lat, s.lng])
+  const geometry = useRouteGeometry(stops)
+  const straightLinePositions = stops.map((s): [number, number] => [s.lat, s.lng])
 
   if (stops.length === 0) {
     return (
@@ -67,49 +69,67 @@ export function RouteMap({ stops }: RouteMapProps) {
     )
   }
 
+  const polylinePositions = geometry ? geometry.coordinates : straightLinePositions
+  const isRoadBased = geometry?.isRoadBased ?? false
+
   return (
-    <div className="isolate overflow-hidden rounded-lg border border-border">
-      <MapContainer
-        center={DEFAULT_CENTER}
-        zoom={12}
-        className="h-[500px] w-full"
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-
-        {stops.map((stop) => (
-          <Marker
-            key={stop.position}
-            position={[stop.lat, stop.lng]}
-            icon={createNumberedIcon(stop.position, stop.position === 1)}
-          >
-            <Popup>
-              <div className="text-sm">
-                <div className="font-semibold">
-                  #{stop.position} {stop.clientName}
-                </div>
-                {stop.address && (
-                  <div className="text-gray-600">{stop.address}</div>
-                )}
-              </div>
-            </Popup>
-          </Marker>
-        ))}
-
-        {polylinePositions.length >= 2 && (
-          <Polyline
-            positions={polylinePositions}
-            color="#2563eb"
-            weight={3}
-            opacity={0.7}
-            dashArray="8 4"
+    <div className="space-y-2">
+      {geometry && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <span>
+            Длина маршрута:{' '}
+            <span className="font-semibold text-foreground">
+              {geometry.distanceKm.toFixed(1)} км
+            </span>
+          </span>
+          {!isRoadBased && (
+            <span className="text-xs text-amber-500">(по прямой — OSRM недоступен)</span>
+          )}
+        </div>
+      )}
+      <div className="isolate overflow-hidden rounded-lg border border-border">
+        <MapContainer
+          center={DEFAULT_CENTER}
+          zoom={12}
+          className="h-[500px] w-full"
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-        )}
 
-        <FitBounds stops={stops} />
-      </MapContainer>
+          {stops.map((stop) => (
+            <Marker
+              key={stop.position}
+              position={[stop.lat, stop.lng]}
+              icon={createNumberedIcon(stop.position, stop.position === 1)}
+            >
+              <Popup>
+                <div className="text-sm">
+                  <div className="font-semibold">
+                    #{stop.position} {stop.clientName}
+                  </div>
+                  {stop.address && (
+                    <div className="text-gray-600">{stop.address}</div>
+                  )}
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+
+          {polylinePositions.length >= 2 && (
+            <Polyline
+              positions={polylinePositions}
+              color="#2563eb"
+              weight={isRoadBased ? 4 : 3}
+              opacity={0.7}
+              dashArray={isRoadBased ? undefined : '8 4'}
+            />
+          )}
+
+          <FitBounds stops={stops} />
+        </MapContainer>
+      </div>
     </div>
   )
 }
