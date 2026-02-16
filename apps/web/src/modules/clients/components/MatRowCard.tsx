@@ -62,7 +62,7 @@ export function MatRowCard({
     const exists = sizes.some((s) => s.id === id)
 
     if (!exists) {
-      addSize(id, trimmed, 0)
+      addSize(id, trimmed, 0, 0)
     }
 
     onSizeChange(id)

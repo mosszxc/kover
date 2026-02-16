@@ -6,8 +6,8 @@ import { supabaseSync, matSizesAdapter } from '@/shared/lib/sync'
 
 interface MatSizeState {
   sizes: MatSizeConfig[]
-  addSize: (id: string, label: string, area: number) => void
-  updateSize: (id: string, updates: { label?: string; area?: number }) => void
+  addSize: (id: string, label: string, area: number, rentalPrice: number) => void
+  updateSize: (id: string, updates: { label?: string; area?: number; rentalPrice?: number }) => void
   removeSize: (id: string) => void
 }
 
@@ -22,9 +22,9 @@ export const useMatSizeStore = create<MatSizeState>()(
     (set) => ({
       sizes: DEFAULT_MAT_SIZES,
 
-      addSize: (id, label, area) =>
+      addSize: (id, label, area, rentalPrice) =>
         set((state) => ({
-          sizes: [...state.sizes, { id, label, area }],
+          sizes: [...state.sizes, { id, label, area, rentalPrice }],
         })),
 
       updateSize: (id, updates) =>
@@ -40,7 +40,17 @@ export const useMatSizeStore = create<MatSizeState>()(
         })),
     }),
     ),
-    { name: 'kover-mat-sizes' },
+    {
+      name: 'kover-mat-sizes',
+      merge: (persisted, current) => {
+        const state = { ...current, ...(persisted as Partial<MatSizeState>) }
+        state.sizes = state.sizes.map((s) => ({
+          ...s,
+          rentalPrice: s.rentalPrice ?? 0,
+        }))
+        return state
+      },
+    },
   ),
 )
 

@@ -9,15 +9,16 @@ export interface MatSizeConfig {
   id: string
   label: string
   area: number
+  rentalPrice: number
 }
 
 /** Стандартные размеры ковриков (используются как начальные данные стора) */
 export const DEFAULT_MAT_SIZES: MatSizeConfig[] = [
-  { id: '400', label: '400', area: 4.0 },
-  { id: '250', label: '250', area: 3.7 },
-  { id: '180', label: '180', area: 2.07 },
-  { id: '150', label: '150', area: 1.275 },
-  { id: '60x80', label: '60×80', area: 0.48 },
+  { id: '400', label: '400', area: 4.0, rentalPrice: 0 },
+  { id: '250', label: '250', area: 3.7, rentalPrice: 0 },
+  { id: '180', label: '180', area: 2.07, rentalPrice: 0 },
+  { id: '150', label: '150', area: 1.275, rentalPrice: 0 },
+  { id: '60x80', label: '60×80', area: 0.48, rentalPrice: 0 },
 ]
 
 export const DAY_LABELS: Record<DayOfWeek, string> = {
