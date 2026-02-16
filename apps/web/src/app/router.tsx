@@ -6,6 +6,7 @@ import { ClientsPage } from "@/pages/ClientsPage"
 import { DriversPage } from "@/pages/DriversPage"
 import { SettingsPage } from "@/pages/SettingsPage"
 import { MatSizesPage } from "@/pages/MatSizesPage"
+import { InventoryPage } from "@/pages/InventoryPage"
 import { LoadingFallback } from "@/shared/components/LoadingFallback"
 
 const ImportPage = lazy(() =>
@@ -47,6 +48,10 @@ export const router = createBrowserRouter([
           {
             path: "/mat-sizes",
             element: <MatSizesPage />,
+          },
+          {
+            path: "/inventory",
+            element: <InventoryPage />,
           },
           {
             path: "/settings",
