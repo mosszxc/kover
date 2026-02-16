@@ -36,11 +36,12 @@ interface ClientsTableProps {
   anomalyIds?: Set<string>
   paymentStatusMap?: Map<string, PaymentInfo>
   onRecordPayment?: (client: Client) => void
+  onQuickPay?: (client: Client) => void
 }
 
 type SortField = 'name' | 'address' | 'mats' | 'area' | 'cost' | 'revenue' | 'margin' | 'frequency' | 'days'
 
-export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPauseClient, anomalyIds, paymentStatusMap, onRecordPayment }: ClientsTableProps) {
+export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPauseClient, anomalyIds, paymentStatusMap, onRecordPayment, onQuickPay }: ClientsTableProps) {
   const clients = useClientStore((s) => s.clients)
   const updateClient = useClientStore((s) => s.updateClient)
   const sizes = useMatSizeStore((s) => s.sizes)
@@ -420,22 +421,37 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                 </div>
                 <div className="flex shrink-0 items-center gap-1.5">
                 {paymentInfo && paymentInfo.status !== 'paid' && onRecordPayment && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onRecordPayment(client)
-                    }}
-                    className={cn(
-                      'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold transition-colors',
-                      paymentInfo.status === 'overdue'
-                        ? 'bg-red-600/20 text-red-400 hover:bg-red-600/30'
-                        : 'bg-amber-600/20 text-amber-400 hover:bg-amber-600/30',
+                  <div className="flex items-center gap-1">
+                    {onQuickPay && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onQuickPay(client)
+                        }}
+                        title="Отметить полную оплату"
+                        className="inline-flex size-6 items-center justify-center rounded-full bg-emerald-600/20 text-emerald-400 transition-colors hover:bg-emerald-600/30"
+                      >
+                        <Check className="size-3.5" />
+                      </button>
                     )}
-                  >
-                    <Banknote className="size-3" />
-                    {paymentInfo.debt > 0 ? `${paymentInfo.debt.toLocaleString('ru-RU')} ₽` : 'Оплатить'}
-                  </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onRecordPayment(client)
+                      }}
+                      className={cn(
+                        'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold transition-colors',
+                        paymentInfo.status === 'overdue'
+                          ? 'bg-red-600/20 text-red-400 hover:bg-red-600/30'
+                          : 'bg-amber-600/20 text-amber-400 hover:bg-amber-600/30',
+                      )}
+                    >
+                      <Banknote className="size-3" />
+                      {paymentInfo.debt > 0 ? `${paymentInfo.debt.toLocaleString('ru-RU')} ₽` : 'Оплатить'}
+                    </button>
+                  </div>
                 )}
                 <button
                   type="button"
