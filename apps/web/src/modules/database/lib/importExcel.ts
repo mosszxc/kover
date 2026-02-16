@@ -125,7 +125,7 @@ export function parseExcelImport(buffer: ArrayBuffer): ParseResult {
         errors.push({ sheet: 'Размеры ковриков', row: i + 1, message: 'Невалидная площадь' })
         continue
       }
-      matSizes.push({ id, label, area })
+      matSizes.push({ id, label, area, rentalPrice: 0 })
     }
   }
 

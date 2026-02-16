@@ -72,7 +72,7 @@ export function DatabasePage() {
       if (currentIds.has(s.id)) {
         store.updateSize(s.id, { label: s.label, area: s.area })
       } else {
-        store.addSize(s.id, s.label, s.area)
+        store.addSize(s.id, s.label, s.area, s.rentalPrice ?? 0)
       }
     }
   }, [])
@@ -82,6 +82,7 @@ export function DatabasePage() {
       <DatabaseOverview
         stats={stats}
         sheets={sheets}
+        matSizes={matSizes}
         importButton={
           <ImportExcelDialog
             currentClients={clients}

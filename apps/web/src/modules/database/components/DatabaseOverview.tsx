@@ -1,11 +1,14 @@
-import { Download, Users, Truck, Ruler, MapPin } from 'lucide-react'
+import { Download, FileDown, Users, Truck, Ruler, MapPin } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import type { DatabaseStats, SheetData } from '../types'
+import type { MatSizeConfig } from '@/shared/types'
 import { exportToExcel } from '../lib/exportExcel'
+import { buildTemplateSheets } from '../lib/buildTemplateSheets'
 
 interface DatabaseOverviewProps {
   stats: DatabaseStats
   sheets: SheetData[]
+  matSizes: MatSizeConfig[]
   importButton?: React.ReactNode
 }
 
@@ -31,10 +34,15 @@ function StatCard({ icon: Icon, label, value, sub }: {
   )
 }
 
-export function DatabaseOverview({ stats, sheets, importButton }: DatabaseOverviewProps) {
+export function DatabaseOverview({ stats, sheets, matSizes, importButton }: DatabaseOverviewProps) {
   const handleExport = async () => {
     const date = new Date().toISOString().slice(0, 10)
     await exportToExcel(sheets, `kover-export-${date}.xlsx`)
+  }
+
+  const handleDownloadTemplate = async () => {
+    const templateSheets = buildTemplateSheets(matSizes)
+    await exportToExcel(templateSheets, 'kover-template.xlsx')
   }
 
   return (
@@ -42,6 +50,10 @@ export function DatabaseOverview({ stats, sheets, importButton }: DatabaseOvervi
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">База данных</h1>
         <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={handleDownloadTemplate} className="gap-2">
+            <FileDown className="h-4 w-4" />
+            Скачать шаблон
+          </Button>
           {importButton}
           <Button onClick={handleExport} className="gap-2">
             <Download className="h-4 w-4" />
