@@ -150,6 +150,7 @@ export type Database = {
           created_at: string
           id: string
           label: string
+          rental_price: number
           updated_at: string
         }
         Insert: {
@@ -157,6 +158,7 @@ export type Database = {
           created_at?: string
           id?: string
           label: string
+          rental_price?: number
           updated_at?: string
         }
         Update: {
@@ -164,6 +166,7 @@ export type Database = {
           created_at?: string
           id?: string
           label?: string
+          rental_price?: number
           updated_at?: string
         }
         Relationships: []
