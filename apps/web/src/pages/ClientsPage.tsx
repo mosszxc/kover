@@ -1,20 +1,76 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ClientsTable, EditClientDialog, AddClientDialog, useClientStore, BatchGeocode, GeocodeSettings, isClientPaused } from '@/modules/clients'
+import type { PaymentInfo } from '@/modules/clients'
 import { useRouteStore } from '@/modules/routes'
+import { usePaymentStore, useClientPaymentStatus, RecordPaymentDialog, getCurrentPeriod } from '@/modules/payments'
 import type { Client } from '@/modules/clients'
 import type { DayOfWeek } from '@/shared/types'
 import { generateId } from '@/shared/lib/generateId'
 import { detectGeoAnomalies } from '@/shared/lib/geoAnomalies'
 import { useServiceLogStore } from '@/shared/stores/serviceLogStore'
+import { useMatSizeStore } from '@/shared/stores/matSizeStore'
+
+const WEEKS_PER_MONTH = 4.33
+
+function getMonthlyRevenue(client: Client, priceMap: Record<string, number>): number {
+  const costPerVisit = client.mats.reduce((sum, m) => sum + m.quantity * (priceMap[m.size] ?? 0), 0)
+  return Math.round(costPerVisit * client.frequency * WEEKS_PER_MONTH * 100) / 100
+}
 
 export function ClientsPage() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
+  const [paymentClient, setPaymentClient] = useState<Client | null>(null)
   const clients = useClientStore((s) => s.clients)
   const deleteClient = useClientStore((s) => s.deleteClient)
   const updateClient = useClientStore((s) => s.updateClient)
   const addStop = useRouteStore((s) => s.addStop)
   const routes = useRouteStore((s) => s.routes)
   const addServiceLog = useServiceLogStore((s) => s.addEntry)
+  const sizes = useMatSizeStore((s) => s.sizes)
+  const payments = usePaymentStore((s) => s.payments)
+  const addPayment = usePaymentStore((s) => s.addPayment)
+
+  const priceMap = useMemo(
+    () => Object.fromEntries(sizes.map((s) => [s.id, s.rentalPrice])),
+    [sizes],
+  )
+  const hasPrices = useMemo(() => sizes.some((s) => s.rentalPrice > 0), [sizes])
+
+  // Auto-ensure payment records for current period
+  useEffect(() => {
+    if (!hasPrices) return
+    const currentPeriod = getCurrentPeriod()
+    const existingClientIds = new Set(
+      payments.filter((p) => p.period === currentPeriod).map((p) => p.clientId),
+    )
+    const activeClients = clients.filter((c) => !isClientPaused(c))
+    for (const client of activeClients) {
+      if (existingClientIds.has(client.id)) continue
+      const expected = getMonthlyRevenue(client, priceMap)
+      if (expected <= 0) continue
+      addPayment({
+        id: crypto.randomUUID(),
+        clientId: client.id,
+        period: currentPeriod,
+        expectedAmount: expected,
+        paidAmount: 0,
+        paidAt: null,
+        notes: '',
+        createdAt: new Date().toISOString(),
+      })
+    }
+  }, [clients, payments, priceMap, hasPrices, addPayment])
+
+  const paymentStatusMap = useClientPaymentStatus()
+
+  // Convert to PaymentInfo map for ClientsTable
+  const paymentInfoMap = useMemo(() => {
+    const map = new Map<string, PaymentInfo>()
+    for (const [clientId, info] of paymentStatusMap) {
+      map.set(clientId, { status: info.status, debt: info.debt })
+    }
+    return map
+  }, [paymentStatusMap])
 
   const activeClients = useMemo(() => clients.filter((c) => !isClientPaused(c)), [clients])
   const anomalyIds = useMemo(() => detectGeoAnomalies(activeClients), [activeClients])
@@ -36,7 +92,6 @@ export function ClientsPage() {
 
   const handleToggleActive = useCallback(
     (client: Client) => {
-      // Вызывается при активации (из паузы)
       updateClient(client.id, { isActive: true, pausedUntil: null })
 
       for (const day of client.days) {
@@ -69,6 +124,15 @@ export function ClientsPage() {
     [updateClient, addServiceLog],
   )
 
+  // Get existing payment for dialog
+  const paymentClientPayment = useMemo(() => {
+    if (!paymentClient) return null
+    const currentPeriod = getCurrentPeriod()
+    return payments.find((p) => p.clientId === paymentClient.id && p.period === currentPeriod) ?? null
+  }, [paymentClient, payments])
+
+  const paymentClientRevenue = paymentClient ? getMonthlyRevenue(paymentClient, priceMap) : 0
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -79,7 +143,15 @@ export function ClientsPage() {
           <AddClientDialog />
         </div>
       </div>
-      <ClientsTable onRowClick={setSelectedClient} isClientInRoute={isClientInRoute} onToggleActive={handleToggleActive} onPauseClient={handlePauseClient} anomalyIds={anomalyIds} />
+      <ClientsTable
+        onRowClick={setSelectedClient}
+        isClientInRoute={isClientInRoute}
+        onToggleActive={handleToggleActive}
+        onPauseClient={handlePauseClient}
+        anomalyIds={anomalyIds}
+        paymentStatusMap={hasPrices ? paymentInfoMap : undefined}
+        onRecordPayment={hasPrices ? setPaymentClient : undefined}
+      />
       {selectedClient && (
         <EditClientDialog
           client={selectedClient}
@@ -90,6 +162,16 @@ export function ClientsPage() {
             deleteClient(id)
             setSelectedClient(null)
           }}
+        />
+      )}
+      {paymentClient && (
+        <RecordPaymentDialog
+          open={!!paymentClient}
+          onOpenChange={(open) => { if (!open) setPaymentClient(null) }}
+          clientId={paymentClient.id}
+          clientName={paymentClient.name}
+          expectedAmount={paymentClientRevenue}
+          existingPayment={paymentClientPayment}
         />
       )}
     </div>

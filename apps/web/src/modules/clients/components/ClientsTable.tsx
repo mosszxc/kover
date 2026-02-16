@@ -19,7 +19,13 @@ import type { DayOfWeek } from '@/shared/types'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 import { MAT_SIZE_STYLES } from '@/shared/constants'
 import type { MatSize } from '@/shared/types'
-import { ClientsFilters, type StatusFilter } from './ClientsFilters'
+import { ClientsFilters, type StatusFilter, type PaymentFilter } from './ClientsFilters'
+import { Banknote } from 'lucide-react'
+
+export interface PaymentInfo {
+  status: 'paid' | 'partial' | 'overdue' | 'pending'
+  debt: number
+}
 
 interface ClientsTableProps {
   onRowClick?: (client: Client) => void
@@ -27,11 +33,13 @@ interface ClientsTableProps {
   onToggleActive?: (client: Client) => void
   onPauseClient?: (client: Client, pausedUntil: string | null) => void
   anomalyIds?: Set<string>
+  paymentStatusMap?: Map<string, PaymentInfo>
+  onRecordPayment?: (client: Client) => void
 }
 
 type SortField = 'name' | 'address' | 'mats' | 'area' | 'cost' | 'revenue' | 'frequency' | 'days'
 
-export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPauseClient, anomalyIds }: ClientsTableProps) {
+export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPauseClient, anomalyIds, paymentStatusMap, onRecordPayment }: ClientsTableProps) {
   const clients = useClientStore((s) => s.clients)
   const updateClient = useClientStore((s) => s.updateClient)
   const sizes = useMatSizeStore((s) => s.sizes)
@@ -104,6 +112,8 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
   const [selectedFrequency, setSelectedFrequency] = useState<number | null>(null)
   const [selectedMatSize, setSelectedMatSize] = useState<string | null>(null)
   const [selectedStatus, setSelectedStatus] = useState<StatusFilter>('all')
+  const [selectedPayment, setSelectedPayment] = useState<PaymentFilter>('all')
+  const hasPayments = (paymentStatusMap?.size ?? 0) > 0
 
   const filteredClients = useMemo(() => {
     let result = clients
@@ -125,8 +135,17 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
         c.mats.some((m) => m.size === selectedMatSize),
       )
     }
+    if (selectedPayment !== 'all' && paymentStatusMap) {
+      result = result.filter((c) => {
+        const info = paymentStatusMap.get(c.id)
+        if (selectedPayment === 'paid') return info?.status === 'paid'
+        if (selectedPayment === 'unpaid') return !info || info.status !== 'paid'
+        if (selectedPayment === 'overdue') return info?.status === 'overdue'
+        return true
+      })
+    }
     return result
-  }, [clients, selectedDays, selectedFrequency, selectedMatSize, selectedStatus])
+  }, [clients, selectedDays, selectedFrequency, selectedMatSize, selectedStatus, selectedPayment, paymentStatusMap])
 
   const table = useReactTable({
     data: filteredClients,
@@ -198,6 +217,9 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
         onMatSizeChange={setSelectedMatSize}
         selectedStatus={selectedStatus}
         onStatusChange={setSelectedStatus}
+        selectedPayment={selectedPayment}
+        onPaymentChange={setSelectedPayment}
+        hasPayments={hasPayments}
       />
 
       <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -229,6 +251,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
           const area = getClientArea(client)
           const cost = hasPrices ? getClientCost(client) : 0
           const revenue = hasPrices ? getClientMonthlyRevenue(client) : 0
+          const paymentInfo = paymentStatusMap?.get(client.id)
 
           return (
             <div
@@ -249,6 +272,17 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
               <div className="flex items-center justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-2">
                   <span className="truncate font-medium text-foreground">{client.name}</span>
+                  {paymentInfo && (
+                    <span
+                      className={cn('inline-block size-2 shrink-0 rounded-full', {
+                        'bg-emerald-400': paymentInfo.status === 'paid',
+                        'bg-amber-400': paymentInfo.status === 'partial',
+                        'bg-red-400': paymentInfo.status === 'overdue',
+                        'bg-muted-foreground': paymentInfo.status === 'pending',
+                      })}
+                      title={`Оплата: ${paymentInfo.status === 'paid' ? 'Оплачен' : paymentInfo.status === 'partial' ? 'Частично' : paymentInfo.status === 'overdue' ? 'Просрочен' : 'Ожидает'}${paymentInfo.debt > 0 ? ` (долг: ${paymentInfo.debt.toLocaleString('ru-RU')} ₽)` : ''}`}
+                    />
+                  )}
                   <span className="hidden text-muted-foreground sm:inline">·</span>
                   <span className="hidden min-w-0 items-center gap-1 text-sm text-muted-foreground sm:inline-flex">
                     <span className={cn('truncate', isAnomaly && 'text-amber-400', hasNoCoords && !isAnomaly && 'text-red-400')}>{client.address}</span>
@@ -350,6 +384,25 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                     </>
                   )}
                 </div>
+                <div className="flex shrink-0 items-center gap-1.5">
+                {paymentInfo && paymentInfo.status !== 'paid' && onRecordPayment && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onRecordPayment(client)
+                    }}
+                    className={cn(
+                      'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold transition-colors',
+                      paymentInfo.status === 'overdue'
+                        ? 'bg-red-600/20 text-red-400 hover:bg-red-600/30'
+                        : 'bg-amber-600/20 text-amber-400 hover:bg-amber-600/30',
+                    )}
+                  >
+                    <Banknote className="size-3" />
+                    {paymentInfo.debt > 0 ? `${paymentInfo.debt.toLocaleString('ru-RU')} ₽` : 'Оплатить'}
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={(e) => {
@@ -392,6 +445,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                     </>
                   )}
                 </button>
+                </div>
               </div>
             </div>
           )

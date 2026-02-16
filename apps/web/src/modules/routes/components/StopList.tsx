@@ -20,16 +20,17 @@ import { useClientStore } from '@/modules/clients'
 import type { Client } from '@/modules/clients'
 import { useGeoAnomalies } from '../hooks/useGeoAnomalies'
 import { isStopSkipped } from '../utils'
-import { StopCard, type DriverOption } from './StopCard'
+import { StopCard, type DriverOption, type StopPaymentInfo } from './StopCard'
 
 interface StopListProps {
   searchQuery?: string
   drivers?: DriverOption[]
   driverFilter?: string | 'unassigned' | null
   onEditClient?: (client: Client) => void
+  paymentStatusMap?: Map<string, StopPaymentInfo>
 }
 
-export function StopList({ searchQuery = '', drivers = [], driverFilter = null, onEditClient }: StopListProps) {
+export function StopList({ searchQuery = '', drivers = [], driverFilter = null, onEditClient, paymentStatusMap }: StopListProps) {
   const routes = useRouteStore((s) => s.routes)
   const selectedDay = useRouteStore((s) => s.selectedDay)
   const reorderStop = useRouteStore((s) => s.reorderStop)
@@ -160,6 +161,7 @@ export function StopList({ searchQuery = '', drivers = [], driverFilter = null, 
                   isAnomaly={anomalies.has(client.id)}
                   isMissingCoords={client.lat == null || client.lng == null}
                   onEditClient={onEditClient}
+                  paymentInfo={paymentStatusMap?.get(client.id)}
                 />
               )
             })}
