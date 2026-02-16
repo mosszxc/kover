@@ -1,6 +1,7 @@
 import { useMemo, useCallback } from 'react'
-import { DatabaseOverview, MigrationPanel } from '@/modules/database'
+import { DatabaseOverview, MigrationPanel, ImportExcelDialog } from '@/modules/database'
 import type { DatabaseStats } from '@/modules/database'
+import type { ImportData } from '@/modules/database'
 import { useClientStore } from '@/modules/clients'
 import { useDriverStore } from '@/modules/drivers'
 import { useRouteStore } from '@/modules/routes'
@@ -52,9 +53,45 @@ export function DatabasePage() {
     }
   }, [matSizes, drivers, clients, routes, serviceLog])
 
+  const handleImportApply = useCallback((data: ImportData) => {
+    useClientStore.getState().seedClients(data.clients)
+    useDriverStore.getState().seedDrivers(data.drivers)
+    useRouteStore.getState().seedRoutes(data.routes)
+
+    // Apply mat sizes: replace all
+    const store = useMatSizeStore.getState()
+    const currentIds = new Set(store.sizes.map((s) => s.id))
+    const importedIds = new Set(data.matSizes.map((s) => s.id))
+
+    // Remove sizes not in import
+    for (const s of store.sizes) {
+      if (!importedIds.has(s.id)) store.removeSize(s.id)
+    }
+    // Add or update sizes from import
+    for (const s of data.matSizes) {
+      if (currentIds.has(s.id)) {
+        store.updateSize(s.id, { label: s.label, area: s.area })
+      } else {
+        store.addSize(s.id, s.label, s.area)
+      }
+    }
+  }, [])
+
   return (
     <div className="space-y-6">
-      <DatabaseOverview stats={stats} sheets={sheets} />
+      <DatabaseOverview
+        stats={stats}
+        sheets={sheets}
+        importButton={
+          <ImportExcelDialog
+            currentClients={clients}
+            currentDrivers={drivers}
+            currentRoutes={routes}
+            currentMatSizes={matSizes}
+            onApply={handleImportApply}
+          />
+        }
+      />
       <MigrationPanel getLocalData={getLocalData} />
     </div>
   )

@@ -15,8 +15,8 @@ interface BuildExportSheetsParams {
   serviceLog: ServiceLogEntry[]
 }
 
-function formatMats(mats: MatSpec[]): string {
-  return mats.map((m) => `${m.size} x${m.quantity}`).join(', ')
+function formatMats(mats: MatSpec[], labelMap: Map<string, string>): string {
+  return mats.map((m) => `${labelMap.get(m.size) ?? m.size} x${m.quantity}`).join(', ')
 }
 
 function formatMatColors(mats: MatSpec[]): string {
@@ -36,8 +36,8 @@ function matArea(sizeId: string, areaMap: Map<string, number>): number {
   return areaMap.get(sizeId) ?? 0
 }
 
-function stopMatsText(clientMats: MatSpec[]): string {
-  return clientMats.map((m) => `${m.size} x${m.quantity}`).join(', ')
+function stopMatsText(clientMats: MatSpec[], labelMap: Map<string, string>): string {
+  return clientMats.map((m) => `${labelMap.get(m.size) ?? m.size} x${m.quantity}`).join(', ')
 }
 
 function stopTotalArea(clientMats: MatSpec[], areaMap: Map<string, number>): number {
@@ -63,6 +63,7 @@ export function buildExportSheets({
   const clientMap = new Map(clients.map((c) => [c.id, c]))
   const driverMap = new Map(drivers.map((d) => [d.id, d.name]))
   const areaMap = new Map(matSizes.map((s) => [s.id, s.area]))
+  const labelMap = new Map(matSizes.map((s) => [s.id, s.label]))
 
   // 1. Клиенты
   const clientSheet: SheetData = {
@@ -74,7 +75,7 @@ export function buildExportSheets({
     rows: clients.map((c) => [
       c.name,
       c.address,
-      formatMats(c.mats),
+      formatMats(c.mats, labelMap),
       formatMatColors(c.mats),
       c.days.map((d) => DAY_LABELS_FULL[d as DayOfWeek]).join(', '),
       c.frequency,
@@ -115,7 +116,7 @@ export function buildExportSheets({
           client?.name ?? stop.clientId,
           stop.driverId ? (driverMap.get(stop.driverId) ?? stop.driverId) : '',
           stopStatus(stop),
-          stopMatsText(mats),
+          stopMatsText(mats, labelMap),
           Math.round(stopTotalArea(mats, areaMap) * 100) / 100,
         ]
       }),
