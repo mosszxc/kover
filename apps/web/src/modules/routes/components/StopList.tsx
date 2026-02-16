@@ -28,9 +28,10 @@ interface StopListProps {
   driverFilter?: string | 'unassigned' | null
   onEditClient?: (client: Client) => void
   paymentStatusMap?: Map<string, StopPaymentInfo>
+  onServiceReport?: (client: Client) => void
 }
 
-export function StopList({ searchQuery = '', drivers = [], driverFilter = null, onEditClient, paymentStatusMap }: StopListProps) {
+export function StopList({ searchQuery = '', drivers = [], driverFilter = null, onEditClient, paymentStatusMap, onServiceReport }: StopListProps) {
   const routes = useRouteStore((s) => s.routes)
   const selectedDay = useRouteStore((s) => s.selectedDay)
   const reorderStop = useRouteStore((s) => s.reorderStop)
@@ -162,6 +163,7 @@ export function StopList({ searchQuery = '', drivers = [], driverFilter = null, 
                   isMissingCoords={client.lat == null || client.lng == null}
                   onEditClient={onEditClient}
                   paymentInfo={paymentStatusMap?.get(client.id)}
+                  onServiceReport={onServiceReport}
                 />
               )
             })}
