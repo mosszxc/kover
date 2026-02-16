@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Package, Plus, Minus, AlertTriangle } from 'lucide-react'
+import { Package, Plus, Minus, AlertTriangle, RotateCw } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { cn } from '@/shared/lib/utils'
 import type { SizeInventorySummary } from '../hooks/useInventorySummary'
@@ -70,6 +70,39 @@ export function InventoryDashboard({ summary, sizeLabels }: InventoryDashboardPr
                 </span>
               </div>
             </div>
+
+            {item.totalOwned > 0 && item.maxWashCycles > 0 && (
+              <div className="mt-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="flex items-center gap-1 text-muted-foreground">
+                    <RotateCw className="size-3" />
+                    Износ
+                  </span>
+                  <span className={cn(
+                    'tabular-nums font-medium',
+                    item.washCycles >= item.maxWashCycles ? 'text-red-400'
+                      : item.washCycles >= item.maxWashCycles * 0.8 ? 'text-amber-400'
+                      : 'text-muted-foreground',
+                  )}>
+                    {item.washCycles}/{item.maxWashCycles}
+                  </span>
+                </div>
+                <div className="mt-1 h-1.5 rounded-full bg-muted">
+                  <div
+                    className={cn(
+                      'h-full rounded-full transition-all',
+                      item.washCycles >= item.maxWashCycles ? 'bg-red-500'
+                        : item.washCycles >= item.maxWashCycles * 0.8 ? 'bg-amber-500'
+                        : 'bg-emerald-500',
+                    )}
+                    style={{ width: `${Math.min(100, (item.washCycles / item.maxWashCycles) * 100)}%` }}
+                  />
+                </div>
+                {item.washCycles >= item.maxWashCycles && (
+                  <p className="mt-1 text-xs text-red-400">Пора менять коврики!</p>
+                )}
+              </div>
+            )}
 
             <div className="mt-3 flex gap-2">
               <Button
