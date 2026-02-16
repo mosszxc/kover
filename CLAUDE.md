@@ -200,7 +200,7 @@ Vite + React 19 + TypeScript
 1. **TypeScript strict mode** everywhere
 2. **Zustand** for state (localStorage persistence)
 3. **Tailwind v4** — no inline styles
-4. **Dark mode first**
+4. **Light mode default** — dark mode via toggle in settings
 5. **pnpm** — not npm/yarn
 6. **Shadcn components** — don't reinvent
 7. **Modular Monolith** — see `design/architecture.md`
