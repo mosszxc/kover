@@ -3,6 +3,8 @@ export interface MatInventory {
   totalOwned: number
   inLaundry: number
   damaged: number
+  washCycles: number
+  maxWashCycles: number
 }
 
 export type TransactionType = 'purchase' | 'write_off' | 'laundry_in' | 'laundry_out'

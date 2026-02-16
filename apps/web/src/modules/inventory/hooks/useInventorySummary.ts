@@ -8,6 +8,8 @@ export interface SizeInventorySummary {
   inLaundry: number
   damaged: number
   inStock: number
+  washCycles: number
+  maxWashCycles: number
 }
 
 interface UseInventorySummaryParams {
@@ -30,7 +32,10 @@ export function useInventorySummary({ clientMatTotals }: UseInventorySummaryPara
       const damaged = inv?.damaged ?? 0
       const inStock = totalOwned - atClients - inLaundry
 
-      return { sizeId, totalOwned, atClients, inLaundry, damaged, inStock }
+      const washCycles = inv?.washCycles ?? 0
+      const maxWashCycles = inv?.maxWashCycles ?? 300
+
+      return { sizeId, totalOwned, atClients, inLaundry, damaged, inStock, washCycles, maxWashCycles }
     })
   }, [inventory, clientMatTotals])
 }

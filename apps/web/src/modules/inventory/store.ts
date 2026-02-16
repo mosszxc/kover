@@ -27,7 +27,7 @@ function createTransaction(sizeId: string, type: TransactionType, quantity: numb
 
 function ensureSize(inventory: MatInventory[], sizeId: string): MatInventory[] {
   if (inventory.some((i) => i.sizeId === sizeId)) return inventory
-  return [...inventory, { sizeId, totalOwned: 0, inLaundry: 0, damaged: 0 }]
+  return [...inventory, { sizeId, totalOwned: 0, inLaundry: 0, damaged: 0, washCycles: 0, maxWashCycles: 300 }]
 }
 
 function updateSize(inventory: MatInventory[], sizeId: string, updater: (item: MatInventory) => MatInventory): MatInventory[] {
@@ -83,6 +83,7 @@ export const useInventoryStore = create<InventoryState>()(
             inventory: updateSize(state.inventory, sizeId, (i) => ({
               ...i,
               inLaundry: Math.max(0, i.inLaundry - quantity),
+              washCycles: (i.washCycles ?? 0) + quantity,
             })),
             transactions: [...state.transactions, createTransaction(sizeId, 'laundry_out', quantity)],
           })),
@@ -95,6 +96,21 @@ export const useInventoryStore = create<InventoryState>()(
         },
       },
     ),
-    { name: 'kover-inventory', version: 1 },
+    {
+      name: 'kover-inventory',
+      version: 2,
+      migrate: (persisted) => {
+        const state = persisted as Record<string, unknown>
+        const inventory = (state.inventory as MatInventory[]) ?? []
+        return {
+          ...state,
+          inventory: inventory.map((i) => ({
+            ...i,
+            washCycles: i.washCycles ?? 0,
+            maxWashCycles: i.maxWashCycles ?? 300,
+          })),
+        }
+      },
+    },
   ),
 )
