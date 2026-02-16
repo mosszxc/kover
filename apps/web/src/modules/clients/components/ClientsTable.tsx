@@ -29,7 +29,7 @@ interface ClientsTableProps {
   anomalyIds?: Set<string>
 }
 
-type SortField = 'name' | 'address' | 'mats' | 'area' | 'cost' | 'frequency' | 'days'
+type SortField = 'name' | 'address' | 'mats' | 'area' | 'cost' | 'revenue' | 'frequency' | 'days'
 
 export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPauseClient, anomalyIds }: ClientsTableProps) {
   const clients = useClientStore((s) => s.clients)
@@ -72,6 +72,13 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
     return client.mats.reduce((sum, m) => sum + m.quantity * (priceMap[m.size] ?? 0), 0)
   }
 
+  const WEEKS_PER_MONTH = 4.33
+
+  function getClientMonthlyRevenue(client: Client): number {
+    const costPerVisit = getClientCost(client)
+    return Math.round(costPerVisit * client.frequency * WEEKS_PER_MONTH * 100) / 100
+  }
+
   const columns = useMemo<ColumnDef<Client>[]>(() => {
     const cols: ColumnDef<Client>[] = [
       { accessorKey: 'name', header: 'Название' },
@@ -80,7 +87,10 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
       { id: 'area', header: 'Метраж', accessorFn: (row) => getClientArea(row) },
     ]
     if (hasPrices) {
-      cols.push({ id: 'cost', header: 'Стоимость', accessorFn: (row) => getClientCost(row) })
+      cols.push(
+        { id: 'cost', header: 'Стоимость', accessorFn: (row) => getClientCost(row) },
+        { id: 'revenue', header: 'Выручка/мес', accessorFn: (row) => getClientMonthlyRevenue(row) },
+      )
     }
     cols.push(
       { accessorKey: 'frequency', header: 'Частота' },
@@ -88,7 +98,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
       { accessorKey: 'isActive', header: 'Статус' },
     )
     return cols
-  }, [getClientArea, getClientCost, hasPrices])
+  }, [getClientArea, getClientCost, getClientMonthlyRevenue, hasPrices])
 
   const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>([])
   const [selectedFrequency, setSelectedFrequency] = useState<number | null>(null)
@@ -156,7 +166,10 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
   const sortButtons: { field: SortField; label: string }[] = [
     { field: 'name', label: 'Имя' },
     { field: 'area', label: 'Метраж' },
-    ...(hasPrices ? [{ field: 'cost' as SortField, label: 'Стоимость' }] : []),
+    ...(hasPrices ? [
+      { field: 'cost' as SortField, label: 'Стоимость' },
+      { field: 'revenue' as SortField, label: 'Выручка/мес' },
+    ] : []),
     { field: 'frequency', label: 'Частота' },
     { field: 'days', label: 'Дни' },
   ]
@@ -215,6 +228,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
           const entries = groupMats(client)
           const area = getClientArea(client)
           const cost = hasPrices ? getClientCost(client) : 0
+          const revenue = hasPrices ? getClientMonthlyRevenue(client) : 0
 
           return (
             <div
@@ -320,6 +334,8 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                     <>
                       <span className="text-muted-foreground">·</span>
                       <span className="text-emerald-400">{cost.toLocaleString('ru-RU')}{'\u00a0'}₽</span>
+                      <span className="text-muted-foreground">·</span>
+                      <span className="text-emerald-400 font-medium">{revenue.toLocaleString('ru-RU')}{'\u00a0'}₽/мес</span>
                     </>
                   )}
                   <span className="text-muted-foreground">·</span>
@@ -382,9 +398,18 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
         })}
       </div>
 
-      <p className="text-sm text-muted-foreground">
-        Показано {table.getFilteredRowModel().rows.length} из {clients.length} клиентов
-      </p>
+      <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <span>Показано {table.getFilteredRowModel().rows.length} из {clients.length} клиентов</span>
+        {hasPrices && (
+          <span className="font-medium text-emerald-400">
+            Выручка/мес: {(Math.round(
+              table.getFilteredRowModel().rows.reduce(
+                (sum, row) => sum + getClientMonthlyRevenue(row.original), 0
+              ) * 100
+            ) / 100).toLocaleString('ru-RU')}{'\u00a0'}₽
+          </span>
+        )}
+      </div>
 
       {pauseDialogClient && (
         <PauseClientDialog
