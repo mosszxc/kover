@@ -114,22 +114,38 @@ export function useBriefing({
       }
     }
 
-    // 3. Overdue payments
+    // 3. Overdue payments with aging
+    const now = new Date()
     const overduePayments = payments.filter((p) => {
       if (p.paidAmount >= p.expectedAmount) return false
       const parts = p.period.split('-').map(Number)
       const year = parts[0] ?? 0
       const month = parts[1] ?? 0
       const periodEnd = new Date(year, month, 0)
-      return new Date() > periodEnd
+      return now > periodEnd
     })
     if (overduePayments.length > 0) {
       const uniqueClients = new Set(overduePayments.map((p) => p.clientId))
+      const totalDebt = overduePayments.reduce((sum, p) => sum + (p.expectedAmount - p.paidAmount), 0)
+      const totalDebtRounded = Math.round(totalDebt * 100) / 100
+
+      // Count clients with 60+ day old debt
+      let criticalCount = 0
+      for (const p of overduePayments) {
+        const parts = p.period.split('-').map(Number)
+        const periodEnd = new Date(parts[0] ?? 0, parts[1] ?? 0, 0)
+        const days = Math.floor((now.getTime() - periodEnd.getTime()) / (1000 * 60 * 60 * 24))
+        if (days >= 60) { criticalCount++; break }
+      }
+
+      const desc = [`${uniqueClients.size} должник(ов), ${totalDebtRounded.toLocaleString('ru-RU')} ₽`]
+      if (criticalCount > 0) desc.push('есть долги 60+ дней')
+
       alerts.push({
         id: 'overdue',
         type: 'overdue',
         title: 'Просроченные оплаты',
-        description: `${uniqueClients.size} клиент(ов) с неоплаченными счетами`,
+        description: desc.join(' · '),
       })
     }
 
