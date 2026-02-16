@@ -1,4 +1,4 @@
-import { Plus, MapPin, Loader2, Minus, Clock, User, Phone, Banknote } from 'lucide-react'
+import { Plus, MapPin, Loader2, Minus, Clock, User, Phone, Banknote, FileText } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { DAY_LABELS } from '@/shared/types'
 import { CLIENT_CATEGORIES } from '../types'
@@ -393,6 +393,30 @@ function ScheduleSection({ form }: { form: ClientFormState }) {
           <p className="mt-1 text-xs text-muted-foreground">
             Если задана — используется вместо расчёта из ковриков
           </p>
+        </div>
+
+        <div>
+          <span className={labelClass}>
+            <FileText className="mr-1 inline size-3.5" />
+            Договор
+          </span>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={form.contractNumber}
+              onChange={(e) => form.setContractNumber(e.target.value)}
+              placeholder="Номер договора"
+              className={`${inputClass} flex-1`}
+              aria-label="Номер договора"
+            />
+            <input
+              type="date"
+              value={form.contractDate}
+              onChange={(e) => form.setContractDate(e.target.value)}
+              className={`${inputClass} w-40`}
+              aria-label="Дата договора"
+            />
+          </div>
         </div>
 
         <div>

@@ -24,6 +24,8 @@ interface PopulateOptions {
   contactPhone?: string | null
   customMonthlyPrice?: number | null
   category?: ClientCategory
+  contractNumber?: string | null
+  contractDate?: string | null
 }
 
 export function useClientForm() {
@@ -40,6 +42,8 @@ export function useClientForm() {
   const [contactName, setContactName] = useState('')
   const [contactPhone, setContactPhone] = useState('')
   const [customMonthlyPrice, setCustomMonthlyPrice] = useState('')
+  const [contractNumber, setContractNumber] = useState('')
+  const [contractDate, setContractDate] = useState('')
   const [errors, setErrors] = useState<FormErrors>({})
   const [touched, setTouched] = useState<Partial<Record<keyof FormErrors, boolean>>>({})
 
@@ -162,6 +166,8 @@ export function useClientForm() {
     setContactName('')
     setContactPhone('')
     setCustomMonthlyPrice('')
+    setContractNumber('')
+    setContractDate('')
     setErrors({})
     setTouched({})
   }, [])
@@ -180,6 +186,8 @@ export function useClientForm() {
     setContactName(opts.contactName ?? '')
     setContactPhone(opts.contactPhone ?? '')
     setCustomMonthlyPrice(opts.customMonthlyPrice != null ? String(opts.customMonthlyPrice) : '')
+    setContractNumber(opts.contractNumber ?? '')
+    setContractDate(opts.contractDate ?? '')
     setErrors({})
     setTouched({})
   }, [])
@@ -220,6 +228,8 @@ export function useClientForm() {
     contactName,
     contactPhone,
     customMonthlyPrice,
+    contractNumber,
+    contractDate,
     errors,
     touched,
     // Setters
@@ -233,6 +243,8 @@ export function useClientForm() {
     setContactName,
     setContactPhone,
     setCustomMonthlyPrice,
+    setContractNumber,
+    setContractDate,
     // Mat ops
     addMat,
     removeMat,

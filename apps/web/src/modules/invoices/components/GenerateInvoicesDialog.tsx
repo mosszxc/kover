@@ -18,6 +18,7 @@ interface ClientData {
   id: string
   name: string
   address: string
+  contractNumber?: string | null
   mats: { size: string; quantity: number }[]
   frequency: number
   isActive: boolean
@@ -110,6 +111,7 @@ export function GenerateInvoicesDialog({ clients, sizes }: GenerateInvoicesDialo
           period: formatPeriodLabel(period),
           clientName: client.name,
           clientAddress: client.address,
+          contractNumber: client.contractNumber,
           mats: matLines,
         })
         counter++
