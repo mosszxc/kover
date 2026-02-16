@@ -1,4 +1,4 @@
-import { ChevronUp, ChevronDown, GripVertical, MapPinOff, Pencil, TriangleAlert, Clock, MoreHorizontal, ArrowRightLeft, X } from 'lucide-react'
+import { ChevronUp, ChevronDown, GripVertical, MapPinOff, Pencil, TriangleAlert, Clock, MoreHorizontal, ArrowRightLeft, X, ClipboardCheck, Phone } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -38,6 +38,11 @@ export interface DriverOption {
   workDays: DayOfWeek[]
 }
 
+export interface StopPaymentInfo {
+  status: 'paid' | 'partial' | 'overdue' | 'pending'
+  debt: number
+}
+
 interface StopCardProps {
   number: number
   client: Client
@@ -51,9 +56,11 @@ interface StopCardProps {
   isAnomaly?: boolean
   isMissingCoords?: boolean
   onEditClient?: (client: Client) => void
+  paymentInfo?: StopPaymentInfo
+  onServiceReport?: (client: Client) => void
 }
 
-export function StopCard({ number, client, stopId, driverId, drivers, stopIndex, isFirst, isLast, isDndEnabled = true, isAnomaly = false, isMissingCoords = false, onEditClient }: StopCardProps) {
+export function StopCard({ number, client, stopId, driverId, drivers, stopIndex, isFirst, isLast, isDndEnabled = true, isAnomaly = false, isMissingCoords = false, onEditClient, paymentInfo, onServiceReport }: StopCardProps) {
   const sizes = useMatSizeStore((s) => s.sizes)
   const areaMap = Object.fromEntries(sizes.map((s) => [s.id, s.area]))
   const labelMap = Object.fromEntries(sizes.map((s) => [s.id, s.label]))
@@ -134,11 +141,34 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
           <p className="truncate lg:whitespace-normal text-base text-foreground">
             {client.originalName}
           </p>
+          {paymentInfo && paymentInfo.status !== 'paid' && paymentInfo.status !== 'pending' && (
+            <span
+              className={cn(
+                'shrink-0 rounded px-1.5 py-0.5 text-xs font-semibold',
+                paymentInfo.status === 'overdue'
+                  ? 'bg-red-600/20 text-red-400'
+                  : 'bg-amber-600/20 text-amber-400',
+              )}
+            >
+              {paymentInfo.debt > 0 ? `${paymentInfo.debt.toLocaleString('ru-RU')} ₽` : paymentInfo.status === 'overdue' ? 'Долг' : 'Частично'}
+            </span>
+          )}
           {formatWorkingHours(client) && (
             <span className="ml-1 inline-flex shrink-0 items-center gap-0.5 text-xs text-muted-foreground">
               <Clock className="size-3" />
               {formatWorkingHours(client)}
             </span>
+          )}
+          {client.contactPhone && (
+            <a
+              href={`tel:${client.contactPhone}`}
+              onClick={(e) => e.stopPropagation()}
+              className="ml-1 inline-flex shrink-0 items-center gap-0.5 text-xs text-blue-400 hover:text-blue-300 transition-colors"
+              title={client.contactName ?? 'Позвонить'}
+            >
+              <Phone className="size-3" />
+              {client.contactPhone}
+            </a>
           )}
         </div>
         {isAnomaly && onEditClient && (
@@ -211,6 +241,12 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
             </DropdownMenuItem>
           )}
           {(!isFirst || !isLast) && <DropdownMenuSeparator />}
+          {onServiceReport && (
+            <DropdownMenuItem onClick={() => onServiceReport(client)}>
+              <ClipboardCheck className="size-4" />
+              Отчёт о визите
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem onClick={() => setTransferOpen(true)}>
             <ArrowRightLeft className="size-4" />
             Перенести в другой день

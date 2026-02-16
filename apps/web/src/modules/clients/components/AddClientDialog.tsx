@@ -14,6 +14,7 @@ import {
 } from '@/shared/ui/dialog'
 import { useSettingsStore } from '@/shared/stores/settingsStore'
 import { useIsMobile } from '@/shared/hooks/useIsMobile'
+import { useServiceLogStore } from '@/shared/stores/serviceLogStore'
 import { useClientStore } from '../store'
 import type { Client } from '../types'
 import { buildOriginalName, rowsToSpecs } from '../lib/formHelpers'
@@ -22,6 +23,7 @@ import { ClientForm, TOTAL_STEPS } from './ClientForm'
 
 export function AddClientDialog() {
   const addClient = useClientStore((s) => s.addClient)
+  const addServiceLog = useServiceLogStore((s) => s.addEntry)
   const geocodeCity = useSettingsStore((s) => s.geocodeCity)
   const isMobile = useIsMobile()
 
@@ -87,12 +89,15 @@ export function AddClientDialog() {
       notes: form.notes.trim(),
       workingHoursStart: form.workingHoursStart || null,
       workingHoursEnd: form.workingHoursEnd || null,
+      contactName: form.contactName.trim() || null,
+      contactPhone: form.contactPhone.trim() || null,
       isActive: true,
       createdAt: new Date().toISOString(),
       ...(lat != null && lng != null ? { lat, lng } : {}),
     }
 
     addClient(newClient)
+    addServiceLog({ clientId: newClient.id, type: 'client_created' })
     toast.success(`Клиент "${form.name.trim()}" добавлен`)
     setSaving(false)
     setOpen(false)

@@ -150,6 +150,7 @@ export type Database = {
           created_at: string
           id: string
           label: string
+          rental_price: number
           updated_at: string
         }
         Insert: {
@@ -157,6 +158,7 @@ export type Database = {
           created_at?: string
           id?: string
           label: string
+          rental_price?: number
           updated_at?: string
         }
         Update: {
@@ -164,6 +166,7 @@ export type Database = {
           created_at?: string
           id?: string
           label?: string
+          rental_price?: number
           updated_at?: string
         }
         Relationships: []
@@ -272,7 +275,8 @@ export type Database = {
         Row: {
           client_id: string
           created_at: string
-          day: number
+          day: number | null
+          details: string | null
           driver_id: string | null
           id: string
           target_day: number | null
@@ -281,7 +285,8 @@ export type Database = {
         Insert: {
           client_id: string
           created_at?: string
-          day: number
+          day?: number | null
+          details?: string | null
           driver_id?: string | null
           id?: string
           target_day?: number | null
@@ -290,7 +295,8 @@ export type Database = {
         Update: {
           client_id?: string
           created_at?: string
-          day?: number
+          day?: number | null
+          details?: string | null
           driver_id?: string | null
           id?: string
           target_day?: number | null

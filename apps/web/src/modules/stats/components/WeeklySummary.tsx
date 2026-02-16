@@ -3,7 +3,7 @@ import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 import { useWeeklyStats } from '../hooks/useWeeklyStats'
 
 export function WeeklySummary() {
-  const { days, totals } = useWeeklyStats()
+  const { days, totals, hasPrices } = useWeeklyStats()
   const sizes = useMatSizeStore((s) => s.sizes)
 
   return (
@@ -31,6 +31,11 @@ export function WeeklySummary() {
               <th className="border-b border-border px-4 py-3 text-right text-sm font-medium text-muted-foreground">
                 Кв.м
               </th>
+              {hasPrices && (
+                <th className="border-b border-border px-4 py-3 text-right text-sm font-medium text-muted-foreground">
+                  Выручка
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -56,6 +61,11 @@ export function WeeklySummary() {
                 <td className="px-4 py-3 text-right text-sm font-semibold tabular-nums text-foreground">
                   {day.totalArea.toFixed(1)}
                 </td>
+                {hasPrices && (
+                  <td className="px-4 py-3 text-right text-sm font-semibold tabular-nums text-green-400">
+                    {day.totalCost.toLocaleString('ru-RU')} ₽
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
@@ -78,6 +88,11 @@ export function WeeklySummary() {
               <td className="px-4 py-3 text-right text-sm font-bold tabular-nums text-foreground">
                 {totals.totalArea.toFixed(1)}
               </td>
+              {hasPrices && (
+                <td className="px-4 py-3 text-right text-sm font-bold tabular-nums text-green-400">
+                  {totals.totalCost.toLocaleString('ru-RU')} ₽
+                </td>
+              )}
             </tr>
           </tfoot>
         </table>

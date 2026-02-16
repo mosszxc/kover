@@ -26,6 +26,7 @@ interface EditingState {
   id: string
   label: string
   area: string
+  rentalPrice: string
 }
 
 interface MatSizeSettingsProps {
@@ -44,22 +45,28 @@ export function MatSizeSettings({ isSizeUsed, getClientsUsing, onDeleteAndReplac
   const [adding, setAdding] = useState(false)
   const [newLabel, setNewLabel] = useState('')
   const [newArea, setNewArea] = useState('')
+  const [newPrice, setNewPrice] = useState('')
   const [deletingSize, setDeletingSize] = useState<MatSizeConfig | null>(null)
   const [replacementSizeId, setReplacementSizeId] = useState<string>('')
 
   function handleStartEdit(size: MatSizeConfig) {
-    setEditing({ id: size.id, label: size.label, area: String(size.area) })
+    setEditing({ id: size.id, label: size.label, area: String(size.area), rentalPrice: String(size.rentalPrice) })
     setAdding(false)
   }
 
   function handleSaveEdit() {
     if (!editing) return
     const area = parseFloat(editing.area)
+    const rentalPrice = parseFloat(editing.rentalPrice)
     if (!editing.label.trim() || isNaN(area) || area <= 0) {
       toast.error('Введите корректное название и площадь')
       return
     }
-    updateSize(editing.id, { label: editing.label.trim(), area })
+    if (isNaN(rentalPrice) || rentalPrice < 0) {
+      toast.error('Введите корректную стоимость аренды')
+      return
+    }
+    updateSize(editing.id, { label: editing.label.trim(), area, rentalPrice })
     toast.success('Размер обновлён')
     setEditing(null)
   }
@@ -85,6 +92,7 @@ export function MatSizeSettings({ isSizeUsed, getClientsUsing, onDeleteAndReplac
 
   function handleAdd() {
     const area = parseFloat(newArea)
+    const rentalPrice = parseFloat(newPrice) || 0
     if (!newLabel.trim()) {
       toast.error('Введите название размера')
       return
@@ -93,15 +101,20 @@ export function MatSizeSettings({ isSizeUsed, getClientsUsing, onDeleteAndReplac
       toast.error('Введите корректную площадь')
       return
     }
+    if (rentalPrice < 0) {
+      toast.error('Стоимость аренды не может быть отрицательной')
+      return
+    }
     const id = newLabel.trim().toLowerCase().replace(/\s+/g, '')
     if (sizes.some((s) => s.id === id)) {
       toast.error('Размер с таким названием уже существует')
       return
     }
-    addSize(id, newLabel.trim(), area)
+    addSize(id, newLabel.trim(), area, rentalPrice)
     toast.success(`Размер «${newLabel.trim()}» добавлен`)
     setNewLabel('')
     setNewArea('')
+    setNewPrice('')
     setAdding(false)
   }
 
@@ -147,6 +160,9 @@ export function MatSizeSettings({ isSizeUsed, getClientsUsing, onDeleteAndReplac
               <th className="border-b border-slate-700 px-4 py-3 text-right text-sm font-medium text-slate-400">
                 Площадь (м²)
               </th>
+              <th className="border-b border-slate-700 px-4 py-3 text-right text-sm font-medium text-slate-400">
+                Цена (₽)
+              </th>
               <th className="border-b border-slate-700 px-4 py-3 text-right text-sm font-medium text-slate-400 w-28">
                 Действия
               </th>
@@ -187,6 +203,20 @@ export function MatSizeSettings({ isSizeUsed, getClientsUsing, onDeleteAndReplac
                       />
                     </td>
                     <td className="px-4 py-2">
+                      <input
+                        type="number"
+                        step="1"
+                        min="0"
+                        value={editing.rentalPrice}
+                        onChange={(e) => setEditing({ ...editing, rentalPrice: e.target.value })}
+                        className={`${inputClass} w-full text-right`}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleSaveEdit()
+                          if (e.key === 'Escape') setEditing(null)
+                        }}
+                      />
+                    </td>
+                    <td className="px-4 py-2">
                       <div className="flex justify-end gap-1">
                         <Button
                           variant="ghost"
@@ -217,6 +247,9 @@ export function MatSizeSettings({ isSizeUsed, getClientsUsing, onDeleteAndReplac
                   </td>
                   <td className="px-4 py-3 text-right text-sm tabular-nums text-slate-50">
                     {size.area}
+                  </td>
+                  <td className="px-4 py-3 text-right text-sm tabular-nums text-slate-50">
+                    {size.rentalPrice > 0 ? `${size.rentalPrice} ₽` : '—'}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-1">
@@ -260,6 +293,7 @@ export function MatSizeSettings({ isSizeUsed, getClientsUsing, onDeleteAndReplac
                         setAdding(false)
                         setNewLabel('')
                         setNewArea('')
+                        setNewPrice('')
                       }
                     }}
                   />
@@ -279,6 +313,27 @@ export function MatSizeSettings({ isSizeUsed, getClientsUsing, onDeleteAndReplac
                         setAdding(false)
                         setNewLabel('')
                         setNewArea('')
+                        setNewPrice('')
+                      }
+                    }}
+                  />
+                </td>
+                <td className="px-4 py-2">
+                  <input
+                    type="number"
+                    step="1"
+                    min="0"
+                    value={newPrice}
+                    onChange={(e) => setNewPrice(e.target.value)}
+                    placeholder="Цена ₽"
+                    className={`${inputClass} w-full text-right`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleAdd()
+                      if (e.key === 'Escape') {
+                        setAdding(false)
+                        setNewLabel('')
+                        setNewArea('')
+                        setNewPrice('')
                       }
                     }}
                   />
@@ -301,6 +356,7 @@ export function MatSizeSettings({ isSizeUsed, getClientsUsing, onDeleteAndReplac
                         setAdding(false)
                         setNewLabel('')
                         setNewArea('')
+                        setNewPrice('')
                       }}
                     >
                       <X className="h-4 w-4" />

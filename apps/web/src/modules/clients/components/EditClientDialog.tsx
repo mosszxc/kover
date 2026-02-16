@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Trash2, Loader2, ClipboardList, History, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Trash2, Loader2, ClipboardList, History, ChevronLeft, ChevronRight, Pause, Play, CalendarClock } from 'lucide-react'
 import { toast } from 'sonner'
+import { cn } from '@/shared/lib/utils'
+import { diffClient } from '@/shared/lib/clientDiff'
+import { useServiceLogStore } from '@/shared/stores/serviceLogStore'
 import { geocodeAddress } from '@/shared/lib/geocode'
 import { useSettingsStore } from '@/shared/stores/settingsStore'
 import { Button } from '@/shared/ui/button'
@@ -25,7 +28,9 @@ import {
 import { useIsMobile } from '@/shared/hooks/useIsMobile'
 import { useClientStore } from '../store'
 import type { Client } from '../types'
+import { isClientPaused, formatPausedUntil } from '../types'
 import { buildOriginalName, rowsToSpecs } from '../lib/formHelpers'
+import { PauseClientDialog } from './PauseClientDialog'
 import { useClientForm } from '../hooks/useClientForm'
 import { ClientForm, TOTAL_STEPS } from './ClientForm'
 import { ServiceHistory } from './ServiceHistory'
@@ -39,12 +44,14 @@ interface EditClientDialogProps {
 
 export function EditClientDialog({ client, open, onOpenChange, onDelete }: EditClientDialogProps) {
   const updateClient = useClientStore((s) => s.updateClient)
+  const addServiceLog = useServiceLogStore((s) => s.addEntry)
   const geocodeCity = useSettingsStore((s) => s.geocodeCity)
   const isMobile = useIsMobile()
 
   const [saving, setSaving] = useState(false)
   const [geocoding, setGeocoding] = useState(false)
   const [tab, setTab] = useState<'data' | 'history'>('data')
+  const [pauseDialogOpen, setPauseDialogOpen] = useState(false)
   const [wizardStep, setWizardStep] = useState(0)
   const form = useClientForm()
 
@@ -64,6 +71,8 @@ export function EditClientDialog({ client, open, onOpenChange, onDelete }: EditC
         notes: client.notes,
         workingHoursStart: client.workingHoursStart,
         workingHoursEnd: client.workingHoursEnd,
+        contactName: client.contactName,
+        contactPhone: client.contactPhone,
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -123,11 +132,22 @@ export function EditClientDialog({ client, open, onOpenChange, onDelete }: EditC
       notes: form.notes.trim(),
       workingHoursStart: form.workingHoursStart || null,
       workingHoursEnd: form.workingHoursEnd || null,
+      contactName: form.contactName.trim() || null,
+      contactPhone: form.contactPhone.trim() || null,
       originalName: buildOriginalName(form.name, form.address, form.mats),
       ...(lat != null && lng != null ? { lat, lng } : {}),
     }
 
     updateClient(client.id, data)
+
+    const { scheduleChanges, profileChanges } = diffClient(client, data)
+    if (scheduleChanges.length > 0) {
+      addServiceLog({ clientId: client.id, type: 'schedule_changed', details: scheduleChanges.join('; ') })
+    }
+    if (profileChanges.length > 0) {
+      addServiceLog({ clientId: client.id, type: 'profile_changed', details: profileChanges.join('; ') })
+    }
+
     toast.success(`Клиент "${form.name.trim()}" сохранён`)
     setSaving(false)
     onOpenChange(false)
@@ -164,9 +184,51 @@ export function EditClientDialog({ client, open, onOpenChange, onDelete }: EditC
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[560px]">
         <DialogHeader>
-          <DialogTitle className="text-lg">
-            Редактирование: {client.name}
-          </DialogTitle>
+          <div className="flex items-center gap-2">
+            <DialogTitle className="text-lg">
+              Редактирование: {client.name}
+            </DialogTitle>
+            {(() => {
+              const paused = isClientPaused(client)
+              return (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!paused) {
+                      setPauseDialogOpen(true)
+                    } else {
+                      updateClient(client.id, { isActive: true, pausedUntil: null })
+                      toast.success('Клиент активирован', { duration: 2000 })
+                    }
+                  }}
+                  className={cn(
+                    'inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold transition-colors',
+                    !paused
+                      ? 'bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30'
+                      : 'bg-amber-600/20 text-amber-400 hover:bg-amber-600/30',
+                  )}
+                  aria-label={!paused ? 'Поставить на паузу' : 'Активировать'}
+                >
+                  {!paused ? (
+                    <>
+                      <Pause className="size-3" />
+                      Активен
+                    </>
+                  ) : client.pausedUntil ? (
+                    <>
+                      <CalendarClock className="size-3" />
+                      До {formatPausedUntil(client.pausedUntil)}
+                    </>
+                  ) : (
+                    <>
+                      <Play className="size-3" />
+                      На паузе
+                    </>
+                  )}
+                </button>
+              )
+            })()}
+          </div>
           <div className="flex gap-1 pt-2">
             <button
               type="button"
@@ -282,6 +344,22 @@ export function EditClientDialog({ client, open, onOpenChange, onDelete }: EditC
           )}
         </DialogFooter>
       </DialogContent>
+
+      <PauseClientDialog
+        open={pauseDialogOpen}
+        onOpenChange={(v) => { if (!v) setPauseDialogOpen(false) }}
+        clientName={client.name}
+        onPause={(pausedUntil) => {
+          updateClient(client.id, { isActive: false, pausedUntil })
+          setPauseDialogOpen(false)
+          toast.success(
+            pausedUntil
+              ? `Клиент на паузе до ${formatPausedUntil(pausedUntil)}`
+              : 'Клиент поставлен на паузу',
+            { duration: 2000 },
+          )
+        }}
+      />
     </Dialog>
   )
 }

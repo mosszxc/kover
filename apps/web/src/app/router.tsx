@@ -6,6 +6,7 @@ import { ClientsPage } from "@/pages/ClientsPage"
 import { DriversPage } from "@/pages/DriversPage"
 import { SettingsPage } from "@/pages/SettingsPage"
 import { MatSizesPage } from "@/pages/MatSizesPage"
+import { InventoryPage } from "@/pages/InventoryPage"
 import { LoadingFallback } from "@/shared/components/LoadingFallback"
 
 const ImportPage = lazy(() =>
@@ -22,6 +23,9 @@ const DatabasePage = lazy(() =>
 )
 const GuidePage = lazy(() =>
   import("@/pages/GuidePage").then((m) => ({ default: m.GuidePage })),
+)
+const BriefingPage = lazy(() =>
+  import("@/pages/BriefingPage").then((m) => ({ default: m.BriefingPage })),
 )
 
 function LazyPage({ children }: { children: React.ReactNode }) {
@@ -47,6 +51,10 @@ export const router = createBrowserRouter([
           {
             path: "/mat-sizes",
             element: <MatSizesPage />,
+          },
+          {
+            path: "/inventory",
+            element: <InventoryPage />,
           },
           {
             path: "/settings",
@@ -81,6 +89,14 @@ export const router = createBrowserRouter([
             element: (
               <LazyPage>
                 <DatabasePage />
+              </LazyPage>
+            ),
+          },
+          {
+            path: "/briefing",
+            element: (
+              <LazyPage>
+                <BriefingPage />
               </LazyPage>
             ),
           },

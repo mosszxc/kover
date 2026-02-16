@@ -20,11 +20,13 @@ export const matSizesAdapter: SyncAdapter<MatSizeConfig, Insert<'mat_sizes'>> = 
     id: local.id,
     label: local.label,
     area: local.area,
+    rental_price: local.rentalPrice,
   }),
   toLocal: (remote) => ({
     id: remote.id!,
     label: remote.label!,
     area: remote.area!,
+    rentalPrice: remote.rental_price ?? 0,
   }),
 }
 
@@ -117,10 +119,11 @@ export const changelogAdapter: SyncAdapter<ChangeLogEntry, Insert<'changelog'>> 
 export interface ServiceLogRemote {
   id: string
   client_id: string
-  day: number
+  day: number | null
   type: string
   driver_id?: string | null
   target_day?: number | null
+  details?: string | null
   created_at?: string
 }
 
@@ -129,19 +132,21 @@ export const serviceLogAdapter: SyncAdapter<ServiceLogEntry, Insert<'service_log
   toRemote: (local) => ({
     id: local.id,
     client_id: local.clientId,
-    day: local.day,
+    day: local.day ?? null,
     type: local.type,
     driver_id: null,
     target_day: local.targetDay ?? null,
+    details: local.details ?? null,
     created_at: local.timestamp,
   }),
   toLocal: (remote) => ({
     id: remote.id!,
     clientId: remote.client_id!,
-    day: remote.day! as DayOfWeek,
+    day: remote.day != null ? (remote.day as DayOfWeek) : undefined,
     type: remote.type! as ServiceLogEntry['type'],
     driverName: undefined,
     targetDay: (remote.target_day as DayOfWeek) ?? undefined,
+    details: remote.details ?? undefined,
     timestamp: remote.created_at ?? new Date().toISOString(),
   }),
 }

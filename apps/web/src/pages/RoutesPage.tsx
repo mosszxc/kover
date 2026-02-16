@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
-import { DaySwitcher, RouteDashboard, RouteSearch, StopList, AddStopDialog, useRouteStore, PrintButton, DriverFilter, BulkAssignDriverDialog, DistributeDriversDialog, isStopSkipped } from '@/modules/routes'
+import { DaySwitcher, RouteDashboard, RouteSearch, StopList, AddStopDialog, useRouteStore, PrintButton, DriverFilter, BulkAssignDriverDialog, DistributeDriversDialog, isStopSkipped, ServiceReportDialog } from '@/modules/routes'
 import { useClientStore, EditClientDialog } from '@/modules/clients'
 import type { Client } from '@/modules/clients'
 import { useDriverStore } from '@/modules/drivers'
 import { PrintSheet } from '@/modules/print'
 import { OptimizeRouteDialog } from '@/modules/map'
+import { useClientPaymentStatus } from '@/modules/payments'
 
 const EMPTY_STOPS: never[] = []
 
@@ -12,6 +13,7 @@ export function RoutesPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [driverFilter, setDriverFilter] = useState<string | 'unassigned' | null>(null)
   const [editingClient, setEditingClient] = useState<Client | null>(null)
+  const [reportClient, setReportClient] = useState<Client | null>(null)
   const clients = useClientStore((s) => s.clients)
   const allDrivers = useDriverStore((s) => s.drivers)
   const selectedDay = useRouteStore((s) => s.selectedDay)
@@ -31,6 +33,15 @@ export function RoutesPage() {
     [stops, activeClientIds],
   )
 
+  const paymentStatusRaw = useClientPaymentStatus()
+  const paymentStatusMap = useMemo(() => {
+    const map = new Map<string, { status: 'paid' | 'partial' | 'overdue' | 'pending'; debt: number }>()
+    for (const [clientId, info] of paymentStatusRaw) {
+      map.set(clientId, { status: info.status, debt: info.debt })
+    }
+    return map
+  }, [paymentStatusRaw])
+
   return (
     <div>
       <div className="space-y-4 print:hidden">
@@ -48,7 +59,7 @@ export function RoutesPage() {
           <DistributeDriversDialog drivers={driverOptions} clients={clients} />
         </div>
         <RouteSearch value={searchQuery} onChange={setSearchQuery} />
-        <StopList searchQuery={searchQuery} drivers={driverOptions} driverFilter={driverFilter} onEditClient={setEditingClient} />
+        <StopList searchQuery={searchQuery} drivers={driverOptions} driverFilter={driverFilter} onEditClient={setEditingClient} paymentStatusMap={paymentStatusMap} onServiceReport={setReportClient} />
         <AddStopDialog clients={clients} />
       </div>
       <PrintSheet stops={activeStops} clients={clients} selectedDay={selectedDay} drivers={driverOptions} />
@@ -57,6 +68,16 @@ export function RoutesPage() {
           client={editingClient}
           open={!!editingClient}
           onOpenChange={(open) => { if (!open) setEditingClient(null) }}
+        />
+      )}
+      {reportClient && (
+        <ServiceReportDialog
+          open={!!reportClient}
+          onOpenChange={(open) => { if (!open) setReportClient(null) }}
+          clientId={reportClient.id}
+          clientName={reportClient.originalName}
+          mats={reportClient.mats}
+          day={selectedDay}
         />
       )}
     </div>

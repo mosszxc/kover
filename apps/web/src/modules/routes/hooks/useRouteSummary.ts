@@ -10,6 +10,8 @@ export interface RouteSummary {
   totalMats: number
   matsBySize: Partial<Record<string, number>>
   totalArea: number
+  totalCost: number
+  costBySize: Partial<Record<string, number>>
 }
 
 export function useRouteSummary(): RouteSummary {
@@ -21,15 +23,18 @@ export function useRouteSummary(): RouteSummary {
   return useMemo(() => {
     const dayRoute = routes.find((r) => r.day === selectedDay)
     if (!dayRoute) {
-      return { stopCount: 0, skippedCount: 0, totalMats: 0, matsBySize: {}, totalArea: 0 }
+      return { stopCount: 0, skippedCount: 0, totalMats: 0, matsBySize: {}, totalArea: 0, totalCost: 0, costBySize: {} }
     }
 
     const clientMap = new Map(clients.map((c) => [c.id, c]))
     const areaMap = Object.fromEntries(sizes.map((s) => [s.id, s.area]))
+    const priceMap = Object.fromEntries(sizes.map((s) => [s.id, s.rentalPrice]))
 
     const matsBySize: Partial<Record<string, number>> = {}
+    const costBySize: Partial<Record<string, number>> = {}
     let totalArea = 0
     let totalMats = 0
+    let totalCost = 0
     let activeStopCount = 0
     let skippedCount = 0
 
@@ -49,6 +54,9 @@ export function useRouteSummary(): RouteSummary {
         matsBySize[mat.size] = (matsBySize[mat.size] ?? 0) + qty
         totalMats += qty
         totalArea += qty * (areaMap[mat.size] ?? 0)
+        const sizeCost = qty * (priceMap[mat.size] ?? 0)
+        costBySize[mat.size] = (costBySize[mat.size] ?? 0) + sizeCost
+        totalCost += sizeCost
       }
     }
 
@@ -58,6 +66,8 @@ export function useRouteSummary(): RouteSummary {
       totalMats,
       matsBySize,
       totalArea: Math.round(totalArea * 100) / 100,
+      totalCost: Math.round(totalCost * 100) / 100,
+      costBySize,
     }
   }, [selectedDay, routes, clients, sizes])
 }

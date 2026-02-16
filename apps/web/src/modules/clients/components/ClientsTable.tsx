@@ -19,7 +19,14 @@ import type { DayOfWeek } from '@/shared/types'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 import { MAT_SIZE_STYLES } from '@/shared/constants'
 import type { MatSize } from '@/shared/types'
-import { ClientsFilters, type StatusFilter } from './ClientsFilters'
+import { ClientsFilters, type StatusFilter, type PaymentFilter } from './ClientsFilters'
+import { Banknote } from 'lucide-react'
+import { useCostSettingsStore } from '@/shared/stores/costSettingsStore'
+
+export interface PaymentInfo {
+  status: 'paid' | 'partial' | 'overdue' | 'pending'
+  debt: number
+}
 
 interface ClientsTableProps {
   onRowClick?: (client: Client) => void
@@ -27,11 +34,13 @@ interface ClientsTableProps {
   onToggleActive?: (client: Client) => void
   onPauseClient?: (client: Client, pausedUntil: string | null) => void
   anomalyIds?: Set<string>
+  paymentStatusMap?: Map<string, PaymentInfo>
+  onRecordPayment?: (client: Client) => void
 }
 
-type SortField = 'name' | 'address' | 'mats' | 'area' | 'frequency' | 'days'
+type SortField = 'name' | 'address' | 'mats' | 'area' | 'cost' | 'revenue' | 'margin' | 'frequency' | 'days'
 
-export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPauseClient, anomalyIds }: ClientsTableProps) {
+export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPauseClient, anomalyIds, paymentStatusMap, onRecordPayment }: ClientsTableProps) {
   const clients = useClientStore((s) => s.clients)
   const updateClient = useClientStore((s) => s.updateClient)
   const sizes = useMatSizeStore((s) => s.sizes)
@@ -47,6 +56,17 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
     () => Object.fromEntries(sizes.map((s) => [s.id, s.label])),
     [sizes],
   )
+  const priceMap = useMemo(
+    () => Object.fromEntries(sizes.map((s) => [s.id, s.rentalPrice])),
+    [sizes],
+  )
+  const hasPrices = useMemo(
+    () => sizes.some((s) => s.rentalPrice > 0),
+    [sizes],
+  )
+  const laundryCostPerSqm = useCostSettingsStore((s) => s.laundryCostPerSqm)
+  const logisticsCostPerStop = useCostSettingsStore((s) => s.logisticsCostPerStop)
+  const hasCostSettings = laundryCostPerSqm > 0 || logisticsCostPerStop > 0
 
   function groupMats(client: Client) {
     const grouped = new Map<string, number>()
@@ -60,20 +80,61 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
     return client.mats.reduce((sum, m) => m.quantity * (areaMap[m.size] ?? 0) + sum, 0)
   }
 
-  const columns = useMemo<ColumnDef<Client>[]>(() => [
-    { accessorKey: 'name', header: 'Название' },
-    { accessorKey: 'address', header: 'Адрес' },
-    { id: 'mats', header: 'Коврики', accessorFn: (row) => row.mats.reduce((sum, m) => sum + m.quantity, 0) },
-    { id: 'area', header: 'Метраж', accessorFn: (row) => getClientArea(row) },
-    { accessorKey: 'frequency', header: 'Частота' },
-    { id: 'days', header: 'Дни', accessorFn: (row) => row.days.length },
-    { accessorKey: 'isActive', header: 'Статус' },
-  ], [getClientArea])
+  function getClientCost(client: Client): number {
+    return client.mats.reduce((sum, m) => sum + m.quantity * (priceMap[m.size] ?? 0), 0)
+  }
+
+  const WEEKS_PER_MONTH = 4.33
+
+  function getClientMonthlyRevenue(client: Client): number {
+    const costPerVisit = getClientCost(client)
+    return Math.round(costPerVisit * client.frequency * WEEKS_PER_MONTH * 100) / 100
+  }
+
+  function getClientMonthlyCostOfService(client: Client): number {
+    const area = getClientArea(client)
+    const visitsPerMonth = client.frequency * WEEKS_PER_MONTH
+    const laundryCost = area * laundryCostPerSqm * visitsPerMonth
+    const logisticsCost = logisticsCostPerStop * visitsPerMonth
+    return Math.round((laundryCost + logisticsCost) * 100) / 100
+  }
+
+  function getClientMargin(client: Client): number {
+    return Math.round((getClientMonthlyRevenue(client) - getClientMonthlyCostOfService(client)) * 100) / 100
+  }
+
+  const columns = useMemo<ColumnDef<Client>[]>(() => {
+    const cols: ColumnDef<Client>[] = [
+      { accessorKey: 'name', header: 'Название' },
+      { accessorKey: 'address', header: 'Адрес' },
+      { id: 'mats', header: 'Коврики', accessorFn: (row) => row.mats.reduce((sum, m) => sum + m.quantity, 0) },
+      { id: 'area', header: 'Метраж', accessorFn: (row) => getClientArea(row) },
+    ]
+    if (hasPrices) {
+      cols.push(
+        { id: 'cost', header: 'Стоимость', accessorFn: (row) => getClientCost(row) },
+        { id: 'revenue', header: 'Выручка/мес', accessorFn: (row) => getClientMonthlyRevenue(row) },
+      )
+      if (hasCostSettings) {
+        cols.push(
+          { id: 'margin', header: 'Маржа/мес', accessorFn: (row) => getClientMargin(row) },
+        )
+      }
+    }
+    cols.push(
+      { accessorKey: 'frequency', header: 'Частота' },
+      { id: 'days', header: 'Дни', accessorFn: (row) => row.days.length },
+      { accessorKey: 'isActive', header: 'Статус' },
+    )
+    return cols
+  }, [getClientArea, getClientCost, getClientMonthlyRevenue, getClientMargin, hasPrices, hasCostSettings])
 
   const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>([])
   const [selectedFrequency, setSelectedFrequency] = useState<number | null>(null)
   const [selectedMatSize, setSelectedMatSize] = useState<string | null>(null)
   const [selectedStatus, setSelectedStatus] = useState<StatusFilter>('all')
+  const [selectedPayment, setSelectedPayment] = useState<PaymentFilter>('all')
+  const hasPayments = (paymentStatusMap?.size ?? 0) > 0
 
   const filteredClients = useMemo(() => {
     let result = clients
@@ -95,8 +156,17 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
         c.mats.some((m) => m.size === selectedMatSize),
       )
     }
+    if (selectedPayment !== 'all' && paymentStatusMap) {
+      result = result.filter((c) => {
+        const info = paymentStatusMap.get(c.id)
+        if (selectedPayment === 'paid') return info?.status === 'paid'
+        if (selectedPayment === 'unpaid') return !info || info.status !== 'paid'
+        if (selectedPayment === 'overdue') return info?.status === 'overdue'
+        return true
+      })
+    }
     return result
-  }, [clients, selectedDays, selectedFrequency, selectedMatSize, selectedStatus])
+  }, [clients, selectedDays, selectedFrequency, selectedMatSize, selectedStatus, selectedPayment, paymentStatusMap])
 
   const table = useReactTable({
     data: filteredClients,
@@ -136,6 +206,11 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
   const sortButtons: { field: SortField; label: string }[] = [
     { field: 'name', label: 'Имя' },
     { field: 'area', label: 'Метраж' },
+    ...(hasPrices ? [
+      { field: 'cost' as SortField, label: 'Стоимость' },
+      { field: 'revenue' as SortField, label: 'Выручка/мес' },
+      ...(hasCostSettings ? [{ field: 'margin' as SortField, label: 'Маржа' }] : []),
+    ] : []),
     { field: 'frequency', label: 'Частота' },
     { field: 'days', label: 'Дни' },
   ]
@@ -164,6 +239,9 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
         onMatSizeChange={setSelectedMatSize}
         selectedStatus={selectedStatus}
         onStatusChange={setSelectedStatus}
+        selectedPayment={selectedPayment}
+        onPaymentChange={setSelectedPayment}
+        hasPayments={hasPayments}
       />
 
       <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -193,6 +271,10 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
           const isActive = !paused
           const entries = groupMats(client)
           const area = getClientArea(client)
+          const cost = hasPrices ? getClientCost(client) : 0
+          const revenue = hasPrices ? getClientMonthlyRevenue(client) : 0
+          const margin = hasPrices && hasCostSettings ? getClientMargin(client) : null
+          const paymentInfo = paymentStatusMap?.get(client.id)
 
           return (
             <div
@@ -213,6 +295,17 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
               <div className="flex items-center justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-2">
                   <span className="truncate font-medium text-foreground">{client.name}</span>
+                  {paymentInfo && (
+                    <span
+                      className={cn('inline-block size-2 shrink-0 rounded-full', {
+                        'bg-emerald-400': paymentInfo.status === 'paid',
+                        'bg-amber-400': paymentInfo.status === 'partial',
+                        'bg-red-400': paymentInfo.status === 'overdue',
+                        'bg-muted-foreground': paymentInfo.status === 'pending',
+                      })}
+                      title={`Оплата: ${paymentInfo.status === 'paid' ? 'Оплачен' : paymentInfo.status === 'partial' ? 'Частично' : paymentInfo.status === 'overdue' ? 'Просрочен' : 'Ожидает'}${paymentInfo.debt > 0 ? ` (долг: ${paymentInfo.debt.toLocaleString('ru-RU')} ₽)` : ''}`}
+                    />
+                  )}
                   <span className="hidden text-muted-foreground sm:inline">·</span>
                   <span className="hidden min-w-0 items-center gap-1 text-sm text-muted-foreground sm:inline-flex">
                     <span className={cn('truncate', isAnomaly && 'text-amber-400', hasNoCoords && !isAnomaly && 'text-red-400')}>{client.address}</span>
@@ -294,6 +387,22 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                   </span>
                   <span className="text-muted-foreground">·</span>
                   <span>{area.toFixed(1)}{'\u00a0'}м²</span>
+                  {hasPrices && cost > 0 && (
+                    <>
+                      <span className="text-muted-foreground">·</span>
+                      <span className="text-emerald-400">{cost.toLocaleString('ru-RU')}{'\u00a0'}₽</span>
+                      <span className="text-muted-foreground">·</span>
+                      <span className="text-emerald-400 font-medium">{revenue.toLocaleString('ru-RU')}{'\u00a0'}₽/мес</span>
+                    </>
+                  )}
+                  {margin !== null && (
+                    <>
+                      <span className="text-muted-foreground">·</span>
+                      <span className={cn('font-medium', margin > 0 ? 'text-emerald-400' : margin < 0 ? 'text-red-400' : 'text-muted-foreground')}>
+                        {margin > 0 ? '+' : ''}{margin.toLocaleString('ru-RU')}{'\u00a0'}₽
+                      </span>
+                    </>
+                  )}
                   <span className="text-muted-foreground">·</span>
                   <span>{client.frequency}×/нед</span>
                   {formatWorkingHours(client) && (
@@ -306,6 +415,25 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                     </>
                   )}
                 </div>
+                <div className="flex shrink-0 items-center gap-1.5">
+                {paymentInfo && paymentInfo.status !== 'paid' && onRecordPayment && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onRecordPayment(client)
+                    }}
+                    className={cn(
+                      'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold transition-colors',
+                      paymentInfo.status === 'overdue'
+                        ? 'bg-red-600/20 text-red-400 hover:bg-red-600/30'
+                        : 'bg-amber-600/20 text-amber-400 hover:bg-amber-600/30',
+                    )}
+                  >
+                    <Banknote className="size-3" />
+                    {paymentInfo.debt > 0 ? `${paymentInfo.debt.toLocaleString('ru-RU')} ₽` : 'Оплатить'}
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={(e) => {
@@ -348,15 +476,39 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                     </>
                   )}
                 </button>
+                </div>
               </div>
             </div>
           )
         })}
       </div>
 
-      <p className="text-sm text-muted-foreground">
-        Показано {table.getFilteredRowModel().rows.length} из {clients.length} клиентов
-      </p>
+      <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <span>Показано {table.getFilteredRowModel().rows.length} из {clients.length} клиентов</span>
+        {hasPrices && (
+          <div className="flex items-center gap-3">
+            <span className="font-medium text-emerald-400">
+              Выручка/мес: {(Math.round(
+                table.getFilteredRowModel().rows.reduce(
+                  (sum, row) => sum + getClientMonthlyRevenue(row.original), 0
+                ) * 100
+              ) / 100).toLocaleString('ru-RU')}{'\u00a0'}₽
+            </span>
+            {hasCostSettings && (() => {
+              const totalMargin = Math.round(
+                table.getFilteredRowModel().rows.reduce(
+                  (sum, row) => sum + getClientMargin(row.original), 0
+                ) * 100
+              ) / 100
+              return (
+                <span className={cn('font-medium', totalMargin > 0 ? 'text-emerald-400' : totalMargin < 0 ? 'text-red-400' : 'text-muted-foreground')}>
+                  Маржа: {totalMargin > 0 ? '+' : ''}{totalMargin.toLocaleString('ru-RU')}{'\u00a0'}₽
+                </span>
+              )
+            })()}
+          </div>
+        )}
+      </div>
 
       {pauseDialogClient && (
         <PauseClientDialog

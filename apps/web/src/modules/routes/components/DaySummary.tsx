@@ -1,4 +1,4 @@
-import { MapPin, Ruler, LayoutGrid } from 'lucide-react'
+import { MapPin, Ruler, LayoutGrid, Banknote } from 'lucide-react'
 import { useRouteSummary } from '../hooks/useRouteSummary'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 
@@ -19,7 +19,7 @@ export function DaySummary() {
   return (
     <div className="space-y-3">
       {/* Ключевые метрики */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <SummaryCard
           icon={<MapPin className="h-4 w-4 text-blue-400" />}
           value={summary.stopCount}
@@ -35,6 +35,13 @@ export function DaySummary() {
           value={`${summary.totalArea} м²`}
           label="Метраж"
         />
+        {summary.totalCost > 0 && (
+          <SummaryCard
+            icon={<Banknote className="h-4 w-4 text-green-400" />}
+            value={`${summary.totalCost} ₽`}
+            label="Стоимость"
+          />
+        )}
       </div>
 
       {/* Коврики по размерам */}
@@ -49,6 +56,11 @@ export function DaySummary() {
                 {summary.matsBySize[s.id]}
               </span>
               <span className="text-sm text-muted-foreground">{s.label}</span>
+              {(summary.costBySize[s.id] ?? 0) > 0 && (
+                <span className="text-xs tabular-nums text-green-400">
+                  {summary.costBySize[s.id]} ₽
+                </span>
+              )}
             </div>
           ))}
         </div>

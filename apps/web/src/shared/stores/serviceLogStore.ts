@@ -11,21 +11,27 @@ export type ServiceEventType =
   | 'paused'
   | 'unpaused'
   | 'skipped'
+  | 'schedule_changed'
+  | 'profile_changed'
+  | 'client_created'
+  | 'client_deleted'
 
 export interface ServiceLogEntry {
   id: string
   clientId: string
   timestamp: string
-  day: DayOfWeek
+  day?: DayOfWeek
   type: ServiceEventType
   driverName?: string
   /** For transfers: target day */
   targetDay?: DayOfWeek
+  /** For profile/schedule changes: human-readable diff */
+  details?: string
 }
 
 interface ServiceLogState {
   entries: ServiceLogEntry[]
-  addEntry: (entry: Omit<ServiceLogEntry, 'id' | 'timestamp'>) => void
+  addEntry: (entry: Omit<ServiceLogEntry, 'id' | 'timestamp'> & { day?: DayOfWeek }) => void
   getClientHistory: (clientId: string) => ServiceLogEntry[]
 }
 
