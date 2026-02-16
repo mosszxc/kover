@@ -3,6 +3,7 @@ import { ClientsTable, EditClientDialog, AddClientDialog, useClientStore, BatchG
 import type { PaymentInfo } from '@/modules/clients'
 import { useRouteStore } from '@/modules/routes'
 import { usePaymentStore, useClientPaymentStatus, RecordPaymentDialog, getCurrentPeriod } from '@/modules/payments'
+import { toast } from 'sonner'
 import { InvoiceSettingsDialog, GenerateInvoicesDialog } from '@/modules/invoices'
 import type { Client } from '@/modules/clients'
 import type { DayOfWeek } from '@/shared/types'
@@ -33,6 +34,7 @@ export function ClientsPage() {
   const sizes = useMatSizeStore((s) => s.sizes)
   const payments = usePaymentStore((s) => s.payments)
   const addPayment = usePaymentStore((s) => s.addPayment)
+  const updatePayment = usePaymentStore((s) => s.updatePayment)
 
   const priceMap = useMemo(
     () => Object.fromEntries(sizes.map((s) => [s.id, s.rentalPrice])),
@@ -137,6 +139,20 @@ export function ClientsPage() {
 
   const paymentClientRevenue = paymentClient ? getMonthlyRevenue(paymentClient, priceMap) : 0
 
+  const handleQuickPay = useCallback(
+    (client: Client) => {
+      const currentPeriod = getCurrentPeriod()
+      const payment = payments.find((p) => p.clientId === client.id && p.period === currentPeriod)
+      if (!payment) return
+      updatePayment(payment.id, {
+        paidAmount: payment.expectedAmount,
+        paidAt: new Date().toISOString(),
+      })
+      toast.success(`${client.name}: оплата ${payment.expectedAmount.toLocaleString('ru-RU')} ₽`, { duration: 2000 })
+    },
+    [payments, updatePayment],
+  )
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -158,6 +174,7 @@ export function ClientsPage() {
         anomalyIds={anomalyIds}
         paymentStatusMap={hasPrices ? paymentInfoMap : undefined}
         onRecordPayment={hasPrices ? setPaymentClient : undefined}
+        onQuickPay={hasPrices ? handleQuickPay : undefined}
       />
       {selectedClient && (
         <EditClientDialog
