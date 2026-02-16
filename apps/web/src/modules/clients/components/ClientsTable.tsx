@@ -29,7 +29,7 @@ interface ClientsTableProps {
   anomalyIds?: Set<string>
 }
 
-type SortField = 'name' | 'address' | 'mats' | 'area' | 'frequency' | 'days'
+type SortField = 'name' | 'address' | 'mats' | 'area' | 'cost' | 'frequency' | 'days'
 
 export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPauseClient, anomalyIds }: ClientsTableProps) {
   const clients = useClientStore((s) => s.clients)
@@ -47,6 +47,14 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
     () => Object.fromEntries(sizes.map((s) => [s.id, s.label])),
     [sizes],
   )
+  const priceMap = useMemo(
+    () => Object.fromEntries(sizes.map((s) => [s.id, s.rentalPrice])),
+    [sizes],
+  )
+  const hasPrices = useMemo(
+    () => sizes.some((s) => s.rentalPrice > 0),
+    [sizes],
+  )
 
   function groupMats(client: Client) {
     const grouped = new Map<string, number>()
@@ -60,15 +68,27 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
     return client.mats.reduce((sum, m) => m.quantity * (areaMap[m.size] ?? 0) + sum, 0)
   }
 
-  const columns = useMemo<ColumnDef<Client>[]>(() => [
-    { accessorKey: 'name', header: 'Название' },
-    { accessorKey: 'address', header: 'Адрес' },
-    { id: 'mats', header: 'Коврики', accessorFn: (row) => row.mats.reduce((sum, m) => sum + m.quantity, 0) },
-    { id: 'area', header: 'Метраж', accessorFn: (row) => getClientArea(row) },
-    { accessorKey: 'frequency', header: 'Частота' },
-    { id: 'days', header: 'Дни', accessorFn: (row) => row.days.length },
-    { accessorKey: 'isActive', header: 'Статус' },
-  ], [getClientArea])
+  function getClientCost(client: Client): number {
+    return client.mats.reduce((sum, m) => sum + m.quantity * (priceMap[m.size] ?? 0), 0)
+  }
+
+  const columns = useMemo<ColumnDef<Client>[]>(() => {
+    const cols: ColumnDef<Client>[] = [
+      { accessorKey: 'name', header: 'Название' },
+      { accessorKey: 'address', header: 'Адрес' },
+      { id: 'mats', header: 'Коврики', accessorFn: (row) => row.mats.reduce((sum, m) => sum + m.quantity, 0) },
+      { id: 'area', header: 'Метраж', accessorFn: (row) => getClientArea(row) },
+    ]
+    if (hasPrices) {
+      cols.push({ id: 'cost', header: 'Стоимость', accessorFn: (row) => getClientCost(row) })
+    }
+    cols.push(
+      { accessorKey: 'frequency', header: 'Частота' },
+      { id: 'days', header: 'Дни', accessorFn: (row) => row.days.length },
+      { accessorKey: 'isActive', header: 'Статус' },
+    )
+    return cols
+  }, [getClientArea, getClientCost, hasPrices])
 
   const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>([])
   const [selectedFrequency, setSelectedFrequency] = useState<number | null>(null)
@@ -136,6 +156,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
   const sortButtons: { field: SortField; label: string }[] = [
     { field: 'name', label: 'Имя' },
     { field: 'area', label: 'Метраж' },
+    ...(hasPrices ? [{ field: 'cost' as SortField, label: 'Стоимость' }] : []),
     { field: 'frequency', label: 'Частота' },
     { field: 'days', label: 'Дни' },
   ]
@@ -193,6 +214,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
           const isActive = !paused
           const entries = groupMats(client)
           const area = getClientArea(client)
+          const cost = hasPrices ? getClientCost(client) : 0
 
           return (
             <div
@@ -294,6 +316,12 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                   </span>
                   <span className="text-muted-foreground">·</span>
                   <span>{area.toFixed(1)}{'\u00a0'}м²</span>
+                  {hasPrices && cost > 0 && (
+                    <>
+                      <span className="text-muted-foreground">·</span>
+                      <span className="text-emerald-400">{cost.toLocaleString('ru-RU')}{'\u00a0'}₽</span>
+                    </>
+                  )}
                   <span className="text-muted-foreground">·</span>
                   <span>{client.frequency}×/нед</span>
                   {formatWorkingHours(client) && (
