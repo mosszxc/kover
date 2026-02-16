@@ -7,6 +7,7 @@ import { useVisibleDays } from '@/shared/hooks/useVisibleDays'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 
 export type StatusFilter = 'all' | 'active' | 'paused'
+export type PaymentFilter = 'all' | 'paid' | 'unpaid' | 'overdue'
 
 interface ClientsFiltersProps {
   selectedDays: DayOfWeek[]
@@ -17,12 +18,22 @@ interface ClientsFiltersProps {
   onMatSizeChange: (size: string | null) => void
   selectedStatus: StatusFilter
   onStatusChange: (status: StatusFilter) => void
+  selectedPayment?: PaymentFilter
+  onPaymentChange?: (payment: PaymentFilter) => void
+  hasPayments?: boolean
 }
 
 const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: 'all', label: 'Все' },
   { value: 'active', label: 'Активные' },
   { value: 'paused', label: 'На паузе' },
+]
+
+const PAYMENT_OPTIONS: { value: PaymentFilter; label: string }[] = [
+  { value: 'all', label: 'Все' },
+  { value: 'paid', label: 'Оплачен' },
+  { value: 'unpaid', label: 'Не оплачен' },
+  { value: 'overdue', label: 'Просрочен' },
 ]
 
 export function ClientsFilters({
@@ -34,6 +45,9 @@ export function ClientsFilters({
   onMatSizeChange,
   selectedStatus,
   onStatusChange,
+  selectedPayment = 'all',
+  onPaymentChange,
+  hasPayments = false,
 }: ClientsFiltersProps) {
   const visibleDays = useVisibleDays()
 
@@ -41,7 +55,8 @@ export function ClientsFilters({
     selectedDays.length > 0 ||
     selectedFrequency !== null ||
     selectedMatSize !== null ||
-    selectedStatus !== 'all'
+    selectedStatus !== 'all' ||
+    selectedPayment !== 'all'
 
   function toggleDay(day: DayOfWeek) {
     if (selectedDays.includes(day)) {
@@ -66,6 +81,7 @@ export function ClientsFilters({
     onFrequencyChange(null)
     onMatSizeChange(null)
     onStatusChange('all')
+    onPaymentChange?.('all')
   }
 
   return (
@@ -149,6 +165,28 @@ export function ClientsFilters({
           </button>
         ))}
       </div>
+
+      {/* Payment filter */}
+      {hasPayments && onPaymentChange && (
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs font-medium text-muted-foreground">Оплата:</span>
+          {PAYMENT_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => onPaymentChange(opt.value)}
+              className={cn(
+                'min-h-[44px] rounded-full px-3 py-1.5 text-sm font-medium transition-colors',
+                selectedPayment === opt.value
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+              )}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Reset button */}
       {hasFilters && (

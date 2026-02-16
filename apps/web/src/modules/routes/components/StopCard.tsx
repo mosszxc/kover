@@ -38,6 +38,11 @@ export interface DriverOption {
   workDays: DayOfWeek[]
 }
 
+export interface StopPaymentInfo {
+  status: 'paid' | 'partial' | 'overdue' | 'pending'
+  debt: number
+}
+
 interface StopCardProps {
   number: number
   client: Client
@@ -51,9 +56,10 @@ interface StopCardProps {
   isAnomaly?: boolean
   isMissingCoords?: boolean
   onEditClient?: (client: Client) => void
+  paymentInfo?: StopPaymentInfo
 }
 
-export function StopCard({ number, client, stopId, driverId, drivers, stopIndex, isFirst, isLast, isDndEnabled = true, isAnomaly = false, isMissingCoords = false, onEditClient }: StopCardProps) {
+export function StopCard({ number, client, stopId, driverId, drivers, stopIndex, isFirst, isLast, isDndEnabled = true, isAnomaly = false, isMissingCoords = false, onEditClient, paymentInfo }: StopCardProps) {
   const sizes = useMatSizeStore((s) => s.sizes)
   const areaMap = Object.fromEntries(sizes.map((s) => [s.id, s.area]))
   const labelMap = Object.fromEntries(sizes.map((s) => [s.id, s.label]))
@@ -134,6 +140,18 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
           <p className="truncate lg:whitespace-normal text-base text-foreground">
             {client.originalName}
           </p>
+          {paymentInfo && paymentInfo.status !== 'paid' && paymentInfo.status !== 'pending' && (
+            <span
+              className={cn(
+                'shrink-0 rounded px-1.5 py-0.5 text-xs font-semibold',
+                paymentInfo.status === 'overdue'
+                  ? 'bg-red-600/20 text-red-400'
+                  : 'bg-amber-600/20 text-amber-400',
+              )}
+            >
+              {paymentInfo.debt > 0 ? `${paymentInfo.debt.toLocaleString('ru-RU')} ₽` : paymentInfo.status === 'overdue' ? 'Долг' : 'Частично'}
+            </span>
+          )}
           {formatWorkingHours(client) && (
             <span className="ml-1 inline-flex shrink-0 items-center gap-0.5 text-xs text-muted-foreground">
               <Clock className="size-3" />

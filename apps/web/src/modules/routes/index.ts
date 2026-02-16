@@ -1,4 +1,5 @@
 export type { DayRoute, RouteStop } from './types'
+export type { StopPaymentInfo } from './components/StopCard'
 export { useRouteStore } from './store'
 export { isStopSkipped } from './utils'
 export { DaySwitcher } from './components/DaySwitcher'

@@ -5,6 +5,7 @@ import type { Client } from '@/modules/clients'
 import { useDriverStore } from '@/modules/drivers'
 import { PrintSheet } from '@/modules/print'
 import { OptimizeRouteDialog } from '@/modules/map'
+import { useClientPaymentStatus } from '@/modules/payments'
 
 const EMPTY_STOPS: never[] = []
 
@@ -31,6 +32,15 @@ export function RoutesPage() {
     [stops, activeClientIds],
   )
 
+  const paymentStatusRaw = useClientPaymentStatus()
+  const paymentStatusMap = useMemo(() => {
+    const map = new Map<string, { status: 'paid' | 'partial' | 'overdue' | 'pending'; debt: number }>()
+    for (const [clientId, info] of paymentStatusRaw) {
+      map.set(clientId, { status: info.status, debt: info.debt })
+    }
+    return map
+  }, [paymentStatusRaw])
+
   return (
     <div>
       <div className="space-y-4 print:hidden">
@@ -48,7 +58,7 @@ export function RoutesPage() {
           <DistributeDriversDialog drivers={driverOptions} clients={clients} />
         </div>
         <RouteSearch value={searchQuery} onChange={setSearchQuery} />
-        <StopList searchQuery={searchQuery} drivers={driverOptions} driverFilter={driverFilter} onEditClient={setEditingClient} />
+        <StopList searchQuery={searchQuery} drivers={driverOptions} driverFilter={driverFilter} onEditClient={setEditingClient} paymentStatusMap={paymentStatusMap} />
         <AddStopDialog clients={clients} />
       </div>
       <PrintSheet stops={activeStops} clients={clients} selectedDay={selectedDay} drivers={driverOptions} />
