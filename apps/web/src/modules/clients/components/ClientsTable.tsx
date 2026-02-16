@@ -11,8 +11,8 @@ import { Check, ChevronDown, ChevronUp, ChevronsUpDown, Search, AlertTriangle, P
 import { cn } from '@/shared/lib/utils'
 import { toast } from 'sonner'
 import { useClientStore } from '../store'
-import type { Client } from '../types'
-import { isClientPaused, formatPausedUntil, formatWorkingHours } from '../types'
+import type { Client, ClientCategory } from '../types'
+import { isClientPaused, formatPausedUntil, formatWorkingHours, CLIENT_CATEGORIES } from '../types'
 import { PauseClientDialog } from './PauseClientDialog'
 import { DAY_LABELS } from '@/shared/types'
 import type { DayOfWeek } from '@/shared/types'
@@ -138,6 +138,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
   const [selectedFrequency, setSelectedFrequency] = useState<number | null>(null)
   const [selectedMatSize, setSelectedMatSize] = useState<string | null>(null)
   const [selectedStatus, setSelectedStatus] = useState<StatusFilter>('all')
+  const [selectedCategory, setSelectedCategory] = useState<ClientCategory | null>(null)
   const [selectedPayment, setSelectedPayment] = useState<PaymentFilter>('all')
   const hasPayments = (paymentStatusMap?.size ?? 0) > 0
 
@@ -161,6 +162,9 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
         c.mats.some((m) => m.size === selectedMatSize),
       )
     }
+    if (selectedCategory !== null) {
+      result = result.filter((c) => c.category === selectedCategory)
+    }
     if (selectedPayment !== 'all' && paymentStatusMap) {
       result = result.filter((c) => {
         const info = paymentStatusMap.get(c.id)
@@ -171,7 +175,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
       })
     }
     return result
-  }, [clients, selectedDays, selectedFrequency, selectedMatSize, selectedStatus, selectedPayment, paymentStatusMap])
+  }, [clients, selectedDays, selectedFrequency, selectedMatSize, selectedStatus, selectedCategory, selectedPayment, paymentStatusMap])
 
   const table = useReactTable({
     data: filteredClients,
@@ -258,6 +262,8 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
         onMatSizeChange={setSelectedMatSize}
         selectedStatus={selectedStatus}
         onStatusChange={setSelectedStatus}
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
         selectedPayment={selectedPayment}
         onPaymentChange={setSelectedPayment}
         hasPayments={hasPayments}
@@ -327,6 +333,11 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
               <div className="flex items-center justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-2">
                   <span className="truncate font-medium text-foreground">{client.name}</span>
+                  {client.category && (
+                    <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+                      {CLIENT_CATEGORIES.find((c) => c.value === client.category)?.label}
+                    </span>
+                  )}
                   {paymentInfo && (
                     <span
                       className={cn('inline-block size-2 shrink-0 rounded-full', {
