@@ -36,6 +36,7 @@ export interface DriverOption {
   id: string
   name: string
   workDays: DayOfWeek[]
+  vehicleCapacity?: number | null
 }
 
 export interface StopPaymentInfo {
