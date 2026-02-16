@@ -92,6 +92,8 @@ export function RouteDashboard({ drivers }: RouteDashboardProps) {
               <span className="font-semibold tabular-nums text-amber-300">{unassigned.stopCount}</span>
               <span className="text-muted-foreground">/</span>
               <span className="tabular-nums text-muted-foreground">{unassigned.matCount} шт</span>
+              <span className="text-muted-foreground">/</span>
+              <span className="tabular-nums text-amber-400">{unassigned.totalArea} м²</span>
             </span>
           )}
           {assigned.map((item) => {
