@@ -1,4 +1,4 @@
-import { ChevronUp, ChevronDown, GripVertical, MapPinOff, Pencil, TriangleAlert, Clock, MoreHorizontal, ArrowRightLeft, X } from 'lucide-react'
+import { ChevronUp, ChevronDown, GripVertical, MapPinOff, Pencil, TriangleAlert, Clock, MoreHorizontal, ArrowRightLeft, X, ClipboardCheck } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -57,9 +57,10 @@ interface StopCardProps {
   isMissingCoords?: boolean
   onEditClient?: (client: Client) => void
   paymentInfo?: StopPaymentInfo
+  onServiceReport?: (client: Client) => void
 }
 
-export function StopCard({ number, client, stopId, driverId, drivers, stopIndex, isFirst, isLast, isDndEnabled = true, isAnomaly = false, isMissingCoords = false, onEditClient, paymentInfo }: StopCardProps) {
+export function StopCard({ number, client, stopId, driverId, drivers, stopIndex, isFirst, isLast, isDndEnabled = true, isAnomaly = false, isMissingCoords = false, onEditClient, paymentInfo, onServiceReport }: StopCardProps) {
   const sizes = useMatSizeStore((s) => s.sizes)
   const areaMap = Object.fromEntries(sizes.map((s) => [s.id, s.area]))
   const labelMap = Object.fromEntries(sizes.map((s) => [s.id, s.label]))
@@ -229,6 +230,12 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
             </DropdownMenuItem>
           )}
           {(!isFirst || !isLast) && <DropdownMenuSeparator />}
+          {onServiceReport && (
+            <DropdownMenuItem onClick={() => onServiceReport(client)}>
+              <ClipboardCheck className="size-4" />
+              Отчёт о визите
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem onClick={() => setTransferOpen(true)}>
             <ArrowRightLeft className="size-4" />
             Перенести в другой день
