@@ -7,7 +7,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { Check, ChevronDown, ChevronUp, ChevronsUpDown, Search, AlertTriangle, Pause, Play, MapPin, TriangleAlert, CalendarClock, Clock } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, ChevronsUpDown, Search, AlertTriangle, Pause, Play, MapPin, TriangleAlert, CalendarClock, Clock, Printer } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { toast } from 'sonner'
 import { useClientStore } from '../store'
@@ -21,6 +21,7 @@ import { MAT_SIZE_STYLES } from '@/shared/constants'
 import type { MatSize } from '@/shared/types'
 import { ClientsFilters, type StatusFilter, type PaymentFilter } from './ClientsFilters'
 import { Banknote } from 'lucide-react'
+import { ClientsPrintView } from './ClientsPrintView'
 import { useCostSettingsStore } from '@/shared/stores/costSettingsStore'
 
 export interface PaymentInfo {
@@ -220,9 +221,23 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
   ]
 
   const rows = table.getRowModel().rows
+  const finalFilteredClients = table.getFilteredRowModel().rows.map((r) => r.original)
+
+  const hasActiveFilters = selectedDays.length > 0 || selectedFrequency !== null || selectedMatSize !== null || selectedStatus !== 'all' || selectedPayment !== 'all' || globalFilter !== ''
+
+  function getPrintTitle(): string {
+    const parts: string[] = []
+    if (selectedPayment === 'overdue') parts.push('Должники')
+    else if (selectedPayment === 'unpaid') parts.push('Неоплаченные')
+    else if (selectedPayment === 'paid') parts.push('Оплаченные')
+    if (selectedStatus === 'paused') parts.push('На паузе')
+    else if (selectedStatus === 'active') parts.push('Активные')
+    return parts.length > 0 ? parts.join(' · ') : 'Список клиентов'
+  }
 
   return (
-    <div className="space-y-4">
+    <>
+    <div className="space-y-4 print:hidden">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <input
@@ -248,7 +263,8 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
         hasPayments={hasPayments}
       />
 
-      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
+      <div className="flex items-center gap-1">
         <span>Сортировка:</span>
         {sortButtons.map(({ field, label }) => (
           <button
@@ -264,6 +280,18 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
             {sortIcon(field)}
           </button>
         ))}
+      </div>
+      {hasActiveFilters && (
+        <button
+          type="button"
+          onClick={() => window.print()}
+          className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          title="Печать отфильтрованного списка"
+        >
+          <Printer className="size-3.5" />
+          Печать
+        </button>
+      )}
       </div>
 
       <div className="space-y-2">
@@ -551,5 +579,11 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
         />
       )}
     </div>
+    <ClientsPrintView
+      clients={finalFilteredClients}
+      paymentInfoMap={paymentStatusMap}
+      title={getPrintTitle()}
+    />
+    </>
   )
 }
