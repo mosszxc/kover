@@ -5,6 +5,8 @@ import type { DayOfWeek } from '@/shared/types'
 import { FREQUENCY_OPTIONS } from '@/shared/constants'
 import { useVisibleDays } from '@/shared/hooks/useVisibleDays'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
+import { CLIENT_CATEGORIES } from '../types'
+import type { ClientCategory } from '../types'
 
 export type StatusFilter = 'all' | 'active' | 'paused'
 export type PaymentFilter = 'all' | 'paid' | 'unpaid' | 'overdue'
@@ -18,6 +20,8 @@ interface ClientsFiltersProps {
   onMatSizeChange: (size: string | null) => void
   selectedStatus: StatusFilter
   onStatusChange: (status: StatusFilter) => void
+  selectedCategory: ClientCategory | null
+  onCategoryChange: (category: ClientCategory | null) => void
   selectedPayment?: PaymentFilter
   onPaymentChange?: (payment: PaymentFilter) => void
   hasPayments?: boolean
@@ -45,6 +49,8 @@ export function ClientsFilters({
   onMatSizeChange,
   selectedStatus,
   onStatusChange,
+  selectedCategory,
+  onCategoryChange,
   selectedPayment = 'all',
   onPaymentChange,
   hasPayments = false,
@@ -56,6 +62,7 @@ export function ClientsFilters({
     selectedFrequency !== null ||
     selectedMatSize !== null ||
     selectedStatus !== 'all' ||
+    selectedCategory !== null ||
     selectedPayment !== 'all'
 
   function toggleDay(day: DayOfWeek) {
@@ -81,6 +88,7 @@ export function ClientsFilters({
     onFrequencyChange(null)
     onMatSizeChange(null)
     onStatusChange('all')
+    onCategoryChange(null)
     onPaymentChange?.('all')
   }
 
@@ -162,6 +170,26 @@ export function ClientsFilters({
             )}
           >
             {opt.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Category filter */}
+      <div className="flex items-center gap-1.5">
+        <span className="text-xs font-medium text-muted-foreground">Категория:</span>
+        {CLIENT_CATEGORIES.map((cat) => (
+          <button
+            key={cat.value}
+            type="button"
+            onClick={() => onCategoryChange(selectedCategory === cat.value ? null : cat.value)}
+            className={cn(
+              'min-h-[44px] rounded-full px-3 py-1.5 text-sm font-medium transition-colors',
+              selectedCategory === cat.value
+                ? 'bg-blue-600 text-white'
+                : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+            )}
+          >
+            {cat.label}
           </button>
         ))}
       </div>

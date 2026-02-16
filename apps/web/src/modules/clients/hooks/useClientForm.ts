@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import type { DayOfWeek } from '@/shared/types'
-import type { MatSpec } from '../types'
+import type { MatSpec, ClientCategory } from '../types'
 import {
   emptyMat,
   specsToRows,
@@ -22,6 +22,10 @@ interface PopulateOptions {
   workingHoursEnd?: string | null
   contactName?: string | null
   contactPhone?: string | null
+  customMonthlyPrice?: number | null
+  category?: ClientCategory
+  contractNumber?: string | null
+  contractDate?: string | null
 }
 
 export function useClientForm() {
@@ -32,10 +36,14 @@ export function useClientForm() {
   const [days, setDays] = useState<DayOfWeek[]>([])
   const [dayReplacements, setDayReplacements] = useState<Partial<Record<DayOfWeek, number>>>({})
   const [notes, setNotes] = useState('')
+  const [category, setCategory] = useState<ClientCategory | ''>('')
   const [workingHoursStart, setWorkingHoursStart] = useState('')
   const [workingHoursEnd, setWorkingHoursEnd] = useState('')
   const [contactName, setContactName] = useState('')
   const [contactPhone, setContactPhone] = useState('')
+  const [customMonthlyPrice, setCustomMonthlyPrice] = useState('')
+  const [contractNumber, setContractNumber] = useState('')
+  const [contractDate, setContractDate] = useState('')
   const [errors, setErrors] = useState<FormErrors>({})
   const [touched, setTouched] = useState<Partial<Record<keyof FormErrors, boolean>>>({})
 
@@ -152,10 +160,14 @@ export function useClientForm() {
     setDays([])
     setDayReplacements({})
     setNotes('')
+    setCategory('')
     setWorkingHoursStart('')
     setWorkingHoursEnd('')
     setContactName('')
     setContactPhone('')
+    setCustomMonthlyPrice('')
+    setContractNumber('')
+    setContractDate('')
     setErrors({})
     setTouched({})
   }, [])
@@ -168,10 +180,14 @@ export function useClientForm() {
     setDays([...opts.days])
     setDayReplacements(opts.dayReplacements ? { ...opts.dayReplacements } : {})
     setNotes(opts.notes)
+    setCategory(opts.category ?? '')
     setWorkingHoursStart(opts.workingHoursStart ?? '')
     setWorkingHoursEnd(opts.workingHoursEnd ?? '')
     setContactName(opts.contactName ?? '')
     setContactPhone(opts.contactPhone ?? '')
+    setCustomMonthlyPrice(opts.customMonthlyPrice != null ? String(opts.customMonthlyPrice) : '')
+    setContractNumber(opts.contractNumber ?? '')
+    setContractDate(opts.contractDate ?? '')
     setErrors({})
     setTouched({})
   }, [])
@@ -206,10 +222,14 @@ export function useClientForm() {
     days,
     dayReplacements,
     notes,
+    category,
     workingHoursStart,
     workingHoursEnd,
     contactName,
     contactPhone,
+    customMonthlyPrice,
+    contractNumber,
+    contractDate,
     errors,
     touched,
     // Setters
@@ -217,10 +237,14 @@ export function useClientForm() {
     setAddress,
     setFrequency,
     setNotes,
+    setCategory,
     setWorkingHoursStart,
     setWorkingHoursEnd,
     setContactName,
     setContactPhone,
+    setCustomMonthlyPrice,
+    setContractNumber,
+    setContractDate,
     // Mat ops
     addMat,
     removeMat,

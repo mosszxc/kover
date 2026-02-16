@@ -1,3 +1,13 @@
+export interface MatBatch {
+  id: string
+  sizeId: string
+  quantity: number
+  remaining: number
+  washCycles: number
+  maxWashCycles: number
+  purchasedAt: string
+}
+
 export interface MatInventory {
   sizeId: string
   totalOwned: number

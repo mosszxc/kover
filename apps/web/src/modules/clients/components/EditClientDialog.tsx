@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Trash2, Loader2, ClipboardList, History, ChevronLeft, ChevronRight, Pause, Play, CalendarClock } from 'lucide-react'
+import { Trash2, Loader2, ClipboardList, History, ChevronLeft, ChevronRight, Pause, Play, CalendarClock, MessageSquare } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/shared/lib/utils'
 import { diffClient } from '@/shared/lib/clientDiff'
@@ -34,6 +34,7 @@ import { PauseClientDialog } from './PauseClientDialog'
 import { useClientForm } from '../hooks/useClientForm'
 import { ClientForm, TOTAL_STEPS } from './ClientForm'
 import { ServiceHistory } from './ServiceHistory'
+import { ClientNotes } from './ClientNotes'
 
 interface EditClientDialogProps {
   client: Client
@@ -50,7 +51,7 @@ export function EditClientDialog({ client, open, onOpenChange, onDelete }: EditC
 
   const [saving, setSaving] = useState(false)
   const [geocoding, setGeocoding] = useState(false)
-  const [tab, setTab] = useState<'data' | 'history'>('data')
+  const [tab, setTab] = useState<'data' | 'notes' | 'history'>('data')
   const [pauseDialogOpen, setPauseDialogOpen] = useState(false)
   const [wizardStep, setWizardStep] = useState(0)
   const form = useClientForm()
@@ -73,6 +74,10 @@ export function EditClientDialog({ client, open, onOpenChange, onDelete }: EditC
         workingHoursEnd: client.workingHoursEnd,
         contactName: client.contactName,
         contactPhone: client.contactPhone,
+        customMonthlyPrice: client.customMonthlyPrice,
+        category: client.category,
+        contractNumber: client.contractNumber,
+        contractDate: client.contractDate,
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -134,6 +139,10 @@ export function EditClientDialog({ client, open, onOpenChange, onDelete }: EditC
       workingHoursEnd: form.workingHoursEnd || null,
       contactName: form.contactName.trim() || null,
       contactPhone: form.contactPhone.trim() || null,
+      customMonthlyPrice: form.customMonthlyPrice ? parseFloat(form.customMonthlyPrice) : null,
+      category: form.category || undefined,
+      contractNumber: form.contractNumber.trim() || null,
+      contractDate: form.contractDate || null,
       originalName: buildOriginalName(form.name, form.address, form.mats),
       ...(lat != null && lng != null ? { lat, lng } : {}),
     }
@@ -244,6 +253,18 @@ export function EditClientDialog({ client, open, onOpenChange, onDelete }: EditC
             </button>
             <button
               type="button"
+              onClick={() => setTab('notes')}
+              className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                tab === 'notes'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+              }`}
+            >
+              <MessageSquare className="h-3.5 w-3.5" />
+              Заметки{client.clientNotes?.length ? ` (${client.clientNotes.length})` : ''}
+            </button>
+            <button
+              type="button"
               onClick={() => setTab('history')}
               className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
                 tab === 'history'
@@ -267,11 +288,17 @@ export function EditClientDialog({ client, open, onOpenChange, onDelete }: EditC
             wizardStep={isMobile ? wizardStep : undefined}
             onWizardStepChange={isMobile ? setWizardStep : undefined}
           />
+        ) : tab === 'notes' ? (
+          <ClientNotes
+            clientId={client.id}
+            notes={client.clientNotes ?? []}
+            pinnedNote={client.notes || undefined}
+          />
         ) : (
           <ServiceHistory clientId={client.id} />
         )}
 
-        <DialogFooter className={`flex-row justify-between sm:justify-between ${tab === 'history' ? 'hidden' : ''}`}>
+        <DialogFooter className={`flex-row justify-between sm:justify-between ${tab !== 'data' ? 'hidden' : ''}`}>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="destructive">

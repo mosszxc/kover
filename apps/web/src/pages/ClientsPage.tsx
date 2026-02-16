@@ -3,6 +3,7 @@ import { ClientsTable, EditClientDialog, AddClientDialog, useClientStore, BatchG
 import type { PaymentInfo } from '@/modules/clients'
 import { useRouteStore } from '@/modules/routes'
 import { usePaymentStore, useClientPaymentStatus, RecordPaymentDialog, getCurrentPeriod } from '@/modules/payments'
+import { toast } from 'sonner'
 import { InvoiceSettingsDialog, GenerateInvoicesDialog } from '@/modules/invoices'
 import type { Client } from '@/modules/clients'
 import type { DayOfWeek } from '@/shared/types'
@@ -14,6 +15,9 @@ import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 const WEEKS_PER_MONTH = 4.33
 
 function getMonthlyRevenue(client: Client, priceMap: Record<string, number>): number {
+  if (client.customMonthlyPrice != null && client.customMonthlyPrice > 0) {
+    return client.customMonthlyPrice
+  }
   const costPerVisit = client.mats.reduce((sum, m) => sum + m.quantity * (priceMap[m.size] ?? 0), 0)
   return Math.round(costPerVisit * client.frequency * WEEKS_PER_MONTH * 100) / 100
 }
@@ -30,6 +34,7 @@ export function ClientsPage() {
   const sizes = useMatSizeStore((s) => s.sizes)
   const payments = usePaymentStore((s) => s.payments)
   const addPayment = usePaymentStore((s) => s.addPayment)
+  const updatePayment = usePaymentStore((s) => s.updatePayment)
 
   const priceMap = useMemo(
     () => Object.fromEntries(sizes.map((s) => [s.id, s.rentalPrice])),
@@ -134,9 +139,23 @@ export function ClientsPage() {
 
   const paymentClientRevenue = paymentClient ? getMonthlyRevenue(paymentClient, priceMap) : 0
 
+  const handleQuickPay = useCallback(
+    (client: Client) => {
+      const currentPeriod = getCurrentPeriod()
+      const payment = payments.find((p) => p.clientId === client.id && p.period === currentPeriod)
+      if (!payment) return
+      updatePayment(payment.id, {
+        paidAmount: payment.expectedAmount,
+        paidAt: new Date().toISOString(),
+      })
+      toast.success(`${client.name}: оплата ${payment.expectedAmount.toLocaleString('ru-RU')} ₽`, { duration: 2000 })
+    },
+    [payments, updatePayment],
+  )
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between print:hidden">
         <h1 className="text-2xl font-bold text-foreground">Клиенты</h1>
         <div className="flex items-center gap-2">
           <CostSettingsDialog />
@@ -155,6 +174,7 @@ export function ClientsPage() {
         anomalyIds={anomalyIds}
         paymentStatusMap={hasPrices ? paymentInfoMap : undefined}
         onRecordPayment={hasPrices ? setPaymentClient : undefined}
+        onQuickPay={hasPrices ? handleQuickPay : undefined}
       />
       {selectedClient && (
         <EditClientDialog

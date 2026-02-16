@@ -18,9 +18,11 @@ interface ClientData {
   id: string
   name: string
   address: string
+  contractNumber?: string | null
   mats: { size: string; quantity: number }[]
   frequency: number
   isActive: boolean
+  customMonthlyPrice?: number | null
 }
 
 interface GenerateInvoicesDialogProps {
@@ -61,6 +63,7 @@ export function GenerateInvoicesDialog({ clients, sizes }: GenerateInvoicesDialo
 
   const eligibleCount = useMemo(
     () => activeClients.filter((c) =>
+      (c.customMonthlyPrice != null && c.customMonthlyPrice > 0) ||
       c.mats.some((m) => (priceMap[m.size] ?? 0) > 0),
     ).length,
     [activeClients, priceMap],
@@ -76,6 +79,20 @@ export function GenerateInvoicesDialog({ clients, sizes }: GenerateInvoicesDialo
       let counter = 1
 
       for (const client of activeClients) {
+        if (client.customMonthlyPrice != null && client.customMonthlyPrice > 0) {
+          invoices.push({
+            invoiceNumber: `${prefix}-${periodDate}-${String(counter).padStart(3, '0')}`,
+            date: new Date().toLocaleDateString('ru-RU'),
+            period: formatPeriodLabel(period),
+            clientName: client.name,
+            clientAddress: client.address,
+            customTotal: client.customMonthlyPrice,
+            mats: [],
+          })
+          counter++
+          continue
+        }
+
         const matLines = client.mats
           .filter((m) => (priceMap[m.size] ?? 0) > 0)
           .map((m) => ({
@@ -94,6 +111,7 @@ export function GenerateInvoicesDialog({ clients, sizes }: GenerateInvoicesDialo
           period: formatPeriodLabel(period),
           clientName: client.name,
           clientAddress: client.address,
+          contractNumber: client.contractNumber,
           mats: matLines,
         })
         counter++

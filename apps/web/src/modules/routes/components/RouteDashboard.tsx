@@ -23,7 +23,7 @@ export function RouteDashboard({ drivers }: RouteDashboardProps) {
     )
   }
 
-  const driverMap = new Map(drivers.map((d) => [d.id, d.name]))
+  const driverMap = new Map(drivers.map((d) => [d.id, d]))
   const unassigned = driverItems.find((i) => i.driverId === null)
   const assigned = driverItems.filter((i) => i.driverId !== null)
   const totalMats = Object.values(summary.matsBySize).reduce<number>((a, b) => a + (b ?? 0), 0)
@@ -94,18 +94,31 @@ export function RouteDashboard({ drivers }: RouteDashboardProps) {
               <span className="tabular-nums text-muted-foreground">{unassigned.matCount} шт</span>
             </span>
           )}
-          {assigned.map((item) => (
-            <span
-              key={item.driverId}
-              className="inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/40 px-2 py-1 text-xs"
-            >
-              <User className="h-3 w-3 text-blue-400" />
-              <span className="font-medium text-foreground">{driverMap.get(item.driverId!) ?? '?'}</span>
-              <span className="font-semibold tabular-nums text-foreground">{item.stopCount}</span>
-              <span className="text-muted-foreground">/</span>
-              <span className="tabular-nums text-muted-foreground">{item.matCount} шт</span>
-            </span>
-          ))}
+          {assigned.map((item) => {
+            const driver = driverMap.get(item.driverId!)
+            const capacity = driver?.vehicleCapacity
+            const overloaded = capacity != null && capacity > 0 && item.totalArea > capacity
+            return (
+              <span
+                key={item.driverId}
+                className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs ${
+                  overloaded
+                    ? 'border-red-500/30 bg-red-500/10'
+                    : 'border-border bg-muted/40'
+                }`}
+              >
+                <User className="h-3 w-3 text-blue-400" />
+                <span className="font-medium text-foreground">{driver?.name ?? '?'}</span>
+                <span className="font-semibold tabular-nums text-foreground">{item.stopCount}</span>
+                <span className="text-muted-foreground">/</span>
+                <span className="tabular-nums text-muted-foreground">{item.totalArea} м²</span>
+                {capacity != null && capacity > 0 && (
+                  <span className={`tabular-nums ${overloaded ? 'text-red-400' : 'text-muted-foreground'}`}>/{capacity}</span>
+                )}
+                {overloaded && <AlertTriangle className="h-3 w-3 text-red-400" />}
+              </span>
+            )
+          })}
         </div>
       )}
     </div>

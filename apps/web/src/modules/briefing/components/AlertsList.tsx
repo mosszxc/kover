@@ -1,4 +1,4 @@
-import { AlertTriangle, Package, CreditCard } from 'lucide-react'
+import { AlertTriangle, Package, CreditCard, CalendarClock } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import type { Alert } from '../types'
 
@@ -6,6 +6,7 @@ const ALERT_CONFIG = {
   overload: { icon: AlertTriangle, color: 'text-red-400', bg: 'bg-red-600/10 border-red-600/20' },
   shortage: { icon: Package, color: 'text-amber-400', bg: 'bg-amber-600/10 border-amber-600/20' },
   overdue: { icon: CreditCard, color: 'text-red-400', bg: 'bg-red-600/10 border-red-600/20' },
+  exceptions: { icon: CalendarClock, color: 'text-blue-400', bg: 'bg-blue-600/10 border-blue-600/20' },
 } as const
 
 interface AlertsListProps {

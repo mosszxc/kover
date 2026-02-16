@@ -16,7 +16,9 @@ export interface InvoiceData {
   period: string
   clientName: string
   clientAddress: string
+  contractNumber?: string | null
   mats: MatLine[]
+  customTotal?: number
 }
 
 const WEEKS_PER_MONTH = 4.33
@@ -46,30 +48,38 @@ function buildInvoiceSheet(invoice: InvoiceData, settings: InvoiceSettings) {
 
   rows.push(['Покупатель:', invoice.clientName])
   if (invoice.clientAddress) rows.push(['Адрес:', invoice.clientAddress])
+  if (invoice.contractNumber) rows.push(['Договор:', invoice.contractNumber])
   rows.push(['Период:', invoice.period])
   rows.push([])
 
-  rows.push(['№', 'Наименование', 'Кол-во', 'Площадь м²', 'Цена/шт', 'Частота/нед', 'Визитов/мес', 'Сумма'])
+  if (invoice.customTotal != null) {
+    rows.push(['№', 'Наименование', 'Сумма'])
+    rows.push([1, 'Аренда грязезащитных ковриков (фикс. цена)', invoice.customTotal])
+    rows.push([])
+    rows.push(['', 'ИТОГО:', invoice.customTotal])
+  } else {
+    rows.push(['№', 'Наименование', 'Кол-во', 'Площадь м²', 'Цена/шт', 'Частота/нед', 'Визитов/мес', 'Сумма'])
 
-  let total = 0
-  invoice.mats.forEach((mat, i) => {
-    const visitsPerMonth = Math.round(mat.frequency * WEEKS_PER_MONTH * 100) / 100
-    const lineTotal = Math.round(mat.quantity * mat.pricePerUnit * visitsPerMonth * 100) / 100
-    total += lineTotal
-    rows.push([
-      i + 1,
-      `Коврик ${mat.label}`,
-      mat.quantity,
-      Math.round(mat.area * mat.quantity * 100) / 100,
-      mat.pricePerUnit,
-      mat.frequency,
-      visitsPerMonth,
-      lineTotal,
-    ])
-  })
+    let total = 0
+    invoice.mats.forEach((mat, i) => {
+      const visitsPerMonth = Math.round(mat.frequency * WEEKS_PER_MONTH * 100) / 100
+      const lineTotal = Math.round(mat.quantity * mat.pricePerUnit * visitsPerMonth * 100) / 100
+      total += lineTotal
+      rows.push([
+        i + 1,
+        `Коврик ${mat.label}`,
+        mat.quantity,
+        Math.round(mat.area * mat.quantity * 100) / 100,
+        mat.pricePerUnit,
+        mat.frequency,
+        visitsPerMonth,
+        lineTotal,
+      ])
+    })
 
-  rows.push([])
-  rows.push(['', '', '', '', '', '', 'ИТОГО:', Math.round(total * 100) / 100])
+    rows.push([])
+    rows.push(['', '', '', '', '', '', 'ИТОГО:', Math.round(total * 100) / 100])
+  }
 
   return rows
 }
@@ -89,19 +99,17 @@ export async function exportInvoices(invoices: InvoiceData[], settings: InvoiceS
       [],
       ['№ счёта', 'Клиент', 'Адрес', 'Сумма'],
     ]
-    for (const inv of invoices) {
-      const total = inv.mats.reduce((sum, m) => {
+    function getInvoiceTotal(inv: InvoiceData): number {
+      if (inv.customTotal != null) return inv.customTotal
+      return inv.mats.reduce((sum, m) => {
         const visits = Math.round(m.frequency * WEEKS_PER_MONTH * 100) / 100
         return sum + Math.round(m.quantity * m.pricePerUnit * visits * 100) / 100
       }, 0)
-      summary.push([inv.invoiceNumber, inv.clientName, inv.clientAddress, Math.round(total * 100) / 100])
     }
-    const grandTotal = invoices.reduce((sum, inv) => {
-      return sum + inv.mats.reduce((s, m) => {
-        const visits = Math.round(m.frequency * WEEKS_PER_MONTH * 100) / 100
-        return s + Math.round(m.quantity * m.pricePerUnit * visits * 100) / 100
-      }, 0)
-    }, 0)
+    for (const inv of invoices) {
+      summary.push([inv.invoiceNumber, inv.clientName, inv.clientAddress, Math.round(getInvoiceTotal(inv) * 100) / 100])
+    }
+    const grandTotal = invoices.reduce((sum, inv) => sum + getInvoiceTotal(inv), 0)
     summary.push([])
     summary.push(['', '', 'ИТОГО:', Math.round(grandTotal * 100) / 100])
 

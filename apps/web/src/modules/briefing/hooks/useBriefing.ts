@@ -4,6 +4,7 @@ import type { DayRoute } from '@/modules/routes'
 import type { Client } from '@/modules/clients'
 import type { Payment } from '@/modules/payments'
 import type { SizeInventorySummary } from '@/modules/inventory'
+import type { RouteException } from '@/shared/stores/routeExceptionsStore'
 import type { BriefingData, Alert, RouteBriefing, WornMat } from '../types'
 import { DAY_LABELS_FULL } from '@/shared/types'
 
@@ -15,6 +16,7 @@ interface UseBriefingParams {
   sizeLabels: Map<string, string>
   maxStopsPerDay: number
   drivers: { id: string; name: string }[]
+  exceptions?: RouteException[]
 }
 
 function getTodayDow(): DayOfWeek {
@@ -36,14 +38,25 @@ export function useBriefing({
   sizeLabels,
   maxStopsPerDay,
   drivers,
+  exceptions = [],
 }: UseBriefingParams): BriefingData {
   const today = getTodayDow()
 
   return useMemo(() => {
+    const todayStr = new Date().toISOString().slice(0, 10)
+    const todaySkipIds = new Set(
+      exceptions
+        .filter((ex) => ex.date === todayStr && ex.day === today && ex.type === 'skip')
+        .map((ex) => ex.clientId),
+    )
+    const todayAdds = exceptions.filter(
+      (ex) => ex.date === todayStr && ex.day === today && ex.type === 'add',
+    )
+
     const todayRoute = routes.find((r) => r.day === today)
     const stops = todayRoute?.stops ?? []
-    const activeStops = stops.filter((s) => !isStopSkipped(s))
-    const skippedStops = stops.filter((s) => isStopSkipped(s))
+    const activeStops = stops.filter((s) => !isStopSkipped(s) && !todaySkipIds.has(s.clientId))
+    const skippedStops = stops.filter((s) => isStopSkipped(s) || todaySkipIds.has(s.clientId))
 
     // Build client map
     const clientMap = new Map(clients.map((c) => [c.id, c]))
@@ -101,27 +114,56 @@ export function useBriefing({
       }
     }
 
-    // 3. Overdue payments
+    // 3. Overdue payments with aging
+    const now = new Date()
     const overduePayments = payments.filter((p) => {
       if (p.paidAmount >= p.expectedAmount) return false
       const parts = p.period.split('-').map(Number)
       const year = parts[0] ?? 0
       const month = parts[1] ?? 0
       const periodEnd = new Date(year, month, 0)
-      return new Date() > periodEnd
+      return now > periodEnd
     })
     if (overduePayments.length > 0) {
       const uniqueClients = new Set(overduePayments.map((p) => p.clientId))
+      const totalDebt = overduePayments.reduce((sum, p) => sum + (p.expectedAmount - p.paidAmount), 0)
+      const totalDebtRounded = Math.round(totalDebt * 100) / 100
+
+      // Count clients with 60+ day old debt
+      let criticalCount = 0
+      for (const p of overduePayments) {
+        const parts = p.period.split('-').map(Number)
+        const periodEnd = new Date(parts[0] ?? 0, parts[1] ?? 0, 0)
+        const days = Math.floor((now.getTime() - periodEnd.getTime()) / (1000 * 60 * 60 * 24))
+        if (days >= 60) { criticalCount++; break }
+      }
+
+      const desc = [`${uniqueClients.size} должник(ов), ${totalDebtRounded.toLocaleString('ru-RU')} ₽`]
+      if (criticalCount > 0) desc.push('есть долги 60+ дней')
+
       alerts.push({
         id: 'overdue',
         type: 'overdue',
         title: 'Просроченные оплаты',
-        description: `${uniqueClients.size} клиент(ов) с неоплаченными счетами`,
+        description: desc.join(' · '),
+      })
+    }
+
+    // 4. Route exceptions for today
+    const totalExceptions = todaySkipIds.size + todayAdds.length
+    if (totalExceptions > 0) {
+      const parts: string[] = []
+      if (todaySkipIds.size > 0) parts.push(`${todaySkipIds.size} пропуск(ов)`)
+      if (todayAdds.length > 0) parts.push(`${todayAdds.length} доп. визит(ов)`)
+      alerts.push({
+        id: 'exceptions',
+        type: 'exceptions',
+        title: 'Исключения на сегодня',
+        description: parts.join(', '),
       })
     }
 
     // Returning clients (pausedUntil === today)
-    const todayStr = new Date().toISOString().slice(0, 10)
     const returningClients = clients.filter(
       (c) => c.pausedUntil && c.pausedUntil <= todayStr && c.isActive,
     )
@@ -147,5 +189,5 @@ export function useBriefing({
       returningClients,
       wornMats,
     }
-  }, [routes, clients, payments, inventorySummary, sizeLabels, maxStopsPerDay, drivers, today])
+  }, [routes, clients, payments, inventorySummary, sizeLabels, maxStopsPerDay, drivers, today, exceptions])
 }

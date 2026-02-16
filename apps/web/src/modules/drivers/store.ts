@@ -52,7 +52,7 @@ export const useDriverStore = create<DriverState>()(
     ),
     {
       name: 'kover-drivers',
-      version: 2,
+      version: 3,
       migrate: (persisted: unknown, version: number) => {
         const state = persisted as Record<string, unknown>
         if (version < 2) {
@@ -62,6 +62,7 @@ export const useDriverStore = create<DriverState>()(
             workDays: d.workDays ?? [0, 1, 2, 3, 4, 5, 6],
           }))
         }
+        // v3: vehicleName, vehicleCapacity — no migration needed, optional fields
         return state as unknown as DriverState
       },
     },

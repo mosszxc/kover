@@ -1,6 +1,8 @@
-import { Plus, MapPin, Loader2, Minus, Clock, User, Phone } from 'lucide-react'
+import { Plus, MapPin, Loader2, Minus, Clock, User, Phone, Banknote, FileText } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { DAY_LABELS } from '@/shared/types'
+import { CLIENT_CATEGORIES } from '../types'
+import type { ClientCategory } from '../types'
 import { useVisibleDays } from '@/shared/hooks/useVisibleDays'
 import { useIsMobile } from '@/shared/hooks/useIsMobile'
 import type { ClientFormState } from '../hooks/useClientForm'
@@ -127,6 +129,25 @@ function BasicSection({
             Координаты определятся автоматически при сохранении
           </p>
         )}
+      </div>
+
+      <div>
+        <label htmlFor={`${idPrefix}-category`} className={labelClass}>
+          Категория
+        </label>
+        <select
+          id={`${idPrefix}-category`}
+          value={form.category}
+          onChange={(e) => form.setCategory(e.target.value as ClientCategory | '')}
+          className={inputClass}
+        >
+          <option value="">Не указана</option>
+          {CLIENT_CATEGORIES.map((cat) => (
+            <option key={cat.value} value={cat.value}>
+              {cat.label}
+            </option>
+          ))}
+        </select>
       </div>
 
       {mode === 'edit' && (
@@ -353,6 +374,49 @@ function ScheduleSection({ form }: { form: ClientFormState }) {
             placeholder="Например: +7 900 123-45-67"
             className={inputClass}
           />
+        </div>
+
+        <div>
+          <span className={labelClass}>
+            <Banknote className="mr-1 inline size-3.5" />
+            Фиксированная цена (₽/мес)
+          </span>
+          <input
+            type="number"
+            min="0"
+            step="100"
+            value={form.customMonthlyPrice}
+            onChange={(e) => form.setCustomMonthlyPrice(e.target.value)}
+            placeholder="Автоматически из ковриков"
+            className={inputClass}
+          />
+          <p className="mt-1 text-xs text-muted-foreground">
+            Если задана — используется вместо расчёта из ковриков
+          </p>
+        </div>
+
+        <div>
+          <span className={labelClass}>
+            <FileText className="mr-1 inline size-3.5" />
+            Договор
+          </span>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={form.contractNumber}
+              onChange={(e) => form.setContractNumber(e.target.value)}
+              placeholder="Номер договора"
+              className={`${inputClass} flex-1`}
+              aria-label="Номер договора"
+            />
+            <input
+              type="date"
+              value={form.contractDate}
+              onChange={(e) => form.setContractDate(e.target.value)}
+              className={`${inputClass} w-40`}
+              aria-label="Дата договора"
+            />
+          </div>
         </div>
 
         <div>

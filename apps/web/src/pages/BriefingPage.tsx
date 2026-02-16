@@ -1,11 +1,13 @@
 import { useMemo } from 'react'
 import { useBriefing, RouteCard, AlertsList, ReturningClients, WornMatsList, QuickLinks } from '@/modules/briefing'
+import { DebtAging } from '@/modules/stats'
 import { useRouteStore } from '@/modules/routes'
 import { useClientStore } from '@/modules/clients'
 import { usePaymentStore } from '@/modules/payments'
 import { useInventorySummary } from '@/modules/inventory'
 import { useRouteSettingsStore } from '@/shared/stores/routeSettingsStore'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
+import { useRouteExceptionsStore } from '@/shared/stores/routeExceptionsStore'
 import { useDriverStore } from '@/modules/drivers'
 
 export function BriefingPage() {
@@ -15,6 +17,7 @@ export function BriefingPage() {
   const maxStopsPerDay = useRouteSettingsStore((s) => s.maxStopsPerDay)
   const sizes = useMatSizeStore((s) => s.sizes)
   const drivers = useDriverStore((s) => s.drivers)
+  const exceptions = useRouteExceptionsStore((s) => s.exceptions)
 
   const clientMatTotals = useMemo(() => {
     const map = new Map<string, number>()
@@ -42,6 +45,7 @@ export function BriefingPage() {
     sizeLabels,
     maxStopsPerDay,
     drivers,
+    exceptions,
   })
 
   return (
@@ -49,6 +53,7 @@ export function BriefingPage() {
       <h1 className="text-2xl font-bold text-foreground">Сегодня</h1>
       <RouteCard route={briefing.route} todayLabel={briefing.todayLabel} />
       <AlertsList alerts={briefing.alerts} />
+      <DebtAging />
       <ReturningClients clients={briefing.returningClients} />
       <WornMatsList mats={briefing.wornMats} />
       <QuickLinks />

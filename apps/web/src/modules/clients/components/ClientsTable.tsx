@@ -7,12 +7,12 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { Check, ChevronDown, ChevronUp, ChevronsUpDown, Search, AlertTriangle, Pause, Play, MapPin, TriangleAlert, CalendarClock, Clock } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, ChevronsUpDown, Search, AlertTriangle, Pause, Play, MapPin, TriangleAlert, CalendarClock, Clock, Printer } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { toast } from 'sonner'
 import { useClientStore } from '../store'
-import type { Client } from '../types'
-import { isClientPaused, formatPausedUntil, formatWorkingHours } from '../types'
+import type { Client, ClientCategory } from '../types'
+import { isClientPaused, formatPausedUntil, formatWorkingHours, CLIENT_CATEGORIES } from '../types'
 import { PauseClientDialog } from './PauseClientDialog'
 import { DAY_LABELS } from '@/shared/types'
 import type { DayOfWeek } from '@/shared/types'
@@ -21,6 +21,7 @@ import { MAT_SIZE_STYLES } from '@/shared/constants'
 import type { MatSize } from '@/shared/types'
 import { ClientsFilters, type StatusFilter, type PaymentFilter } from './ClientsFilters'
 import { Banknote } from 'lucide-react'
+import { ClientsPrintView } from './ClientsPrintView'
 import { useCostSettingsStore } from '@/shared/stores/costSettingsStore'
 
 export interface PaymentInfo {
@@ -36,11 +37,12 @@ interface ClientsTableProps {
   anomalyIds?: Set<string>
   paymentStatusMap?: Map<string, PaymentInfo>
   onRecordPayment?: (client: Client) => void
+  onQuickPay?: (client: Client) => void
 }
 
 type SortField = 'name' | 'address' | 'mats' | 'area' | 'cost' | 'revenue' | 'margin' | 'frequency' | 'days'
 
-export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPauseClient, anomalyIds, paymentStatusMap, onRecordPayment }: ClientsTableProps) {
+export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPauseClient, anomalyIds, paymentStatusMap, onRecordPayment, onQuickPay }: ClientsTableProps) {
   const clients = useClientStore((s) => s.clients)
   const updateClient = useClientStore((s) => s.updateClient)
   const sizes = useMatSizeStore((s) => s.sizes)
@@ -87,6 +89,9 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
   const WEEKS_PER_MONTH = 4.33
 
   function getClientMonthlyRevenue(client: Client): number {
+    if (client.customMonthlyPrice != null && client.customMonthlyPrice > 0) {
+      return client.customMonthlyPrice
+    }
     const costPerVisit = getClientCost(client)
     return Math.round(costPerVisit * client.frequency * WEEKS_PER_MONTH * 100) / 100
   }
@@ -133,6 +138,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
   const [selectedFrequency, setSelectedFrequency] = useState<number | null>(null)
   const [selectedMatSize, setSelectedMatSize] = useState<string | null>(null)
   const [selectedStatus, setSelectedStatus] = useState<StatusFilter>('all')
+  const [selectedCategory, setSelectedCategory] = useState<ClientCategory | null>(null)
   const [selectedPayment, setSelectedPayment] = useState<PaymentFilter>('all')
   const hasPayments = (paymentStatusMap?.size ?? 0) > 0
 
@@ -156,6 +162,9 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
         c.mats.some((m) => m.size === selectedMatSize),
       )
     }
+    if (selectedCategory !== null) {
+      result = result.filter((c) => c.category === selectedCategory)
+    }
     if (selectedPayment !== 'all' && paymentStatusMap) {
       result = result.filter((c) => {
         const info = paymentStatusMap.get(c.id)
@@ -166,7 +175,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
       })
     }
     return result
-  }, [clients, selectedDays, selectedFrequency, selectedMatSize, selectedStatus, selectedPayment, paymentStatusMap])
+  }, [clients, selectedDays, selectedFrequency, selectedMatSize, selectedStatus, selectedCategory, selectedPayment, paymentStatusMap])
 
   const table = useReactTable({
     data: filteredClients,
@@ -178,7 +187,8 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
       const query = filterValue.toLowerCase()
       return (
         row.original.name.toLowerCase().includes(query) ||
-        row.original.address.toLowerCase().includes(query)
+        row.original.address.toLowerCase().includes(query) ||
+        (row.original.contractNumber?.toLowerCase().includes(query) ?? false)
       )
     },
     getCoreRowModel: getCoreRowModel(),
@@ -216,9 +226,23 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
   ]
 
   const rows = table.getRowModel().rows
+  const finalFilteredClients = table.getFilteredRowModel().rows.map((r) => r.original)
+
+  const hasActiveFilters = selectedDays.length > 0 || selectedFrequency !== null || selectedMatSize !== null || selectedStatus !== 'all' || selectedPayment !== 'all' || globalFilter !== ''
+
+  function getPrintTitle(): string {
+    const parts: string[] = []
+    if (selectedPayment === 'overdue') parts.push('Должники')
+    else if (selectedPayment === 'unpaid') parts.push('Неоплаченные')
+    else if (selectedPayment === 'paid') parts.push('Оплаченные')
+    if (selectedStatus === 'paused') parts.push('На паузе')
+    else if (selectedStatus === 'active') parts.push('Активные')
+    return parts.length > 0 ? parts.join(' · ') : 'Список клиентов'
+  }
 
   return (
-    <div className="space-y-4">
+    <>
+    <div className="space-y-4 print:hidden">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <input
@@ -239,12 +263,15 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
         onMatSizeChange={setSelectedMatSize}
         selectedStatus={selectedStatus}
         onStatusChange={setSelectedStatus}
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
         selectedPayment={selectedPayment}
         onPaymentChange={setSelectedPayment}
         hasPayments={hasPayments}
       />
 
-      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
+      <div className="flex items-center gap-1">
         <span>Сортировка:</span>
         {sortButtons.map(({ field, label }) => (
           <button
@@ -260,6 +287,18 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
             {sortIcon(field)}
           </button>
         ))}
+      </div>
+      {hasActiveFilters && (
+        <button
+          type="button"
+          onClick={() => window.print()}
+          className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          title="Печать отфильтрованного списка"
+        >
+          <Printer className="size-3.5" />
+          Печать
+        </button>
+      )}
       </div>
 
       <div className="space-y-2">
@@ -295,6 +334,11 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
               <div className="flex items-center justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-2">
                   <span className="truncate font-medium text-foreground">{client.name}</span>
+                  {client.category && (
+                    <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+                      {CLIENT_CATEGORIES.find((c) => c.value === client.category)?.label}
+                    </span>
+                  )}
                   {paymentInfo && (
                     <span
                       className={cn('inline-block size-2 shrink-0 rounded-full', {
@@ -417,22 +461,37 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                 </div>
                 <div className="flex shrink-0 items-center gap-1.5">
                 {paymentInfo && paymentInfo.status !== 'paid' && onRecordPayment && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onRecordPayment(client)
-                    }}
-                    className={cn(
-                      'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold transition-colors',
-                      paymentInfo.status === 'overdue'
-                        ? 'bg-red-600/20 text-red-400 hover:bg-red-600/30'
-                        : 'bg-amber-600/20 text-amber-400 hover:bg-amber-600/30',
+                  <div className="flex items-center gap-1">
+                    {onQuickPay && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onQuickPay(client)
+                        }}
+                        title="Отметить полную оплату"
+                        className="inline-flex size-6 items-center justify-center rounded-full bg-emerald-600/20 text-emerald-400 transition-colors hover:bg-emerald-600/30"
+                      >
+                        <Check className="size-3.5" />
+                      </button>
                     )}
-                  >
-                    <Banknote className="size-3" />
-                    {paymentInfo.debt > 0 ? `${paymentInfo.debt.toLocaleString('ru-RU')} ₽` : 'Оплатить'}
-                  </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onRecordPayment(client)
+                      }}
+                      className={cn(
+                        'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold transition-colors',
+                        paymentInfo.status === 'overdue'
+                          ? 'bg-red-600/20 text-red-400 hover:bg-red-600/30'
+                          : 'bg-amber-600/20 text-amber-400 hover:bg-amber-600/30',
+                      )}
+                    >
+                      <Banknote className="size-3" />
+                      {paymentInfo.debt > 0 ? `${paymentInfo.debt.toLocaleString('ru-RU')} ₽` : 'Оплатить'}
+                    </button>
+                  </div>
                 )}
                 <button
                   type="button"
@@ -532,5 +591,11 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
         />
       )}
     </div>
+    <ClientsPrintView
+      clients={finalFilteredClients}
+      paymentInfoMap={paymentStatusMap}
+      title={getPrintTitle()}
+    />
+    </>
   )
 }
