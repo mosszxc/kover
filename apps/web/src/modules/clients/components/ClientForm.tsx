@@ -1,4 +1,4 @@
-import { Plus, MapPin, Loader2, Minus, Clock } from 'lucide-react'
+import { Plus, MapPin, Loader2, Minus, Clock, User, Phone } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { DAY_LABELS } from '@/shared/types'
 import { useVisibleDays } from '@/shared/hooks/useVisibleDays'
@@ -325,6 +325,34 @@ function ScheduleSection({ form }: { form: ClientFormState }) {
               aria-label="Конец работы"
             />
           </div>
+        </div>
+
+        <div>
+          <span className={labelClass}>
+            <User className="mr-1 inline size-3.5" />
+            Контактное лицо
+          </span>
+          <input
+            type="text"
+            value={form.contactName}
+            onChange={(e) => form.setContactName(e.target.value)}
+            placeholder="Например: Иван Петрович"
+            className={inputClass}
+          />
+        </div>
+
+        <div>
+          <span className={labelClass}>
+            <Phone className="mr-1 inline size-3.5" />
+            Телефон
+          </span>
+          <input
+            type="tel"
+            value={form.contactPhone}
+            onChange={(e) => form.setContactPhone(e.target.value)}
+            placeholder="Например: +7 900 123-45-67"
+            className={inputClass}
+          />
         </div>
 
         <div>

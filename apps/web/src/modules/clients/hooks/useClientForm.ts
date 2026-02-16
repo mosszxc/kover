@@ -20,6 +20,8 @@ interface PopulateOptions {
   notes: string
   workingHoursStart?: string | null
   workingHoursEnd?: string | null
+  contactName?: string | null
+  contactPhone?: string | null
 }
 
 export function useClientForm() {
@@ -32,6 +34,8 @@ export function useClientForm() {
   const [notes, setNotes] = useState('')
   const [workingHoursStart, setWorkingHoursStart] = useState('')
   const [workingHoursEnd, setWorkingHoursEnd] = useState('')
+  const [contactName, setContactName] = useState('')
+  const [contactPhone, setContactPhone] = useState('')
   const [errors, setErrors] = useState<FormErrors>({})
   const [touched, setTouched] = useState<Partial<Record<keyof FormErrors, boolean>>>({})
 
@@ -150,6 +154,8 @@ export function useClientForm() {
     setNotes('')
     setWorkingHoursStart('')
     setWorkingHoursEnd('')
+    setContactName('')
+    setContactPhone('')
     setErrors({})
     setTouched({})
   }, [])
@@ -164,6 +170,8 @@ export function useClientForm() {
     setNotes(opts.notes)
     setWorkingHoursStart(opts.workingHoursStart ?? '')
     setWorkingHoursEnd(opts.workingHoursEnd ?? '')
+    setContactName(opts.contactName ?? '')
+    setContactPhone(opts.contactPhone ?? '')
     setErrors({})
     setTouched({})
   }, [])
@@ -200,6 +208,8 @@ export function useClientForm() {
     notes,
     workingHoursStart,
     workingHoursEnd,
+    contactName,
+    contactPhone,
     errors,
     touched,
     // Setters
@@ -209,6 +219,8 @@ export function useClientForm() {
     setNotes,
     setWorkingHoursStart,
     setWorkingHoursEnd,
+    setContactName,
+    setContactPhone,
     // Mat ops
     addMat,
     removeMat,

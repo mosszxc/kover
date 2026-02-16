@@ -68,6 +68,7 @@ function PrintTable({ title, rows, sizes, day }: PrintTableProps) {
           <tr>
             <th className="num">#</th>
             <th className="col-name">Название</th>
+            <th className="col-name">Телефон</th>
             {sizes.map((s) => (
               <th key={s.id} className="num">{s.label}</th>
             ))}
@@ -79,6 +80,7 @@ function PrintTable({ title, rows, sizes, day }: PrintTableProps) {
             <tr key={stop.id}>
               <td className="num stop-num">{index + 1}</td>
               <td>{client?.originalName ?? '—'}</td>
+              <td>{client?.contactPhone ?? ''}</td>
               {sizes.map((s) => {
                 const qty = client ? getMatQuantity(client, s.id, day) : 0
                 return <td key={s.id} className="num">{qty > 0 ? qty : ''}</td>
@@ -93,6 +95,7 @@ function PrintTable({ title, rows, sizes, day }: PrintTableProps) {
           <tr>
             <td className="num" />
             <td>Итого: {rows.length} точек</td>
+            <td />
             {sizes.map((s) => (
               <td key={s.id} className="num">
                 {(totals[s.id] ?? 0) > 0 ? totals[s.id] : ''}

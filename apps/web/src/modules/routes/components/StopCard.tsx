@@ -1,4 +1,4 @@
-import { ChevronUp, ChevronDown, GripVertical, MapPinOff, Pencil, TriangleAlert, Clock, MoreHorizontal, ArrowRightLeft, X, ClipboardCheck } from 'lucide-react'
+import { ChevronUp, ChevronDown, GripVertical, MapPinOff, Pencil, TriangleAlert, Clock, MoreHorizontal, ArrowRightLeft, X, ClipboardCheck, Phone } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -158,6 +158,17 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
               <Clock className="size-3" />
               {formatWorkingHours(client)}
             </span>
+          )}
+          {client.contactPhone && (
+            <a
+              href={`tel:${client.contactPhone}`}
+              onClick={(e) => e.stopPropagation()}
+              className="ml-1 inline-flex shrink-0 items-center gap-0.5 text-xs text-blue-400 hover:text-blue-300 transition-colors"
+              title={client.contactName ?? 'Позвонить'}
+            >
+              <Phone className="size-3" />
+              {client.contactPhone}
+            </a>
           )}
         </div>
         {isAnomaly && onEditClient && (

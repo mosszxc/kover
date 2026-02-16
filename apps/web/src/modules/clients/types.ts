@@ -20,6 +20,8 @@ export interface Client {
   pausedUntil?: string | null
   workingHoursStart?: string | null
   workingHoursEnd?: string | null
+  contactName?: string | null
+  contactPhone?: string | null
   createdAt: string
   lat?: number
   lng?: number
