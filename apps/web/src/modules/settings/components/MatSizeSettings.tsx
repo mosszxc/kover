@@ -119,7 +119,7 @@ export function MatSizeSettings({ isSizeUsed, getClientsUsing, onDeleteAndReplac
   }
 
   const inputClass =
-    'h-9 rounded-md border border-slate-700 bg-slate-900 px-2 text-sm text-slate-50 placeholder:text-slate-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-colors'
+    'h-9 rounded-md border border-border bg-muted px-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors'
 
   const availableReplacements = deletingSize
     ? sizes.filter((s) => s.id !== deletingSize.id)
@@ -131,8 +131,8 @@ export function MatSizeSettings({ isSizeUsed, getClientsUsing, onDeleteAndReplac
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-slate-50">Размеры ковриков</h2>
-          <p className="text-sm text-slate-400">
+          <h2 className="text-lg font-semibold text-foreground">Размеры ковриков</h2>
+          <p className="text-sm text-muted-foreground">
             Управление списком доступных размеров ковриков
           </p>
         </div>
@@ -150,20 +150,20 @@ export function MatSizeSettings({ isSizeUsed, getClientsUsing, onDeleteAndReplac
         </Button>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-slate-700">
+      <div className="overflow-hidden rounded-lg border border-border">
         <table className="w-full">
-          <thead className="bg-slate-900">
+          <thead className="bg-muted">
             <tr>
-              <th className="border-b border-slate-700 px-4 py-3 text-left text-sm font-medium text-slate-400">
+              <th className="border-b border-border px-4 py-3 text-left text-sm font-medium text-muted-foreground">
                 Название
               </th>
-              <th className="border-b border-slate-700 px-4 py-3 text-right text-sm font-medium text-slate-400">
+              <th className="border-b border-border px-4 py-3 text-right text-sm font-medium text-muted-foreground">
                 Площадь (м²)
               </th>
-              <th className="border-b border-slate-700 px-4 py-3 text-right text-sm font-medium text-slate-400">
+              <th className="border-b border-border px-4 py-3 text-right text-sm font-medium text-muted-foreground">
                 Цена (₽)
               </th>
-              <th className="border-b border-slate-700 px-4 py-3 text-right text-sm font-medium text-slate-400 w-28">
+              <th className="border-b border-border px-4 py-3 text-right text-sm font-medium text-muted-foreground w-28">
                 Действия
               </th>
             </tr>
@@ -174,7 +174,7 @@ export function MatSizeSettings({ isSizeUsed, getClientsUsing, onDeleteAndReplac
 
               if (isEditing) {
                 return (
-                  <tr key={size.id} className={`border-b border-slate-800 ${i % 2 === 1 ? 'bg-slate-900/50' : ''}`}>
+                  <tr key={size.id} className={`border-b border-border ${i % 2 === 1 ? 'bg-muted/50' : ''}`}>
                     <td className="px-4 py-2">
                       <input
                         type="text"
@@ -229,7 +229,7 @@ export function MatSizeSettings({ isSizeUsed, getClientsUsing, onDeleteAndReplac
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-slate-400 hover:text-slate-300"
+                          className="h-8 w-8 text-muted-foreground hover:text-foreground"
                           onClick={() => setEditing(null)}
                         >
                           <X className="h-4 w-4" />
@@ -241,14 +241,14 @@ export function MatSizeSettings({ isSizeUsed, getClientsUsing, onDeleteAndReplac
               }
 
               return (
-                <tr key={size.id} className={`border-b border-slate-800 ${i % 2 === 1 ? 'bg-slate-900/50' : ''}`}>
-                  <td className="px-4 py-3 text-sm text-slate-50">
+                <tr key={size.id} className={`border-b border-border ${i % 2 === 1 ? 'bg-muted/50' : ''}`}>
+                  <td className="px-4 py-3 text-sm text-foreground">
                     {size.label}
                   </td>
-                  <td className="px-4 py-3 text-right text-sm tabular-nums text-slate-50">
+                  <td className="px-4 py-3 text-right text-sm tabular-nums text-foreground">
                     {size.area}
                   </td>
-                  <td className="px-4 py-3 text-right text-sm tabular-nums text-slate-50">
+                  <td className="px-4 py-3 text-right text-sm tabular-nums text-foreground">
                     {size.rentalPrice > 0 ? `${size.rentalPrice} ₽` : '—'}
                   </td>
                   <td className="px-4 py-3">
@@ -256,7 +256,7 @@ export function MatSizeSettings({ isSizeUsed, getClientsUsing, onDeleteAndReplac
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-slate-400 hover:text-slate-200"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
                         onClick={() => handleStartEdit(size)}
                         aria-label={`Редактировать ${size.label}`}
                       >
@@ -265,7 +265,7 @@ export function MatSizeSettings({ isSizeUsed, getClientsUsing, onDeleteAndReplac
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-slate-400 hover:text-red-400"
+                        className="h-8 w-8 text-muted-foreground hover:text-red-400"
                         onClick={() => handleDelete(size)}
                         aria-label={`Удалить ${size.label}`}
                       >
@@ -278,7 +278,7 @@ export function MatSizeSettings({ isSizeUsed, getClientsUsing, onDeleteAndReplac
             })}
 
             {adding && (
-              <tr className="border-b border-slate-800 bg-blue-950/20">
+              <tr className="border-b border-border bg-primary/5">
                 <td className="px-4 py-2">
                   <input
                     type="text"
@@ -351,7 +351,7 @@ export function MatSizeSettings({ isSizeUsed, getClientsUsing, onDeleteAndReplac
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-slate-400 hover:text-slate-300"
+                      className="h-8 w-8 text-muted-foreground hover:text-foreground"
                       onClick={() => {
                         setAdding(false)
                         setNewLabel('')

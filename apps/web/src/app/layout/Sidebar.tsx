@@ -33,8 +33,8 @@ export function Sidebar() {
               cn(
                 "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors duration-150 cursor-pointer",
                 isActive
-                  ? "bg-muted text-white"
-                  : "text-muted-foreground hover:bg-muted hover:text-white"
+                  ? "bg-muted text-foreground"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )
             }
           >

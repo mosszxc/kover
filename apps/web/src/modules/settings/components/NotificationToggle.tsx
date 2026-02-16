@@ -17,20 +17,20 @@ export function NotificationToggle() {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-lg font-semibold text-slate-50">Уведомления</h2>
-        <p className="text-sm text-slate-400">
+        <h2 className="text-lg font-semibold text-foreground">Уведомления</h2>
+        <p className="text-sm text-muted-foreground">
           {isTauri()
             ? 'Системные уведомления Windows при важных событиях'
             : 'Всплывающие уведомления внутри приложения'}
         </p>
       </div>
 
-      <label className="flex cursor-pointer items-center justify-between rounded-lg border border-slate-700 px-4 py-3">
+      <label className="flex cursor-pointer items-center justify-between rounded-lg border border-border px-4 py-3">
         <div>
-          <span className="text-sm font-medium text-slate-50">
+          <span className="text-sm font-medium text-foreground">
             Показывать уведомления
           </span>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-muted-foreground">
             Ошибки синхронизации, обновления приложения и другие важные события
           </p>
         </div>
@@ -40,11 +40,11 @@ export function NotificationToggle() {
           aria-checked={enabled}
           onClick={handleToggle}
           className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
-            enabled ? 'bg-blue-600' : 'bg-slate-600'
+            enabled ? 'bg-primary' : 'bg-input'
           }`}
         >
           <span
-            className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${
+            className={`inline-block h-4 w-4 rounded-full bg-background shadow-sm transition-transform ${
               enabled ? 'translate-x-6' : 'translate-x-1'
             }`}
           />

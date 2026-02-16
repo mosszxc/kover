@@ -144,7 +144,7 @@ export function FileSyncStatus() {
             Восстановить из файла
           </Button>
         </div>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-muted-foreground">
           Данные будут автоматически сохраняться на диск при каждом изменении
         </p>
 
@@ -175,7 +175,7 @@ export function FileSyncStatus() {
           <span className="truncate max-w-40">{fileSyncFileName}</span>
         </div>
         {lastFileSyncAt && (
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-muted-foreground">
             {formatTime(lastFileSyncAt)}
           </span>
         )}
@@ -184,7 +184,7 @@ export function FileSyncStatus() {
         <Button variant="ghost" size="sm" onClick={handleReconnect} className="h-7 text-xs">
           Переподключить
         </Button>
-        <Button variant="ghost" size="sm" onClick={handleDisconnect} className="h-7 text-xs text-slate-500">
+        <Button variant="ghost" size="sm" onClick={handleDisconnect} className="h-7 text-xs text-muted-foreground">
           <Unplug className="h-3.5 w-3.5" />
           Отключить
         </Button>
