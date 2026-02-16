@@ -20,7 +20,7 @@ export interface RouteBriefing {
 
 export interface Alert {
   id: string
-  type: 'overload' | 'shortage' | 'overdue'
+  type: 'overload' | 'shortage' | 'overdue' | 'exceptions'
   title: string
   description: string
 }

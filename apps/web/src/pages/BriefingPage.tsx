@@ -6,6 +6,7 @@ import { usePaymentStore } from '@/modules/payments'
 import { useInventorySummary } from '@/modules/inventory'
 import { useRouteSettingsStore } from '@/shared/stores/routeSettingsStore'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
+import { useRouteExceptionsStore } from '@/shared/stores/routeExceptionsStore'
 import { useDriverStore } from '@/modules/drivers'
 
 export function BriefingPage() {
@@ -15,6 +16,7 @@ export function BriefingPage() {
   const maxStopsPerDay = useRouteSettingsStore((s) => s.maxStopsPerDay)
   const sizes = useMatSizeStore((s) => s.sizes)
   const drivers = useDriverStore((s) => s.drivers)
+  const exceptions = useRouteExceptionsStore((s) => s.exceptions)
 
   const clientMatTotals = useMemo(() => {
     const map = new Map<string, number>()
@@ -42,6 +44,7 @@ export function BriefingPage() {
     sizeLabels,
     maxStopsPerDay,
     drivers,
+    exceptions,
   })
 
   return (

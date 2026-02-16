@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react'
-import { DaySwitcher, RouteDashboard, RouteSearch, StopList, AddStopDialog, useRouteStore, PrintButton, DriverFilter, BulkAssignDriverDialog, DistributeDriversDialog, isStopSkipped, ServiceReportDialog } from '@/modules/routes'
+import { DaySwitcher, RouteDashboard, RouteSearch, StopList, AddStopDialog, AddOneTimeDialog, useRouteStore, PrintButton, DriverFilter, BulkAssignDriverDialog, DistributeDriversDialog, isStopSkipped, ServiceReportDialog } from '@/modules/routes'
 import { useClientStore, EditClientDialog } from '@/modules/clients'
 import type { Client } from '@/modules/clients'
 import { useDriverStore } from '@/modules/drivers'
 import { PrintSheet } from '@/modules/print'
 import { OptimizeRouteDialog } from '@/modules/map'
 import { useClientPaymentStatus } from '@/modules/payments'
+import { useRouteExceptionsStore } from '@/shared/stores/routeExceptionsStore'
 
 const EMPTY_STOPS: never[] = []
 
@@ -24,13 +25,26 @@ export function RoutesPage() {
     [allDrivers],
   )
 
+  const exceptions = useRouteExceptionsStore((s) => s.exceptions)
+  const today = new Date().toISOString().slice(0, 10)
+
+  const todaySkipIds = useMemo(() => {
+    const set = new Set<string>()
+    for (const ex of exceptions) {
+      if (ex.date === today && ex.day === selectedDay && ex.type === 'skip') {
+        set.add(ex.clientId)
+      }
+    }
+    return set
+  }, [exceptions, today, selectedDay])
+
   const activeClientIds = useMemo(
     () => new Set(clients.filter((c) => c.isActive).map((c) => c.id)),
     [clients],
   )
   const activeStops = useMemo(
-    () => stops.filter((s) => activeClientIds.has(s.clientId) && !isStopSkipped(s)),
-    [stops, activeClientIds],
+    () => stops.filter((s) => activeClientIds.has(s.clientId) && !isStopSkipped(s) && !todaySkipIds.has(s.clientId)),
+    [stops, activeClientIds, todaySkipIds],
   )
 
   const paymentStatusRaw = useClientPaymentStatus()
@@ -60,7 +74,10 @@ export function RoutesPage() {
         </div>
         <RouteSearch value={searchQuery} onChange={setSearchQuery} />
         <StopList searchQuery={searchQuery} drivers={driverOptions} driverFilter={driverFilter} onEditClient={setEditingClient} paymentStatusMap={paymentStatusMap} onServiceReport={setReportClient} />
-        <AddStopDialog clients={clients} />
+        <div className="flex gap-2">
+          <AddStopDialog clients={clients} />
+          <AddOneTimeDialog clients={clients} />
+        </div>
       </div>
       <PrintSheet stops={activeStops} clients={clients} selectedDay={selectedDay} drivers={driverOptions} />
       {editingClient && (
