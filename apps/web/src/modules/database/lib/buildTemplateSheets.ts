@@ -43,8 +43,8 @@ export function buildTemplateSheets(matSizes: MatSizeConfig[]): SheetData[] {
 
   const matSizeSheet: SheetData = {
     name: 'Размеры ковриков',
-    header: ['ID', 'Название', 'Площадь (м²)'],
-    rows: matSizes.map((s) => [s.id, s.label, s.area]),
+    header: ['ID', 'Название', 'Площадь (м²)', 'Цена (₽)'],
+    rows: matSizes.map((s) => [s.id, s.label, s.area, s.rentalPrice]),
   }
 
   return [clientSheet, driverSheet, routeSheet, matSizeSheet]

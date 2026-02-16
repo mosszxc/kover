@@ -125,7 +125,8 @@ export function parseExcelImport(buffer: ArrayBuffer): ParseResult {
         errors.push({ sheet: 'Размеры ковриков', row: i + 1, message: 'Невалидная площадь' })
         continue
       }
-      matSizes.push({ id, label, area, rentalPrice: 0 })
+      const rentalPrice = parseFloat(cell(row, msCol, 'Цена (₽)')) || 0
+      matSizes.push({ id, label, area, rentalPrice })
     }
   }
 
@@ -307,7 +308,7 @@ function diffMatSizes(imported: MatSizeConfig[], current: MatSizeConfig[]): Diff
       added.push(item)
     } else {
       matchedIds.add(item.id)
-      if (existing.label !== item.label || existing.area !== item.area) {
+      if (existing.label !== item.label || existing.area !== item.area || existing.rentalPrice !== item.rentalPrice) {
         changed.push({ old: existing, new: item })
       }
     }
