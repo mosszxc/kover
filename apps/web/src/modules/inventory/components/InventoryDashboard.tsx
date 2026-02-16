@@ -71,7 +71,50 @@ export function InventoryDashboard({ summary, sizeLabels }: InventoryDashboardPr
               </div>
             </div>
 
-            {item.totalOwned > 0 && item.maxWashCycles > 0 && (
+            {item.totalOwned > 0 && item.batches.length > 0 && (
+              <div className="mt-2 space-y-1.5">
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <RotateCw className="size-3" />
+                  Износ по партиям
+                </div>
+                {item.batches.map((batch) => {
+                  const pct = Math.min(100, batch.wearPercent)
+                  return (
+                    <div key={batch.id}>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">
+                          {new Date(batch.purchasedAt).toLocaleDateString('ru-RU', { month: 'short', year: '2-digit' })}
+                          {' '}({batch.remaining} шт)
+                        </span>
+                        <span className={cn(
+                          'tabular-nums font-medium',
+                          batch.wearPercent >= 100 ? 'text-red-400'
+                            : batch.wearPercent >= 80 ? 'text-amber-400'
+                            : 'text-muted-foreground',
+                        )}>
+                          {batch.washCycles}/{batch.maxWashCycles}
+                        </span>
+                      </div>
+                      <div className="mt-0.5 h-1.5 rounded-full bg-muted">
+                        <div
+                          className={cn(
+                            'h-full rounded-full transition-all',
+                            batch.wearPercent >= 100 ? 'bg-red-500'
+                              : batch.wearPercent >= 80 ? 'bg-amber-500'
+                              : 'bg-emerald-500',
+                          )}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                      {batch.wearPercent >= 100 && (
+                        <p className="mt-0.5 text-xs text-red-400">Пора менять эту партию!</p>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+            {item.totalOwned > 0 && item.batches.length === 0 && item.maxWashCycles > 0 && (
               <div className="mt-2">
                 <div className="flex items-center justify-between text-xs">
                   <span className="flex items-center gap-1 text-muted-foreground">
