@@ -24,6 +24,9 @@ const DatabasePage = lazy(() =>
 const GuidePage = lazy(() =>
   import("@/pages/GuidePage").then((m) => ({ default: m.GuidePage })),
 )
+const BriefingPage = lazy(() =>
+  import("@/pages/BriefingPage").then((m) => ({ default: m.BriefingPage })),
+)
 
 function LazyPage({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<LoadingFallback />}>{children}</Suspense>
@@ -86,6 +89,14 @@ export const router = createBrowserRouter([
             element: (
               <LazyPage>
                 <DatabasePage />
+              </LazyPage>
+            ),
+          },
+          {
+            path: "/briefing",
+            element: (
+              <LazyPage>
+                <BriefingPage />
               </LazyPage>
             ),
           },
