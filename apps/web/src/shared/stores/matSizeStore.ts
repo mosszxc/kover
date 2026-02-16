@@ -65,3 +65,9 @@ export function getMatLabel(sizeId: string): string {
   const sizes = useMatSizeStore.getState().sizes
   return sizes.find((s) => s.id === sizeId)?.label ?? sizeId
 }
+
+/** Получить цену аренды размера по id */
+export function getMatRentalPrice(sizeId: string): number {
+  const sizes = useMatSizeStore.getState().sizes
+  return sizes.find((s) => s.id === sizeId)?.rentalPrice ?? 0
+}
