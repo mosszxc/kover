@@ -21,6 +21,7 @@ import { MAT_SIZE_STYLES } from '@/shared/constants'
 import type { MatSize } from '@/shared/types'
 import { ClientsFilters, type StatusFilter, type PaymentFilter } from './ClientsFilters'
 import { Banknote } from 'lucide-react'
+import { useCostSettingsStore } from '@/shared/stores/costSettingsStore'
 
 export interface PaymentInfo {
   status: 'paid' | 'partial' | 'overdue' | 'pending'
@@ -37,7 +38,7 @@ interface ClientsTableProps {
   onRecordPayment?: (client: Client) => void
 }
 
-type SortField = 'name' | 'address' | 'mats' | 'area' | 'cost' | 'revenue' | 'frequency' | 'days'
+type SortField = 'name' | 'address' | 'mats' | 'area' | 'cost' | 'revenue' | 'margin' | 'frequency' | 'days'
 
 export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPauseClient, anomalyIds, paymentStatusMap, onRecordPayment }: ClientsTableProps) {
   const clients = useClientStore((s) => s.clients)
@@ -63,6 +64,9 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
     () => sizes.some((s) => s.rentalPrice > 0),
     [sizes],
   )
+  const laundryCostPerSqm = useCostSettingsStore((s) => s.laundryCostPerSqm)
+  const logisticsCostPerStop = useCostSettingsStore((s) => s.logisticsCostPerStop)
+  const hasCostSettings = laundryCostPerSqm > 0 || logisticsCostPerStop > 0
 
   function groupMats(client: Client) {
     const grouped = new Map<string, number>()
@@ -87,6 +91,18 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
     return Math.round(costPerVisit * client.frequency * WEEKS_PER_MONTH * 100) / 100
   }
 
+  function getClientMonthlyCostOfService(client: Client): number {
+    const area = getClientArea(client)
+    const visitsPerMonth = client.frequency * WEEKS_PER_MONTH
+    const laundryCost = area * laundryCostPerSqm * visitsPerMonth
+    const logisticsCost = logisticsCostPerStop * visitsPerMonth
+    return Math.round((laundryCost + logisticsCost) * 100) / 100
+  }
+
+  function getClientMargin(client: Client): number {
+    return Math.round((getClientMonthlyRevenue(client) - getClientMonthlyCostOfService(client)) * 100) / 100
+  }
+
   const columns = useMemo<ColumnDef<Client>[]>(() => {
     const cols: ColumnDef<Client>[] = [
       { accessorKey: 'name', header: 'Название' },
@@ -99,6 +115,11 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
         { id: 'cost', header: 'Стоимость', accessorFn: (row) => getClientCost(row) },
         { id: 'revenue', header: 'Выручка/мес', accessorFn: (row) => getClientMonthlyRevenue(row) },
       )
+      if (hasCostSettings) {
+        cols.push(
+          { id: 'margin', header: 'Маржа/мес', accessorFn: (row) => getClientMargin(row) },
+        )
+      }
     }
     cols.push(
       { accessorKey: 'frequency', header: 'Частота' },
@@ -106,7 +127,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
       { accessorKey: 'isActive', header: 'Статус' },
     )
     return cols
-  }, [getClientArea, getClientCost, getClientMonthlyRevenue, hasPrices])
+  }, [getClientArea, getClientCost, getClientMonthlyRevenue, getClientMargin, hasPrices, hasCostSettings])
 
   const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>([])
   const [selectedFrequency, setSelectedFrequency] = useState<number | null>(null)
@@ -188,6 +209,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
     ...(hasPrices ? [
       { field: 'cost' as SortField, label: 'Стоимость' },
       { field: 'revenue' as SortField, label: 'Выручка/мес' },
+      ...(hasCostSettings ? [{ field: 'margin' as SortField, label: 'Маржа' }] : []),
     ] : []),
     { field: 'frequency', label: 'Частота' },
     { field: 'days', label: 'Дни' },
@@ -251,6 +273,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
           const area = getClientArea(client)
           const cost = hasPrices ? getClientCost(client) : 0
           const revenue = hasPrices ? getClientMonthlyRevenue(client) : 0
+          const margin = hasPrices && hasCostSettings ? getClientMargin(client) : null
           const paymentInfo = paymentStatusMap?.get(client.id)
 
           return (
@@ -372,6 +395,14 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                       <span className="text-emerald-400 font-medium">{revenue.toLocaleString('ru-RU')}{'\u00a0'}₽/мес</span>
                     </>
                   )}
+                  {margin !== null && (
+                    <>
+                      <span className="text-muted-foreground">·</span>
+                      <span className={cn('font-medium', margin > 0 ? 'text-emerald-400' : margin < 0 ? 'text-red-400' : 'text-muted-foreground')}>
+                        {margin > 0 ? '+' : ''}{margin.toLocaleString('ru-RU')}{'\u00a0'}₽
+                      </span>
+                    </>
+                  )}
                   <span className="text-muted-foreground">·</span>
                   <span>{client.frequency}×/нед</span>
                   {formatWorkingHours(client) && (
@@ -455,13 +486,27 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
       <div className="flex items-center justify-between text-sm text-muted-foreground">
         <span>Показано {table.getFilteredRowModel().rows.length} из {clients.length} клиентов</span>
         {hasPrices && (
-          <span className="font-medium text-emerald-400">
-            Выручка/мес: {(Math.round(
-              table.getFilteredRowModel().rows.reduce(
-                (sum, row) => sum + getClientMonthlyRevenue(row.original), 0
-              ) * 100
-            ) / 100).toLocaleString('ru-RU')}{'\u00a0'}₽
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="font-medium text-emerald-400">
+              Выручка/мес: {(Math.round(
+                table.getFilteredRowModel().rows.reduce(
+                  (sum, row) => sum + getClientMonthlyRevenue(row.original), 0
+                ) * 100
+              ) / 100).toLocaleString('ru-RU')}{'\u00a0'}₽
+            </span>
+            {hasCostSettings && (() => {
+              const totalMargin = Math.round(
+                table.getFilteredRowModel().rows.reduce(
+                  (sum, row) => sum + getClientMargin(row.original), 0
+                ) * 100
+              ) / 100
+              return (
+                <span className={cn('font-medium', totalMargin > 0 ? 'text-emerald-400' : totalMargin < 0 ? 'text-red-400' : 'text-muted-foreground')}>
+                  Маржа: {totalMargin > 0 ? '+' : ''}{totalMargin.toLocaleString('ru-RU')}{'\u00a0'}₽
+                </span>
+              )
+            })()}
+          </div>
         )}
       </div>
 

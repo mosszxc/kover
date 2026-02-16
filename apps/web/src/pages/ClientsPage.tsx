@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ClientsTable, EditClientDialog, AddClientDialog, useClientStore, BatchGeocode, GeocodeSettings, isClientPaused } from '@/modules/clients'
+import { ClientsTable, EditClientDialog, AddClientDialog, useClientStore, BatchGeocode, GeocodeSettings, isClientPaused, CostSettingsDialog } from '@/modules/clients'
 import type { PaymentInfo } from '@/modules/clients'
 import { useRouteStore } from '@/modules/routes'
 import { usePaymentStore, useClientPaymentStatus, RecordPaymentDialog, getCurrentPeriod } from '@/modules/payments'
@@ -138,6 +138,7 @@ export function ClientsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">Клиенты</h1>
         <div className="flex items-center gap-2">
+          <CostSettingsDialog />
           <GeocodeSettings />
           <BatchGeocode />
           <AddClientDialog />
