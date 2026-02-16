@@ -1,5 +1,5 @@
 import { NavLink } from "react-router"
-import { MapPin, Users, BarChart3, Map, Truck, Settings, Ruler, Database, BookOpen } from "lucide-react"
+import { MapPin, Users, BarChart3, Map, Truck, Settings, Ruler, Database, BookOpen, Warehouse } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
 
 const navItems = [
@@ -8,6 +8,7 @@ const navItems = [
   { to: "/clients", label: "Клиенты", icon: Users },
   { to: "/drivers", label: "Водители", icon: Truck },
   { to: "/mat-sizes", label: "Размеры", icon: Ruler },
+  { to: "/inventory", label: "Инвентарь", icon: Warehouse },
   { to: "/stats", label: "Статистика", icon: BarChart3 },
   { to: "/database", label: "База данных", icon: Database },
   { to: "/guide", label: "Справка", icon: BookOpen },

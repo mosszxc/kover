@@ -1,0 +1,7 @@
+export type { MatInventory, InventoryTransaction, TransactionType } from './types'
+export { TRANSACTION_LABELS } from './types'
+export { useInventoryStore } from './store'
+export { useInventorySummary } from './hooks/useInventorySummary'
+export type { SizeInventorySummary } from './hooks/useInventorySummary'
+export { InventoryDashboard } from './components/InventoryDashboard'
+export { StockDialog } from './components/StockDialog'
