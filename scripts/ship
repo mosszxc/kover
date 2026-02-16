@@ -374,24 +374,29 @@ else
     fi
 fi
 
-# 5.3 Sync local develop (non-blocking)
+# 5.3 Sync local develop (non-blocking, no checkout)
 echo "[PHASE 5] Syncing local develop..."
 MAIN_REPO=$(git worktree list | head -1 | awk '{print $1}')
-cd "$MAIN_REPO"
-git fetch origin develop 2>/dev/null
-STASHED=false
-if ! git diff --quiet 2>/dev/null || ! git diff --cached --quiet 2>/dev/null; then
-    git stash push -q -m "ship: auto-stash for develop sync" 2>/dev/null && STASHED=true
-fi
-if git checkout develop 2>/dev/null && git pull origin develop 2>/dev/null; then
-    SYNC_STATUS="synced"
-    echo "[PHASE 5] Local develop synced ✓"
+git -C "$MAIN_REPO" fetch origin develop 2>/dev/null
+CURRENT_BRANCH=$(git -C "$MAIN_REPO" rev-parse --abbrev-ref HEAD 2>/dev/null)
+if [ "$CURRENT_BRANCH" = "develop" ]; then
+    # On develop — fast-forward merge (no checkout needed)
+    if git -C "$MAIN_REPO" merge --ff-only origin/develop 2>/dev/null; then
+        SYNC_STATUS="synced"
+        echo "[PHASE 5] Local develop synced ✓"
+    else
+        SYNC_STATUS="FAILED (run: cd $MAIN_REPO && git pull origin develop)"
+        echo "⚠️  Local develop sync failed (non-blocking)"
+    fi
 else
-    SYNC_STATUS="FAILED (run: git checkout develop && git pull)"
-    echo "⚠️  Local develop sync failed (non-blocking)"
-fi
-if [ "$STASHED" = true ]; then
-    git stash pop -q 2>/dev/null || echo "⚠️  git stash pop failed — run: git stash pop"
+    # On another branch — update develop ref directly (no checkout/stash)
+    if git -C "$MAIN_REPO" branch -f develop origin/develop 2>/dev/null; then
+        SYNC_STATUS="synced"
+        echo "[PHASE 5] Local develop synced ✓"
+    else
+        SYNC_STATUS="FAILED (run: cd $MAIN_REPO && git checkout develop && git pull)"
+        echo "⚠️  Local develop sync failed (non-blocking)"
+    fi
 fi
 
 # 5.4 Final verification (tracked state — no extra API calls)
