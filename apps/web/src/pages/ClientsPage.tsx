@@ -86,6 +86,7 @@ export function ClientsPage() {
           open={!!selectedClient}
           onOpenChange={(open) => { if (!open) setSelectedClient(null) }}
           onDelete={(id) => {
+            addServiceLog({ clientId: id, type: 'client_deleted' })
             deleteClient(id)
             setSelectedClient(null)
           }}
