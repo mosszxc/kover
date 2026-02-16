@@ -1,8 +1,9 @@
 import { NavLink } from "react-router"
-import { MapPin, Users, BarChart3, Map, Truck, Settings, Ruler, Database, BookOpen, Warehouse } from "lucide-react"
+import { MapPin, Users, BarChart3, Map, Truck, Settings, Ruler, Database, BookOpen, Warehouse, Sun } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
 
 const navItems = [
+  { to: "/briefing", label: "Сегодня", icon: Sun },
   { to: "/", label: "Маршрут", icon: MapPin },
   { to: "/map", label: "Карта", icon: Map },
   { to: "/clients", label: "Клиенты", icon: Users },
