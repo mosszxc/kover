@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { Trash2, Loader2, ClipboardList, History, ChevronLeft, ChevronRight, Pause, Play, CalendarClock } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/shared/lib/utils'
+import { diffClient } from '@/shared/lib/clientDiff'
+import { useServiceLogStore } from '@/shared/stores/serviceLogStore'
 import { geocodeAddress } from '@/shared/lib/geocode'
 import { useSettingsStore } from '@/shared/stores/settingsStore'
 import { Button } from '@/shared/ui/button'
@@ -42,6 +44,7 @@ interface EditClientDialogProps {
 
 export function EditClientDialog({ client, open, onOpenChange, onDelete }: EditClientDialogProps) {
   const updateClient = useClientStore((s) => s.updateClient)
+  const addServiceLog = useServiceLogStore((s) => s.addEntry)
   const geocodeCity = useSettingsStore((s) => s.geocodeCity)
   const isMobile = useIsMobile()
 
@@ -132,6 +135,15 @@ export function EditClientDialog({ client, open, onOpenChange, onDelete }: EditC
     }
 
     updateClient(client.id, data)
+
+    const { scheduleChanges, profileChanges } = diffClient(client, data)
+    if (scheduleChanges.length > 0) {
+      addServiceLog({ clientId: client.id, type: 'schedule_changed', details: scheduleChanges.join('; ') })
+    }
+    if (profileChanges.length > 0) {
+      addServiceLog({ clientId: client.id, type: 'profile_changed', details: profileChanges.join('; ') })
+    }
+
     toast.success(`Клиент "${form.name.trim()}" сохранён`)
     setSaving(false)
     onOpenChange(false)
