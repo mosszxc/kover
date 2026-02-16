@@ -1,5 +1,16 @@
 import { useMemo } from 'react'
 import { useInventoryStore } from '../store'
+import type { MatBatch } from '../types'
+
+export interface BatchWearInfo {
+  id: string
+  purchasedAt: string
+  quantity: number
+  remaining: number
+  washCycles: number
+  maxWashCycles: number
+  wearPercent: number
+}
 
 export interface SizeInventorySummary {
   sizeId: string
@@ -10,14 +21,29 @@ export interface SizeInventorySummary {
   inStock: number
   washCycles: number
   maxWashCycles: number
+  worstBatch: BatchWearInfo | null
+  batches: BatchWearInfo[]
 }
 
 interface UseInventorySummaryParams {
   clientMatTotals: Map<string, number>
 }
 
+function toBatchWearInfo(b: MatBatch): BatchWearInfo {
+  return {
+    id: b.id,
+    purchasedAt: b.purchasedAt,
+    quantity: b.quantity,
+    remaining: b.remaining,
+    washCycles: b.washCycles,
+    maxWashCycles: b.maxWashCycles,
+    wearPercent: b.maxWashCycles > 0 ? (b.washCycles / b.maxWashCycles) * 100 : 0,
+  }
+}
+
 export function useInventorySummary({ clientMatTotals }: UseInventorySummaryParams): SizeInventorySummary[] {
   const inventory = useInventoryStore((s) => s.inventory)
+  const batches = useInventoryStore((s) => s.batches)
 
   return useMemo(() => {
     const allSizeIds = new Set<string>()
@@ -35,7 +61,16 @@ export function useInventorySummary({ clientMatTotals }: UseInventorySummaryPara
       const washCycles = inv?.washCycles ?? 0
       const maxWashCycles = inv?.maxWashCycles ?? 300
 
-      return { sizeId, totalOwned, atClients, inLaundry, damaged, inStock, washCycles, maxWashCycles }
+      const sizeBatches = batches
+        .filter((b) => b.sizeId === sizeId && b.remaining > 0)
+        .sort((a, b) => a.purchasedAt.localeCompare(b.purchasedAt))
+        .map(toBatchWearInfo)
+
+      const worstBatch = sizeBatches.length > 0
+        ? sizeBatches.reduce((worst, b) => b.wearPercent > worst.wearPercent ? b : worst)
+        : null
+
+      return { sizeId, totalOwned, atClients, inLaundry, damaged, inStock, washCycles, maxWashCycles, worstBatch, batches: sizeBatches }
     })
-  }, [inventory, clientMatTotals])
+  }, [inventory, batches, clientMatTotals])
 }

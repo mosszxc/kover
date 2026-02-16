@@ -1,10 +1,11 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { temporal } from 'zundo'
-import type { MatInventory, InventoryTransaction, TransactionType } from './types'
+import type { MatInventory, MatBatch, InventoryTransaction, TransactionType } from './types'
 
 interface InventoryState {
   inventory: MatInventory[]
+  batches: MatBatch[]
   transactions: InventoryTransaction[]
   setInventory: (sizeId: string, data: Partial<MatInventory>) => void
   addTransaction: (tx: InventoryTransaction) => void
@@ -35,11 +36,56 @@ function updateSize(inventory: MatInventory[], sizeId: string, updater: (item: M
   return ensured.map((i) => (i.sizeId === sizeId ? updater(i) : i))
 }
 
+/** Distribute wash cycles across batches FIFO (oldest first) */
+function distributeLaundryOut(batches: MatBatch[], sizeId: string, quantity: number): MatBatch[] {
+  const sizeBatches = batches
+    .filter((b) => b.sizeId === sizeId && b.remaining > 0)
+    .sort((a, b) => a.purchasedAt.localeCompare(b.purchasedAt))
+
+  let remaining = quantity
+  const updated = new Map<string, MatBatch>()
+
+  for (const batch of sizeBatches) {
+    if (remaining <= 0) break
+    const cyclesForBatch = Math.min(remaining, batch.remaining)
+    updated.set(batch.id, {
+      ...batch,
+      washCycles: batch.washCycles + cyclesForBatch,
+    })
+    remaining -= cyclesForBatch
+  }
+
+  return batches.map((b) => updated.get(b.id) ?? b)
+}
+
+/** Write off from oldest batches first (FIFO) */
+function distributeWriteOff(batches: MatBatch[], sizeId: string, quantity: number): MatBatch[] {
+  const sizeBatches = batches
+    .filter((b) => b.sizeId === sizeId && b.remaining > 0)
+    .sort((a, b) => a.purchasedAt.localeCompare(b.purchasedAt))
+
+  let remaining = quantity
+  const updated = new Map<string, MatBatch>()
+
+  for (const batch of sizeBatches) {
+    if (remaining <= 0) break
+    const toRemove = Math.min(remaining, batch.remaining)
+    updated.set(batch.id, {
+      ...batch,
+      remaining: batch.remaining - toRemove,
+    })
+    remaining -= toRemove
+  }
+
+  return batches.map((b) => updated.get(b.id) ?? b)
+}
+
 export const useInventoryStore = create<InventoryState>()(
   persist(
     temporal(
       (set) => ({
         inventory: [],
+        batches: [],
         transactions: [],
 
         setInventory: (sizeId, data) =>
@@ -51,13 +97,26 @@ export const useInventoryStore = create<InventoryState>()(
           set((state) => ({ transactions: [...state.transactions, tx] })),
 
         recordPurchase: (sizeId, quantity, notes = '') =>
-          set((state) => ({
-            inventory: updateSize(state.inventory, sizeId, (i) => ({
-              ...i,
-              totalOwned: i.totalOwned + quantity,
-            })),
-            transactions: [...state.transactions, createTransaction(sizeId, 'purchase', quantity, notes)],
-          })),
+          set((state) => {
+            const maxWashCycles = state.inventory.find((i) => i.sizeId === sizeId)?.maxWashCycles ?? 300
+            const newBatch: MatBatch = {
+              id: crypto.randomUUID(),
+              sizeId,
+              quantity,
+              remaining: quantity,
+              washCycles: 0,
+              maxWashCycles,
+              purchasedAt: new Date().toISOString(),
+            }
+            return {
+              inventory: updateSize(state.inventory, sizeId, (i) => ({
+                ...i,
+                totalOwned: i.totalOwned + quantity,
+              })),
+              batches: [...state.batches, newBatch],
+              transactions: [...state.transactions, createTransaction(sizeId, 'purchase', quantity, notes)],
+            }
+          }),
 
         recordWriteOff: (sizeId, quantity, notes = '') =>
           set((state) => ({
@@ -66,6 +125,7 @@ export const useInventoryStore = create<InventoryState>()(
               totalOwned: Math.max(0, i.totalOwned - quantity),
               damaged: i.damaged + quantity,
             })),
+            batches: distributeWriteOff(state.batches, sizeId, quantity),
             transactions: [...state.transactions, createTransaction(sizeId, 'write_off', quantity, notes)],
           })),
 
@@ -85,31 +145,54 @@ export const useInventoryStore = create<InventoryState>()(
               inLaundry: Math.max(0, i.inLaundry - quantity),
               washCycles: (i.washCycles ?? 0) + quantity,
             })),
+            batches: distributeLaundryOut(state.batches, sizeId, quantity),
             transactions: [...state.transactions, createTransaction(sizeId, 'laundry_out', quantity)],
           })),
       }),
       {
         limit: 20,
         partialize: (state) => {
-          const { inventory, transactions } = state
-          return { inventory, transactions } as InventoryState
+          const { inventory, batches, transactions } = state
+          return { inventory, batches, transactions } as InventoryState
         },
       },
     ),
     {
       name: 'kover-inventory',
-      version: 2,
-      migrate: (persisted) => {
+      version: 3,
+      migrate: (persisted, version) => {
         const state = persisted as Record<string, unknown>
-        const inventory = (state.inventory as MatInventory[]) ?? []
-        return {
-          ...state,
-          inventory: inventory.map((i) => ({
+
+        if (version < 2) {
+          const inventory = (state.inventory as MatInventory[]) ?? []
+          state.inventory = inventory.map((i) => ({
             ...i,
             washCycles: i.washCycles ?? 0,
             maxWashCycles: i.maxWashCycles ?? 300,
-          })),
+          }))
         }
+
+        // v2 → v3: create legacy batches from existing inventory
+        if (version < 3) {
+          const inventory = (state.inventory as MatInventory[]) ?? []
+          const existingBatches = (state.batches as MatBatch[]) ?? []
+
+          if (existingBatches.length === 0) {
+            state.batches = inventory
+              .filter((i) => i.totalOwned > 0)
+              .map((i) => ({
+                id: crypto.randomUUID(),
+                sizeId: i.sizeId,
+                quantity: i.totalOwned,
+                remaining: i.totalOwned,
+                washCycles: i.washCycles ?? 0,
+                maxWashCycles: i.maxWashCycles ?? 300,
+                purchasedAt: '2025-01-01T00:00:00.000Z',
+              }))
+          }
+        }
+
+        return state as unknown as InventoryState
       },
     },
   ),
