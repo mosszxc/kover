@@ -89,6 +89,8 @@ export function AddClientDialog() {
       notes: form.notes.trim(),
       workingHoursStart: form.workingHoursStart || null,
       workingHoursEnd: form.workingHoursEnd || null,
+      contactName: form.contactName.trim() || null,
+      contactPhone: form.contactPhone.trim() || null,
       isActive: true,
       createdAt: new Date().toISOString(),
       ...(lat != null && lng != null ? { lat, lng } : {}),
