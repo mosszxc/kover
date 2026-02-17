@@ -117,9 +117,9 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
           ref={setActivatorNodeRef}
           {...listeners}
           aria-label="Перетащить для изменения порядка"
-          className="flex size-6 shrink-0 cursor-grab items-center justify-center rounded opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 print:hidden"
+          className="flex size-6 min-h-[44px] min-w-[44px] shrink-0 cursor-grab items-center justify-center rounded active:cursor-grabbing focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 print:hidden"
         >
-          <GripVertical className="size-5 text-muted-foreground" />
+          <GripVertical className="size-5 text-foreground/40" />
         </button>
       )}
 
