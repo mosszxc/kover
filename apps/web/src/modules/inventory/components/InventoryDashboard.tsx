@@ -74,7 +74,7 @@ export function InventoryDashboard({ summary, sizeLabels }: InventoryDashboardPr
             {item.totalOwned > 0 && item.batches.length > 0 && (
               <div className="mt-2 space-y-1.5">
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <RotateCw className="size-3" />
+                  <RotateCw className="size-4" />
                   Износ по партиям
                 </div>
                 {item.batches.map((batch) => {
@@ -118,7 +118,7 @@ export function InventoryDashboard({ summary, sizeLabels }: InventoryDashboardPr
               <div className="mt-2">
                 <div className="flex items-center justify-between text-xs">
                   <span className="flex items-center gap-1 text-muted-foreground">
-                    <RotateCw className="size-3" />
+                    <RotateCw className="size-4" />
                     Износ
                   </span>
                   <span className={cn(

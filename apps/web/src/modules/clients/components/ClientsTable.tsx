@@ -354,10 +354,10 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                       e.stopPropagation()
                       toggleExpanded(client.id)
                     }}
-                    className="shrink-0 rounded p-0.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded p-0.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                     aria-label={isExpanded ? 'Свернуть детали' : 'Развернуть детали'}
                   >
-                    <ChevronDown className={cn('size-4 transition-transform duration-150', isExpanded && 'rotate-180')} />
+                    <ChevronDown className={cn('size-5 transition-transform duration-150', isExpanded && 'rotate-180')} />
                   </button>
                   <span className="truncate font-medium text-foreground">{client.name}</span>
                   {client.category && (
@@ -503,9 +503,9 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                               onQuickPay(client)
                             }}
                             title="Отметить полную оплату"
-                            className="inline-flex size-6 items-center justify-center rounded-full bg-emerald-600/20 text-emerald-400 transition-colors hover:bg-emerald-600/30"
+                            className="inline-flex size-8 min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-emerald-600/20 text-emerald-400 transition-colors hover:bg-emerald-600/30"
                           >
-                            <Check className="size-3.5" />
+                            <Check className="size-4" />
                           </button>
                         )}
                         <button
