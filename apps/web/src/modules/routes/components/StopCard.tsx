@@ -176,7 +176,7 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
             </span>
           )}
           {formatWorkingHours(client) && (
-            <span className="ml-1 inline-flex shrink-0 items-center gap-0.5 text-xs text-muted-foreground">
+            <span className="ml-1 inline-flex shrink-0 items-center gap-0.5 text-sm text-muted-foreground">
               <Clock className="size-3" />
               {formatWorkingHours(client)}
             </span>
@@ -185,7 +185,7 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
             <a
               href={`tel:${client.contactPhone}`}
               onClick={(e) => e.stopPropagation()}
-              className="ml-1 inline-flex shrink-0 items-center gap-0.5 text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+              className="ml-1 inline-flex shrink-0 items-center gap-0.5 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
               title={client.contactName ?? 'Позвонить'}
             >
               <Phone className="size-3" />

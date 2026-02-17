@@ -283,7 +283,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
         hasPayments={hasPayments}
       />
 
-      <div className="flex items-center justify-between text-xs text-muted-foreground">
+      <div className="flex items-center justify-between text-sm text-muted-foreground">
       <div className="flex items-center gap-1">
         <span>Сортировка:</span>
         {sortButtons.map(({ field, label }) => (
@@ -361,7 +361,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                   </button>
                   <span className="truncate font-medium text-foreground">{client.name}</span>
                   {client.category && (
-                    <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+                    <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-sm text-muted-foreground">
                       {CLIENT_CATEGORIES.find((c) => c.value === client.category)?.label}
                     </span>
                   )}

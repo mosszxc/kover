@@ -27,7 +27,7 @@ export function RouteCard({ route, todayLabel }: RouteCardProps) {
           <MapPin className="size-4 text-emerald-400" />
           <div>
             <div className="text-2xl font-bold text-foreground">{route.activeStops}</div>
-            <div className="text-xs text-muted-foreground">остановок</div>
+            <div className="text-sm text-muted-foreground">остановок</div>
           </div>
         </div>
 
@@ -36,7 +36,7 @@ export function RouteCard({ route, todayLabel }: RouteCardProps) {
             <SkipForward className="size-4 text-amber-400" />
             <div>
               <div className="text-2xl font-bold text-foreground">{route.skippedStops}</div>
-              <div className="text-xs text-muted-foreground">пропущено</div>
+              <div className="text-sm text-muted-foreground">пропущено</div>
             </div>
           </div>
         )}
@@ -45,7 +45,7 @@ export function RouteCard({ route, todayLabel }: RouteCardProps) {
           <Truck className="size-4 text-blue-400" />
           <div>
             <div className="text-2xl font-bold text-foreground">{route.drivers.length}</div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-sm text-muted-foreground">
               {route.drivers.length === 1 ? 'водитель' : 'водителей'}
             </div>
           </div>
@@ -57,7 +57,7 @@ export function RouteCard({ route, todayLabel }: RouteCardProps) {
           </div>
           <div>
             <div className="text-2xl font-bold text-foreground">{route.totalMatsSqm}</div>
-            <div className="text-xs text-muted-foreground">ковриков</div>
+            <div className="text-sm text-muted-foreground">ковриков</div>
           </div>
         </div>
       </div>
