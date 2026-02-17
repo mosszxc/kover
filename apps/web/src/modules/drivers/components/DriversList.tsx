@@ -62,13 +62,13 @@ export function DriversList({ onRowClick }: DriversListProps) {
                 {driver.name}
               </p>
               {driver.phone && (
-                <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                <p className="flex items-center gap-1 text-sm text-muted-foreground">
                   <Phone className="h-3 w-3" />
                   {driver.phone}
                 </p>
               )}
               {driver.vehicleName && (
-                <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                <p className="flex items-center gap-1 text-sm text-muted-foreground">
                   <Truck className="h-3 w-3" />
                   {driver.vehicleName}
                   {driver.vehicleCapacity != null && ` (${driver.vehicleCapacity} м²)`}

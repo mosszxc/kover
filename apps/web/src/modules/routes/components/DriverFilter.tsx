@@ -12,7 +12,7 @@ export function DriverFilter({ drivers, value, onChange }: DriverFilterProps) {
 
   const btnClass = (active: boolean) =>
     cn(
-      'shrink-0 rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+      'shrink-0 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
       active
         ? 'bg-muted text-foreground'
         : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
@@ -20,7 +20,7 @@ export function DriverFilter({ drivers, value, onChange }: DriverFilterProps) {
 
   return (
     <div className="flex flex-wrap items-center gap-1.5">
-      <span className="mr-1 text-xs text-muted-foreground">Водитель:</span>
+      <span className="mr-1 text-sm text-muted-foreground">Водитель:</span>
       <button
         type="button"
         onClick={() => onChange(null)}
