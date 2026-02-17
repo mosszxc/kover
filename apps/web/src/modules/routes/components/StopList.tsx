@@ -253,7 +253,7 @@ export function StopList({ searchQuery = '', drivers = [], driverFilter = null, 
             Пропущены ({skippedStops.length})
           </button>
           {showSkipped && (
-            <div className="mt-1 space-y-px opacity-60">
+            <div className="mt-1 space-y-px">
               {skippedStops.map((stop) => {
                 const client = clientMap.get(stop.clientId)
                 if (!client) return null
@@ -263,7 +263,7 @@ export function StopList({ searchQuery = '', drivers = [], driverFilter = null, 
                     key={stop.id}
                     className="flex items-center gap-3 border-l-3 border-l-border p-3"
                   >
-                    <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground line-through">
+                    <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
                       {client.originalName}
                       {dateException && (
                         <span className="ml-2 inline-flex items-center gap-1 text-xs no-underline">

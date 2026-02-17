@@ -342,7 +342,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                   : hasNoCoords
                     ? 'border-red-500/30 bg-red-500/5'
                     : 'border-border',
-                isActive ? 'hover:bg-muted/50' : 'opacity-60 hover:bg-muted/30',
+                isActive ? 'hover:bg-muted/50' : 'border-l-2 border-amber-400 hover:bg-muted/30',
               )}
             >
               {/* Line 1: name · address | days */}
