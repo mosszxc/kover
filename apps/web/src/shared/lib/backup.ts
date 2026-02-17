@@ -8,19 +8,40 @@ export interface BackupMeta {
   timestamp: string
   clientCount: number
   routeStopCount: number
+  driverCount: number
+  paymentCount: number
+  inventorySizeCount: number
+  changelogCount: number
+  serviceLogCount: number
+  serviceReportCount: number
+  routeExceptionCount: number
 }
 
 export interface BackupData {
   meta: BackupMeta
   clients: unknown
   routes: unknown
+  drivers?: unknown
+  payments?: unknown
+  inventory?: unknown
+  inventoryTransactions?: unknown
+  matSizes?: unknown
+  settings?: unknown
+  costSettings?: unknown
+  invoiceSettings?: unknown
+  routeSettings?: unknown
+  routeExceptions?: unknown
+  changelog?: unknown
+  serviceLog?: unknown
+  serviceReports?: unknown
 }
 
-export async function saveBackup(clients: unknown[], routes: unknown[]): Promise<BackupMeta> {
+export async function saveBackup(stores: Omit<BackupData, 'meta'>): Promise<BackupMeta> {
   const timestamp = new Date().toISOString()
   const key = `${BACKUP_PREFIX}${timestamp}`
 
-  const stopCount = (routes as { stops: unknown[] }[]).reduce(
+  const routes = stores.routes as { stops: unknown[] }[] | undefined
+  const stopCount = (routes ?? []).reduce(
     (sum, r) => sum + (r.stops?.length ?? 0),
     0,
   )
@@ -28,11 +49,18 @@ export async function saveBackup(clients: unknown[], routes: unknown[]): Promise
   const meta: BackupMeta = {
     key,
     timestamp,
-    clientCount: clients.length,
+    clientCount: Array.isArray(stores.clients) ? stores.clients.length : 0,
     routeStopCount: stopCount,
+    driverCount: Array.isArray(stores.drivers) ? stores.drivers.length : 0,
+    paymentCount: Array.isArray(stores.payments) ? stores.payments.length : 0,
+    inventorySizeCount: Array.isArray(stores.inventory) ? stores.inventory.length : 0,
+    changelogCount: Array.isArray(stores.changelog) ? stores.changelog.length : 0,
+    serviceLogCount: Array.isArray(stores.serviceLog) ? stores.serviceLog.length : 0,
+    serviceReportCount: Array.isArray(stores.serviceReports) ? stores.serviceReports.length : 0,
+    routeExceptionCount: Array.isArray(stores.routeExceptions) ? stores.routeExceptions.length : 0,
   }
 
-  const data: BackupData = { meta, clients, routes }
+  const data: BackupData = { meta, ...stores }
   await set(key, data)
 
   // Cleanup old backups

@@ -98,6 +98,8 @@ export function useBriefing({
         type: 'overload',
         title: 'Перегрузка маршрута',
         description: `${activeStops.length} остановок (макс. ${maxStopsPerDay})`,
+        actionUrl: '/',
+        actionLabel: 'Открыть маршрут',
       })
     }
 
@@ -110,6 +112,8 @@ export function useBriefing({
           type: 'shortage',
           title: `Нехватка ковриков ${label}`,
           description: `Дефицит: ${Math.abs(item.inStock)} шт.`,
+          actionUrl: '/inventory',
+          actionLabel: 'Инвентарь',
         })
       }
     }
@@ -146,6 +150,8 @@ export function useBriefing({
         type: 'overdue',
         title: 'Просроченные оплаты',
         description: desc.join(' · '),
+        actionUrl: '/clients',
+        actionLabel: 'Показать',
       })
     }
 
@@ -160,6 +166,8 @@ export function useBriefing({
         type: 'exceptions',
         title: 'Исключения на сегодня',
         description: parts.join(', '),
+        actionUrl: '/',
+        actionLabel: 'Открыть маршрут',
       })
     }
 

@@ -13,8 +13,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/shared/ui/alert-dialog'
-import { useRouteStore } from '@/modules/routes'
-import { useClientStore } from '@/modules/clients'
 import {
   saveBackup,
   listBackups,
@@ -22,8 +20,7 @@ import {
   deleteBackup,
   type BackupMeta,
 } from '@/shared/lib/backup'
-import type { Client } from '@/modules/clients'
-import type { DayRoute } from '@/modules/routes'
+import { collectStores, restoreStores } from '@/shared/lib/backupStores'
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleString('ru-RU', {
@@ -34,11 +31,24 @@ function formatDate(iso: string): string {
   })
 }
 
+function BackupSummary({ backup }: { backup: BackupMeta }) {
+  const parts: string[] = []
+
+  if (backup.clientCount > 0) parts.push(`${backup.clientCount} клиентов`)
+  if (backup.routeStopCount > 0) parts.push(`${backup.routeStopCount} точек`)
+  if (backup.driverCount > 0) parts.push(`${backup.driverCount} водителей`)
+  if (backup.paymentCount > 0) parts.push(`${backup.paymentCount} оплат`)
+  if (backup.inventorySizeCount > 0) parts.push(`${backup.inventorySizeCount} размеров`)
+  if (backup.serviceReportCount > 0) parts.push(`${backup.serviceReportCount} отчётов`)
+
+  if (parts.length === 0) parts.push('Пустой бекап')
+
+  return <span>{parts.join(', ')}</span>
+}
+
 export function BackupManager() {
   const [backups, setBackups] = useState<BackupMeta[]>([])
   const [loading, setLoading] = useState(false)
-  const seedClients = useClientStore((s) => s.seedClients)
-  const seedRoutes = useRouteStore((s) => s.seedRoutes)
 
   const refresh = useCallback(async () => {
     setBackups(await listBackups())
@@ -51,9 +61,8 @@ export function BackupManager() {
   async function handleCreateBackup() {
     setLoading(true)
     try {
-      const clients = useClientStore.getState().clients
-      const routes = useRouteStore.getState().routes
-      await saveBackup(clients, routes)
+      const stores = collectStores()
+      await saveBackup(stores)
       await refresh()
       toast.success('Бекап создан')
     } catch {
@@ -70,8 +79,7 @@ export function BackupManager() {
       return
     }
 
-    seedClients(data.clients as Client[])
-    seedRoutes(data.routes as DayRoute[])
+    restoreStores(data)
     toast.success('Данные восстановлены из бекапа')
   }
 
@@ -105,7 +113,7 @@ export function BackupManager() {
               <div>
                 <div className="text-sm text-foreground">{formatDate(backup.timestamp)}</div>
                 <div className="text-xs text-muted-foreground">
-                  {backup.clientCount} клиентов, {backup.routeStopCount} точек
+                  <BackupSummary backup={backup} />
                 </div>
               </div>
               <div className="flex items-center gap-1">

@@ -2,7 +2,12 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { syncSettingChange } from '@/shared/lib/sync/settingsSync'
 
+type Theme = 'light' | 'dark'
+
 interface SettingsState {
+  theme: Theme
+  setTheme: (theme: Theme) => void
+
   geocodeCity: string
   setGeocodeCity: (city: string) => void
 
@@ -29,6 +34,13 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
+      theme: 'light' as Theme,
+      setTheme: (theme: Theme) => {
+        set({ theme })
+        document.documentElement.classList.toggle('dark', theme === 'dark')
+        syncSettingChange('theme', theme)
+      },
+
       geocodeCity: '',
       setGeocodeCity: (city) => {
         const trimmed = city.trim()

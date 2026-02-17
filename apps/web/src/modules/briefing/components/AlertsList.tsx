@@ -1,5 +1,7 @@
-import { AlertTriangle, Package, CreditCard, CalendarClock } from 'lucide-react'
+import { AlertTriangle, Package, CreditCard, CalendarClock, ArrowRight } from 'lucide-react'
+import { Link } from 'react-router'
 import { cn } from '@/shared/lib/utils'
+import { Button } from '@/shared/ui/button'
 import type { Alert } from '../types'
 
 const ALERT_CONFIG = {
@@ -32,10 +34,10 @@ export function AlertsList({ alerts }: AlertsListProps) {
         return (
           <div
             key={alert.id}
-            className={cn('flex items-start gap-3 rounded-lg border p-3', config.bg)}
+            className={cn('flex items-center gap-3 rounded-lg border p-3', config.bg)}
           >
-            <Icon className={cn('size-5 shrink-0 mt-0.5', config.color)} />
-            <div>
+            <Icon className={cn('size-5 shrink-0', config.color)} />
+            <div className="flex-1 min-w-0">
               <div className={cn('text-sm font-medium', config.color)}>
                 {alert.title}
               </div>
@@ -43,6 +45,12 @@ export function AlertsList({ alerts }: AlertsListProps) {
                 {alert.description}
               </div>
             </div>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to={alert.actionUrl}>
+                {alert.actionLabel}
+                <ArrowRight className="size-3.5" />
+              </Link>
+            </Button>
           </div>
         )
       })}

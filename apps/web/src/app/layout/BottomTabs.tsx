@@ -1,13 +1,12 @@
 import { NavLink } from "react-router"
-import { MapPin, Users, BarChart3, Map, Settings, Ruler } from "lucide-react"
+import { MapPin, Users, Map, Settings, Sun } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
 
 const navItems = [
+  { to: "/briefing", label: "Сегодня", icon: Sun },
   { to: "/", label: "Маршрут", icon: MapPin },
   { to: "/map", label: "Карта", icon: Map },
   { to: "/clients", label: "Клиенты", icon: Users },
-  { to: "/mat-sizes", label: "Размеры", icon: Ruler },
-  { to: "/stats", label: "Стат.", icon: BarChart3 },
   { to: "/settings", label: "Настройки", icon: Settings },
 ] as const
 
@@ -23,7 +22,7 @@ export function BottomTabs() {
             cn(
               "flex flex-1 flex-col items-center gap-1 py-2.5 text-xs font-medium transition-colors duration-150 cursor-pointer",
               isActive
-                ? "text-white"
+                ? "text-foreground"
                 : "text-muted-foreground"
             )
           }

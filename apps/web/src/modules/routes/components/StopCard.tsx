@@ -103,7 +103,7 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
         isAnomaly
           ? 'border-l-amber-500 bg-amber-500/5'
           : isMissingCoords
-            ? 'border-l-slate-500 bg-slate-500/5'
+            ? 'border-l-muted-foreground bg-muted/5'
             : driverId
               ? 'border-l-blue-500'
               : 'border-l-border',
@@ -131,7 +131,7 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
         <div className="flex items-center gap-1.5">
           {isMissingCoords && (
             <span title="Нет координат — не отображается на карте" className="shrink-0 print:hidden">
-              <MapPinOff className="size-4 text-slate-400" aria-label="Нет координат" />
+              <MapPinOff className="size-4 text-muted-foreground" aria-label="Нет координат" />
             </span>
           )}
           {isAnomaly && (

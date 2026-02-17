@@ -23,6 +23,8 @@ export interface Alert {
   type: 'overload' | 'shortage' | 'overdue' | 'exceptions'
   title: string
   description: string
+  actionUrl: string
+  actionLabel: string
 }
 
 export interface WornMat {

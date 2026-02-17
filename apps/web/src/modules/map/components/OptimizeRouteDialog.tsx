@@ -149,8 +149,8 @@ export function OptimizeRouteDialog() {
 
         {loading && (
           <div className="flex flex-col items-center justify-center gap-2 py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
-            <p className="text-sm text-slate-400">Рассчитываем оптимальный маршрут...</p>
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">Рассчитываем оптимальный маршрут...</p>
           </div>
         )}
 
@@ -185,7 +185,7 @@ export function OptimizeRouteDialog() {
             </p>
 
             {noCoordCount > 0 && (
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-muted-foreground">
                 {noCoordCount} {noCoordCount === 1 ? 'точка без координат перемещена' : noCoordCount < 5 ? 'точки без координат перемещены' : 'точек без координат перемещены'} в конец маршрута.
               </p>
             )}
@@ -196,7 +196,7 @@ export function OptimizeRouteDialog() {
               </p>
             )}
 
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
               Метод: {result.method === 'road' ? 'по дорогам (OSRM)' : 'по прямой (fallback)'}
             </p>
           </div>

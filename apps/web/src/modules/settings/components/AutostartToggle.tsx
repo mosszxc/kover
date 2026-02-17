@@ -48,18 +48,18 @@ export function AutostartToggle() {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-lg font-semibold text-slate-50">Автозапуск</h2>
-        <p className="text-sm text-slate-400">
+        <h2 className="text-lg font-semibold text-foreground">Автозапуск</h2>
+        <p className="text-sm text-muted-foreground">
           Kover будет запускаться автоматически при входе в Windows
         </p>
       </div>
 
-      <label className="flex cursor-pointer items-center justify-between rounded-lg border border-slate-700 px-4 py-3">
+      <label className="flex cursor-pointer items-center justify-between rounded-lg border border-border px-4 py-3">
         <div>
-          <span className="text-sm font-medium text-slate-50">
+          <span className="text-sm font-medium text-foreground">
             Запускать с Windows
           </span>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-muted-foreground">
             Kover стартует при входе в систему
           </p>
         </div>
@@ -69,11 +69,11 @@ export function AutostartToggle() {
           aria-checked={autostartEnabled}
           onClick={handleAutostartToggle}
           className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
-            autostartEnabled ? 'bg-blue-600' : 'bg-slate-600'
+            autostartEnabled ? 'bg-primary' : 'bg-input'
           }`}
         >
           <span
-            className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${
+            className={`inline-block h-4 w-4 rounded-full bg-background shadow-sm transition-transform ${
               autostartEnabled ? 'translate-x-6' : 'translate-x-1'
             }`}
           />
@@ -81,12 +81,12 @@ export function AutostartToggle() {
       </label>
 
       {autostartEnabled && (
-        <label className="flex cursor-pointer items-center justify-between rounded-lg border border-slate-700 px-4 py-3">
+        <label className="flex cursor-pointer items-center justify-between rounded-lg border border-border px-4 py-3">
           <div>
-            <span className="text-sm font-medium text-slate-50">
+            <span className="text-sm font-medium text-foreground">
               Запускать свёрнутым
             </span>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-muted-foreground">
               Окно скрыто в трей, доступ через иконку в панели задач
             </p>
           </div>
@@ -96,11 +96,11 @@ export function AutostartToggle() {
             aria-checked={startMinimized}
             onClick={handleMinimizedToggle}
             className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
-              startMinimized ? 'bg-blue-600' : 'bg-slate-600'
+              startMinimized ? 'bg-primary' : 'bg-input'
             }`}
           >
             <span
-              className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${
+              className={`inline-block h-4 w-4 rounded-full bg-background shadow-sm transition-transform ${
                 startMinimized ? 'translate-x-6' : 'translate-x-1'
               }`}
             />

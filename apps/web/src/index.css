@@ -43,7 +43,7 @@
 :root {
   --radius: 0.625rem;
 
-  /* Light mode — secondary, MASTER.md says dark mode first */
+  /* Light mode — default */
   --background: oklch(0.985 0.002 247.839);
   --foreground: oklch(0.145 0.017 265.775);
   --card: oklch(1 0 0);

@@ -1,6 +1,7 @@
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router'
 import { cn } from '@/shared/lib/utils'
+import { Button } from '@/shared/ui/button'
 import type { WornMat } from '../types'
 
 interface WornMatsListProps {
@@ -19,12 +20,12 @@ export function WornMatsList({ mats }: WornMatsListProps) {
             Износ ковриков
           </h2>
         </div>
-        <Link
-          to="/inventory"
-          className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
-        >
-          Инвентарь
-        </Link>
+        <Button variant="ghost" size="sm" asChild>
+          <Link to="/inventory">
+            Инвентарь
+            <ArrowRight className="size-3.5" />
+          </Link>
+        </Button>
       </div>
 
       <div className="space-y-2">
