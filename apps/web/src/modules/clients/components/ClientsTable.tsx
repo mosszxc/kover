@@ -49,6 +49,19 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState('')
   const [pauseDialogClient, setPauseDialogClient] = useState<Client | null>(null)
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+
+  function toggleExpanded(clientId: string) {
+    setExpandedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(clientId)) {
+        next.delete(clientId)
+      } else {
+        next.add(clientId)
+      }
+      return next
+    })
+  }
 
   const areaMap = useMemo(
     () => Object.fromEntries(sizes.map((s) => [s.id, s.area])),
@@ -315,6 +328,8 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
           const margin = hasPrices && hasCostSettings ? getClientMargin(client) : null
           const paymentInfo = paymentStatusMap?.get(client.id)
 
+          const isExpanded = expandedIds.has(client.id)
+
           return (
             <div
               key={client.id}
@@ -333,6 +348,17 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
               {/* Line 1: name · address | days */}
               <div className="flex items-center justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      toggleExpanded(client.id)
+                    }}
+                    className="shrink-0 rounded p-0.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    aria-label={isExpanded ? 'Свернуть детали' : 'Развернуть детали'}
+                  >
+                    <ChevronDown className={cn('size-4 transition-transform duration-150', isExpanded && 'rotate-180')} />
+                  </button>
                   <span className="truncate font-medium text-foreground">{client.name}</span>
                   {client.category && (
                     <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
@@ -410,98 +436,110 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                 )}
               </div>
 
-              {/* Line 2: mats · area · frequency | status */}
-              <div className="mt-1.5 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2 text-sm tabular-nums text-muted-foreground">
-                  <span className="text-foreground">
-                    {entries.map(([size, qty], i) => {
-                      const style = MAT_SIZE_STYLES[size as MatSize]
-                      return (
-                        <span key={size}>
-                          {i > 0 && <span className="text-muted-foreground">{' · '}</span>}
-                          <span
-                            className={cn('mr-0.5 inline-block size-2 rounded-full', style?.dot ?? 'bg-muted-foreground')}
-                          />
-                          {labelMap[size] ?? size}
-                          {'\u00d7'}
-                          {qty}
-                        </span>
-                      )
-                    })}
-                  </span>
-                  <span className="text-muted-foreground">·</span>
-                  <span>{area.toFixed(1)}{'\u00a0'}м²</span>
-                  {hasPrices && cost > 0 && (
-                    <>
-                      <span className="text-muted-foreground">·</span>
-                      <span className="text-emerald-400">{cost.toLocaleString('ru-RU')}{'\u00a0'}₽</span>
-                      <span className="text-muted-foreground">·</span>
-                      <span className="text-emerald-400 font-medium">{revenue.toLocaleString('ru-RU')}{'\u00a0'}₽/мес</span>
-                    </>
-                  )}
-                  {margin !== null && (
-                    <>
-                      <span className="text-muted-foreground">·</span>
-                      <span className={cn('font-medium', margin > 0 ? 'text-emerald-400' : margin < 0 ? 'text-red-400' : 'text-muted-foreground')}>
-                        {margin > 0 ? '+' : ''}{margin.toLocaleString('ru-RU')}{'\u00a0'}₽
-                      </span>
-                    </>
-                  )}
-                  <span className="text-muted-foreground">·</span>
-                  <span>{client.frequency}×/нед</span>
-                  {formatWorkingHours(client) && (
-                    <>
-                      <span className="text-muted-foreground">·</span>
-                      <span className="inline-flex items-center gap-0.5">
-                        <Clock className="size-3" />
-                        {formatWorkingHours(client)}
-                      </span>
-                    </>
-                  )}
-                </div>
-                <div className="flex shrink-0 items-center gap-1.5">
-                {paymentInfo && paymentInfo.status !== 'paid' && onRecordPayment && (
-                  <div className="flex items-center gap-1">
-                    {onQuickPay && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          onQuickPay(client)
-                        }}
-                        title="Отметить полную оплату"
-                        className="inline-flex size-6 items-center justify-center rounded-full bg-emerald-600/20 text-emerald-400 transition-colors hover:bg-emerald-600/30"
-                      >
-                        <Check className="size-3.5" />
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onRecordPayment(client)
-                      }}
-                      className={cn(
-                        'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold transition-colors',
-                        paymentInfo.status === 'overdue'
-                          ? 'bg-red-600/20 text-red-400 hover:bg-red-600/30'
-                          : 'bg-amber-600/20 text-amber-400 hover:bg-amber-600/30',
-                      )}
-                    >
-                      <Banknote className="size-3" />
-                      {paymentInfo.debt > 0 ? `${paymentInfo.debt.toLocaleString('ru-RU')} ₽` : 'Оплатить'}
-                    </button>
-                  </div>
+              {/* Line 2: expanded details — mats · area · frequency */}
+              <div
+                className={cn(
+                  'grid transition-[grid-template-rows] duration-150',
+                  isExpanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
                 )}
+              >
+                <div className="overflow-hidden">
+                  <div className="mt-1.5 flex items-center justify-between gap-3">
+                    <div className="flex flex-wrap items-center gap-2 text-sm tabular-nums text-muted-foreground">
+                      <span className="text-foreground">
+                        {entries.map(([size, qty], i) => {
+                          const style = MAT_SIZE_STYLES[size as MatSize]
+                          return (
+                            <span key={size}>
+                              {i > 0 && <span className="text-muted-foreground">{' · '}</span>}
+                              <span
+                                className={cn('mr-0.5 inline-block size-2 rounded-full', style?.dot ?? 'bg-muted-foreground')}
+                              />
+                              {labelMap[size] ?? size}
+                              {'\u00d7'}
+                              {qty}
+                            </span>
+                          )
+                        })}
+                      </span>
+                      <span className="text-muted-foreground">·</span>
+                      <span>{area.toFixed(1)}{'\u00a0'}м²</span>
+                      {hasPrices && cost > 0 && (
+                        <>
+                          <span className="text-muted-foreground">·</span>
+                          <span className="text-emerald-400">{cost.toLocaleString('ru-RU')}{'\u00a0'}₽</span>
+                          <span className="text-muted-foreground">·</span>
+                          <span className="text-emerald-400 font-medium">{revenue.toLocaleString('ru-RU')}{'\u00a0'}₽/мес</span>
+                        </>
+                      )}
+                      {margin !== null && (
+                        <>
+                          <span className="text-muted-foreground">·</span>
+                          <span className={cn('font-medium', margin > 0 ? 'text-emerald-400' : margin < 0 ? 'text-red-400' : 'text-muted-foreground')}>
+                            {margin > 0 ? '+' : ''}{margin.toLocaleString('ru-RU')}{'\u00a0'}₽
+                          </span>
+                        </>
+                      )}
+                      <span className="text-muted-foreground">·</span>
+                      <span>{client.frequency}×/нед</span>
+                      {formatWorkingHours(client) && (
+                        <>
+                          <span className="text-muted-foreground">·</span>
+                          <span className="inline-flex items-center gap-0.5">
+                            <Clock className="size-3" />
+                            {formatWorkingHours(client)}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1.5">
+                    {paymentInfo && paymentInfo.status !== 'paid' && onRecordPayment && (
+                      <div className="flex items-center gap-1">
+                        {onQuickPay && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              onQuickPay(client)
+                            }}
+                            title="Отметить полную оплату"
+                            className="inline-flex size-6 items-center justify-center rounded-full bg-emerald-600/20 text-emerald-400 transition-colors hover:bg-emerald-600/30"
+                          >
+                            <Check className="size-3.5" />
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onRecordPayment(client)
+                          }}
+                          className={cn(
+                            'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold transition-colors',
+                            paymentInfo.status === 'overdue'
+                              ? 'bg-red-600/20 text-red-400 hover:bg-red-600/30'
+                              : 'bg-amber-600/20 text-amber-400 hover:bg-amber-600/30',
+                          )}
+                        >
+                          <Banknote className="size-3" />
+                          {paymentInfo.debt > 0 ? `${paymentInfo.debt.toLocaleString('ru-RU')} ₽` : 'Оплатить'}
+                        </button>
+                      </div>
+                    )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Status button — always visible */}
+              <div className="mt-1.5 flex items-center justify-end">
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation()
                     if (isActive) {
-                      // Активен → открыть диалог паузы
                       setPauseDialogClient(client)
                     } else {
-                      // На паузе → активировать
                       if (onToggleActive) {
                         onToggleActive({ ...client, isActive: false })
                       } else {
@@ -535,7 +573,6 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                     </>
                   )}
                 </button>
-                </div>
               </div>
             </div>
           )
