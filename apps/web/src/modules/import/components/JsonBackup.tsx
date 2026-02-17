@@ -12,29 +12,23 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/shared/ui/alert-dialog'
-
-interface BackupData {
-  clients: unknown[]
-  routes: unknown[]
-}
-
-interface JsonBackupProps {
-  data: BackupData
-  onRestore: (data: BackupData) => void
-}
+import type { BackupData } from '@/shared/lib/backup'
+import { collectStores, restoreStores } from '@/shared/lib/backupStores'
 
 function validateBackup(data: unknown): data is BackupData {
   if (typeof data !== 'object' || data === null) return false
   const obj = data as Record<string, unknown>
+  // Core fields required; rest optional for backward compat with old backups
   return Array.isArray(obj.clients) && Array.isArray(obj.routes)
 }
 
-export function JsonBackup({ data, onRestore }: JsonBackupProps) {
+export function JsonBackup() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [pendingData, setPendingData] = useState<BackupData | null>(null)
 
   const handleExport = () => {
-    const json = JSON.stringify(data, null, 2)
+    const stores = collectStores()
+    const json = JSON.stringify(stores, null, 2)
     const blob = new Blob([json], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const date = new Date().toISOString().slice(0, 10)
@@ -71,7 +65,7 @@ export function JsonBackup({ data, onRestore }: JsonBackupProps) {
 
   const handleConfirmRestore = () => {
     if (!pendingData) return
-    onRestore(pendingData)
+    restoreStores(pendingData as BackupData)
     setPendingData(null)
     toast.success('Данные восстановлены')
   }

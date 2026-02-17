@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
-import { useRouteStore } from '@/modules/routes'
 import { useClientStore } from '@/modules/clients'
 import { saveBackup } from '@/shared/lib/backup'
+import { collectStores } from '@/shared/lib/backupStores'
 
 const BACKUP_INTERVAL = 30 * 60 * 1000 // 30 minutes
 
@@ -9,9 +9,9 @@ export function useAutoBackup() {
   useEffect(() => {
     const interval = setInterval(() => {
       const clients = useClientStore.getState().clients
-      const routes = useRouteStore.getState().routes
       if (clients.length > 0) {
-        saveBackup(clients, routes)
+        const stores = collectStores()
+        saveBackup(stores)
       }
     }, BACKUP_INTERVAL)
 

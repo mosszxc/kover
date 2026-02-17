@@ -11,6 +11,7 @@ import type { DayOfWeek } from '@/shared/types'
 import { FileSyncStatus } from '@/shared/components/FileSyncStatus'
 import { generateId } from '@/shared/lib/generateId'
 
+
 interface ParsedData {
   clients: ParsedClient[]
   routesByDay: Record<DayOfWeek, string[]>
@@ -88,15 +89,8 @@ export function ImportPage() {
   const [parsed, setParsed] = useState<ParsedData | null>(null)
   const navigate = useNavigate()
 
-  const clients = useClientStore((s) => s.clients)
-  const routes = useRouteStore((s) => s.routes)
   const seedClients = useClientStore((s) => s.seedClients)
   const seedRoutes = useRouteStore((s) => s.seedRoutes)
-
-  const handleRestore = (data: { clients: unknown[]; routes: unknown[] }) => {
-    seedClients(data.clients as Client[])
-    seedRoutes(data.routes as DayRoute[])
-  }
 
   const handleConfirm = (editedClients: ParsedClient[]) => {
     if (!parsed) return
@@ -125,7 +119,7 @@ export function ImportPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-foreground">Импорт</h1>
       <ExcelUpload onParsed={setParsed} />
-      <JsonBackup data={{ clients, routes }} onRestore={handleRestore} />
+      <JsonBackup />
 
       <div className="rounded-lg border border-border bg-card p-4 space-y-2">
         <h2 className="text-lg font-semibold text-foreground">Автосохранение на диск</h2>
