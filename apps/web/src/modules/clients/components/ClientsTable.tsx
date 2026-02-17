@@ -283,7 +283,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
         hasPayments={hasPayments}
       />
 
-      <div className="flex items-center justify-between text-xs text-muted-foreground">
+      <div className="flex items-center justify-between text-sm text-muted-foreground">
       <div className="flex items-center gap-1">
         <span>Сортировка:</span>
         {sortButtons.map(({ field, label }) => (
@@ -342,7 +342,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                   : hasNoCoords
                     ? 'border-red-500/30 bg-red-500/5'
                     : 'border-border',
-                isActive ? 'hover:bg-muted/50' : 'opacity-60 hover:bg-muted/30',
+                isActive ? 'hover:bg-muted/50' : 'border-l-2 border-amber-400 hover:bg-muted/30',
               )}
             >
               {/* Line 1: name · address | days */}
@@ -354,14 +354,14 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                       e.stopPropagation()
                       toggleExpanded(client.id)
                     }}
-                    className="shrink-0 rounded p-0.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded p-0.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                     aria-label={isExpanded ? 'Свернуть детали' : 'Развернуть детали'}
                   >
-                    <ChevronDown className={cn('size-4 transition-transform duration-150', isExpanded && 'rotate-180')} />
+                    <ChevronDown className={cn('size-5 transition-transform duration-150', isExpanded && 'rotate-180')} />
                   </button>
                   <span className="truncate font-medium text-foreground">{client.name}</span>
                   {client.category && (
-                    <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+                    <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-sm text-muted-foreground">
                       {CLIENT_CATEGORIES.find((c) => c.value === client.category)?.label}
                     </span>
                   )}
@@ -503,9 +503,9 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                               onQuickPay(client)
                             }}
                             title="Отметить полную оплату"
-                            className="inline-flex size-6 items-center justify-center rounded-full bg-emerald-600/20 text-emerald-400 transition-colors hover:bg-emerald-600/30"
+                            className="inline-flex size-8 min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-emerald-600/20 text-emerald-400 transition-colors hover:bg-emerald-600/30"
                           >
-                            <Check className="size-3.5" />
+                            <Check className="size-4" />
                           </button>
                         )}
                         <button

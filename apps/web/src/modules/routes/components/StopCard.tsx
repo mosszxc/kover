@@ -117,11 +117,32 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
           ref={setActivatorNodeRef}
           {...listeners}
           aria-label="Перетащить для изменения порядка"
-          className="flex size-6 shrink-0 cursor-grab items-center justify-center rounded opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 print:hidden"
+          className="flex size-6 min-h-[44px] min-w-[44px] shrink-0 cursor-grab items-center justify-center rounded active:cursor-grabbing focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 print:hidden"
         >
-          <GripVertical className="size-5 text-muted-foreground" />
+          <GripVertical className="size-5 text-foreground/40" />
         </button>
       )}
+
+      <div className="flex shrink-0 flex-col print:hidden">
+        <button
+          type="button"
+          disabled={isFirst}
+          onClick={() => moveStop(selectedDay, stopId, stopIndex - 1)}
+          aria-label="Переместить вверх"
+          className="flex size-6 min-h-[44px] min-w-[44px] items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-30 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        >
+          <ChevronUp className="size-4" />
+        </button>
+        <button
+          type="button"
+          disabled={isLast}
+          onClick={() => moveStop(selectedDay, stopId, stopIndex + 1)}
+          aria-label="Переместить вниз"
+          className="flex size-6 min-h-[44px] min-w-[44px] items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-30 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        >
+          <ChevronDown className="size-4" />
+        </button>
+      </div>
 
       <span className="w-8 shrink-0 text-center text-sm tabular-nums text-muted-foreground">
         {number}
@@ -155,7 +176,7 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
             </span>
           )}
           {formatWorkingHours(client) && (
-            <span className="ml-1 inline-flex shrink-0 items-center gap-0.5 text-xs text-muted-foreground">
+            <span className="ml-1 inline-flex shrink-0 items-center gap-0.5 text-sm text-muted-foreground">
               <Clock className="size-3" />
               {formatWorkingHours(client)}
             </span>
@@ -164,7 +185,7 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
             <a
               href={`tel:${client.contactPhone}`}
               onClick={(e) => e.stopPropagation()}
-              className="ml-1 inline-flex shrink-0 items-center gap-0.5 text-xs text-blue-400 hover:text-blue-300 transition-colors"
+              className="ml-1 inline-flex shrink-0 items-center gap-0.5 text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
               title={client.contactName ?? 'Позвонить'}
             >
               <Phone className="size-3" />
@@ -229,19 +250,6 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          {!isFirst && (
-            <DropdownMenuItem onClick={() => moveStop(selectedDay, stopId, stopIndex - 1)}>
-              <ChevronUp className="size-4" />
-              Переместить вверх
-            </DropdownMenuItem>
-          )}
-          {!isLast && (
-            <DropdownMenuItem onClick={() => moveStop(selectedDay, stopId, stopIndex + 1)}>
-              <ChevronDown className="size-4" />
-              Переместить вниз
-            </DropdownMenuItem>
-          )}
-          {(!isFirst || !isLast) && <DropdownMenuSeparator />}
           {onServiceReport && (
             <DropdownMenuItem onClick={() => onServiceReport(client)}>
               <ClipboardCheck className="size-4" />

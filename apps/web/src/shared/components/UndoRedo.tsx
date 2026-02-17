@@ -67,9 +67,9 @@ export function UndoRedo() {
         disabled={!hasPast}
         title="Отменить (Ctrl+Z)"
         aria-label="Отменить"
-        className="h-8 w-8 p-0"
+        className="h-8 w-8 min-h-[44px] min-w-[44px] p-0"
       >
-        <Undo2 className="h-4 w-4" />
+        <Undo2 className="h-5 w-5" />
       </Button>
       <Button
         variant="ghost"
@@ -78,9 +78,9 @@ export function UndoRedo() {
         disabled={!hasFuture}
         title="Повторить (Ctrl+Shift+Z)"
         aria-label="Повторить"
-        className="h-8 w-8 p-0"
+        className="h-8 w-8 min-h-[44px] min-w-[44px] p-0"
       >
-        <Redo2 className="h-4 w-4" />
+        <Redo2 className="h-5 w-5" />
       </Button>
     </div>
   )

@@ -52,8 +52,8 @@ export function DaySwitcher() {
             {count > 0 && (
               <span
                 className={cn(
-                  'text-xs font-semibold',
-                  isActive ? 'text-blue-200' : 'text-muted-foreground',
+                  'text-sm font-semibold',
+                  isActive ? 'text-blue-100' : 'text-muted-foreground',
                 )}
               >
                 {count}
