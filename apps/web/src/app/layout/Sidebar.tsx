@@ -1,6 +1,7 @@
 import { NavLink } from "react-router"
-import { MapPin, Users, BarChart3, Map, Truck, Settings, Ruler, Database, BookOpen, Warehouse, Sun } from "lucide-react"
+import { MapPin, Users, BarChart3, Map, Truck, Settings, Ruler, Database, BookOpen, Warehouse, Sun, Sparkles } from "lucide-react"
 import { cn } from "@/shared/lib/utils"
+import { useWhatsNewStore, releases } from "@/modules/whats-new"
 
 const mainItems = [
   { to: "/briefing", label: "Сегодня", icon: Sun },
@@ -22,7 +23,7 @@ const systemItems = [
   { to: "/settings", label: "Настройки", icon: Settings },
 ] as const
 
-function NavGroup({ label, items }: { label: string; items: ReadonlyArray<{ to: string; label: string; icon: React.ComponentType<{ className?: string }> }> }) {
+function NavGroup({ label, items, badge }: { label: string; items: ReadonlyArray<{ to: string; label: string; icon: React.ComponentType<{ className?: string }> }>; badge?: Record<string, boolean> }) {
   return (
     <div>
       <div className="px-3 py-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
@@ -45,6 +46,9 @@ function NavGroup({ label, items }: { label: string; items: ReadonlyArray<{ to: 
           >
             <Icon className="h-5 w-5 shrink-0" />
             {label}
+            {badge && badge[to] && (
+              <span className="ml-auto h-2 w-2 rounded-full bg-primary" />
+            )}
           </NavLink>
         ))}
       </div>
@@ -52,7 +56,20 @@ function NavGroup({ label, items }: { label: string; items: ReadonlyArray<{ to: 
   )
 }
 
+function useHasNewUpdates() {
+  const lastSeenVersion = useWhatsNewStore((s) => s.lastSeenVersion)
+  const latest = releases[0]
+  if (!latest) return false
+  return lastSeenVersion !== latest.version
+}
+
 export function Sidebar() {
+  const hasNew = useHasNewUpdates()
+
+  const whatsNewItems = [
+    { to: "/whats-new", label: "Нововведения", icon: Sparkles },
+  ] as const
+
   return (
     <aside className="no-print hidden md:flex md:w-60 md:flex-col md:fixed md:inset-y-0 bg-card border-r border-border">
       <div className="flex h-14 items-center px-4">
@@ -64,6 +81,8 @@ export function Sidebar() {
         <div className="my-2 mx-3 border-t border-border" />
         <NavGroup label="Управление" items={managementItems} />
         <div className="mt-auto">
+          <div className="my-2 mx-3 border-t border-border" />
+          <NavGroup label="Нововведения" items={whatsNewItems} badge={hasNew ? { "/whats-new": true } : undefined} />
           <div className="my-2 mx-3 border-t border-border" />
           <NavGroup label="Система" items={systemItems} />
         </div>
