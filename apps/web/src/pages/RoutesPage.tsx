@@ -3,7 +3,7 @@ import { DaySwitcher, RouteDashboard, RouteSearch, StopList, AddStopDialog, AddO
 import { useClientStore, EditClientDialog } from '@/modules/clients'
 import type { Client } from '@/modules/clients'
 import { useDriverStore } from '@/modules/drivers'
-import { PrintSheet } from '@/modules/print'
+import { PrintSheet, PrintFieldsToggle } from '@/modules/print'
 import { OptimizeRouteDialog } from '@/modules/map'
 import { useClientPaymentStatus } from '@/modules/payments'
 import { useRouteExceptionsStore } from '@/shared/stores/routeExceptionsStore'
@@ -64,7 +64,9 @@ export function RoutesPage() {
           <DaySwitcher />
           <div className="flex items-center gap-2 ml-auto">
             <OptimizeRouteDialog />
-            <PrintButton drivers={driverOptions} selectedDriverIds={printDriverIds} onSelectedDriverIdsChange={setPrintDriverIds} />
+            <PrintButton drivers={driverOptions} selectedDriverIds={printDriverIds} onSelectedDriverIdsChange={setPrintDriverIds}>
+              <PrintFieldsToggle />
+            </PrintButton>
           </div>
         </div>
         <RouteDashboard drivers={driverOptions} />
