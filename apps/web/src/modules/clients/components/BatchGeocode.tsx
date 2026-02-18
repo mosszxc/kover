@@ -3,6 +3,7 @@ import { MapPin, RefreshCw, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/shared/ui/button'
 import { geocodeAddress, delay } from '@/shared/lib/geocode'
+import { waitForSync } from '@/shared/lib/sync'
 import { useSettingsStore } from '@/shared/stores/settingsStore'
 import { useClientStore } from '../store'
 import { useGeocodeProgressStore } from '../geocodeProgressStore'
@@ -76,6 +77,9 @@ export function BatchGeocode() {
         await delay(1100) // Nominatim rate limit: 1 req/sec
       }
     }
+
+    // Wait for all sync operations to complete before showing success
+    await waitForSync()
 
     useGeocodeProgressStore.getState().finish(successCount, targets.length)
 

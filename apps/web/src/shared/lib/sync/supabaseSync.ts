@@ -2,6 +2,7 @@ import type { StateCreator, StoreMutatorIdentifier } from 'zustand'
 import { supabase } from '@/shared/lib/supabase'
 import type { SyncAdapter } from './types'
 import type { Database } from '@/shared/types/database'
+import { trackSync } from './syncQueue'
 
 type TableName = keyof Database['public']['Tables']
 
@@ -18,6 +19,7 @@ interface SupabaseSyncConfig {
  *
  * При каждом set() сравнивает текущий массив с предыдущим и upsert'ит изменённые записи.
  * Удалённые записи отправляет как delete.
+ * Все операции отслеживаются через syncQueue — ошибки показываются пользователю.
  */
 export function supabaseSync<
   T extends object,
@@ -44,13 +46,16 @@ export function supabaseSync<
 
       // Upsert changed/new items
       const toUpsert: Record<string, unknown>[] = []
+      const upsertIds: string[] = []
       for (const item of nextItems) {
         if (!prevIds.has(item.id)) {
           toUpsert.push(config.adapter.toRemote(item))
+          upsertIds.push(item.id)
         } else {
           const prevItem = prevItems.find((p) => p.id === item.id)
           if (prevItem !== item) {
             toUpsert.push(config.adapter.toRemote(item))
+            upsertIds.push(item.id)
           }
         }
       }
@@ -58,25 +63,22 @@ export function supabaseSync<
       const table = config.adapter.table as TableName
 
       if (toUpsert.length > 0) {
-        supabase
-          .from(table)
-          .upsert(toUpsert as never)
-          .then(({ error }) => {
-            if (error) console.error(`[sync] write-through ${table}:`, error.message)
-          })
+        trackSync(
+          table,
+          upsertIds,
+          supabase.from(table).upsert(toUpsert as never),
+        )
       }
 
       // Delete removed items
       const nextIds = new Set(nextItems.map((i) => i.id))
       for (const id of prevIds) {
         if (!nextIds.has(id)) {
-          supabase
-            .from(table)
-            .delete()
-            .eq('id', id)
-            .then(({ error }) => {
-              if (error) console.error(`[sync] delete ${table}:`, error.message)
-            })
+          trackSync(
+            table,
+            [id],
+            supabase.from(table).delete().eq('id', id),
+          )
         }
       }
     }) as typeof set
