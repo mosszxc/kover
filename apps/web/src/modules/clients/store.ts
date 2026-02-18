@@ -73,8 +73,3 @@ export const useClientStore = create<ClientState>()(
     },
   ),
 )
-
-// Clean up legacy localStorage key left by removed persist middleware
-if (typeof window !== 'undefined') {
-  localStorage.removeItem('kover-clients')
-}

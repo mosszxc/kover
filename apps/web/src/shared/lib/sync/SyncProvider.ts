@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { supabase, isSupabaseConfigured } from '@/shared/lib/supabase'
 import { notify } from '@/shared/lib/notifications'
-import { useSyncStore } from './syncStore'
+import { useSyncStore, setHydrating } from './syncStore'
 import { fetchAll, subscribeToTable } from './engine'
 import {
   matSizesAdapter,
@@ -51,6 +51,7 @@ export function useSyncProvider() {
 
     // One-time cleanup: remove stale localStorage keys from removed persist stores
     const deprecatedKeys = [
+      'kover-clients',
       'kover-routes',
       'kover-drivers',
       'kover-mat-sizes',
@@ -64,6 +65,7 @@ export function useSyncProvider() {
 
     async function hydrate() {
       setStatus('syncing')
+      setHydrating(true)
       try {
         // Hydrate simple stores
         const [matSizes, drivers, clients, changelog, serviceLog] = await Promise.all([
@@ -142,6 +144,8 @@ export function useSyncProvider() {
       } catch (e) {
         console.error('[sync] hydration error:', e)
         setError((e as Error).message)
+      } finally {
+        setHydrating(false)
       }
     }
 
