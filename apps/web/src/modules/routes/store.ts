@@ -245,7 +245,17 @@ export const useRouteStore = create<RouteState>()(
           }
         }),
 
-      seedRoutes: (routes) => set({ routes }),
+      seedRoutes: (routes) => {
+        // Ensure all 7 days exist (seed data may only have Mon-Fri)
+        const existingDays = new Set(routes.map((r) => r.day))
+        const complete = [...routes]
+        for (const day of [0, 1, 2, 3, 4, 5, 6] as DayOfWeek[]) {
+          if (!existingDays.has(day)) {
+            complete.push({ day, stops: [] })
+          }
+        }
+        set({ routes: complete })
+      },
     }),
     {
       limit: 20,
