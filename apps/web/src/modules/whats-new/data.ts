@@ -9,6 +9,21 @@ export interface ReleaseEntry {
 
 export const releases: ReleaseEntry[] = [
   {
+    version: "1.0.3",
+    date: "2026-02-18",
+    items: [
+      { type: "feature", text: "Страница «Нововведения» — теперь видно что нового в приложении" },
+      { type: "feature", text: "Индикатор непрочитанных обновлений в сайдбаре" },
+    ],
+  },
+  {
+    version: "1.0.2",
+    date: "2026-02-18",
+    items: [
+      { type: "feature", text: "Версия приложения отображается в настройках" },
+    ],
+  },
+  {
     version: "1.0.1",
     date: "2026-02-18",
     items: [
