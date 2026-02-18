@@ -1,5 +1,6 @@
 export { AutostartToggle } from './components/AutostartToggle'
 export { MatSizeSettings } from './components/MatSizeSettings'
+export { MaxStopsPerDaySetting } from './components/MaxStopsPerDaySetting'
 export { NotificationToggle } from './components/NotificationToggle'
 export { ThemeToggle } from './components/ThemeToggle'
 export { WeekendToggle } from './components/WeekendToggle'
