@@ -27,6 +27,9 @@ const GuidePage = lazy(() =>
 const BriefingPage = lazy(() =>
   import("@/pages/BriefingPage").then((m) => ({ default: m.BriefingPage })),
 )
+const WhatsNewPage = lazy(() =>
+  import("@/pages/WhatsNewPage").then((m) => ({ default: m.WhatsNewPage })),
+)
 
 function LazyPage({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<LoadingFallback />}>{children}</Suspense>
@@ -105,6 +108,14 @@ export const router = createBrowserRouter([
             element: (
               <LazyPage>
                 <GuidePage />
+              </LazyPage>
+            ),
+          },
+          {
+            path: "/whats-new",
+            element: (
+              <LazyPage>
+                <WhatsNewPage />
               </LazyPage>
             ),
           },
