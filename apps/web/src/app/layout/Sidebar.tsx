@@ -57,6 +57,7 @@ export function Sidebar() {
     <aside className="no-print hidden md:flex md:w-60 md:flex-col md:fixed md:inset-y-0 bg-card border-r border-border">
       <div className="flex h-14 items-center px-4">
         <span className="text-lg font-bold text-foreground">Kover</span>
+        <span className="text-xs text-muted-foreground ml-1.5">{__APP_VERSION__}</span>
       </div>
 
       <nav className="flex-1 flex flex-col px-2 py-2">
