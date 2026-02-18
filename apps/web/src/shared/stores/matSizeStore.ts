@@ -6,8 +6,8 @@ import { supabaseSync, matSizesAdapter } from '@/shared/lib/sync'
 
 interface MatSizeState {
   sizes: MatSizeConfig[]
-  addSize: (id: string, label: string, area: number, rentalPrice: number) => void
-  updateSize: (id: string, updates: { label?: string; area?: number; rentalPrice?: number }) => void
+  addSize: (id: string, label: string, area: number, rentalPrice: number, maxWashCycles?: number) => void
+  updateSize: (id: string, updates: { label?: string; area?: number; rentalPrice?: number; maxWashCycles?: number }) => void
   removeSize: (id: string) => void
 }
 
@@ -22,9 +22,9 @@ export const useMatSizeStore = create<MatSizeState>()(
     (set) => ({
       sizes: DEFAULT_MAT_SIZES,
 
-      addSize: (id, label, area, rentalPrice) =>
+      addSize: (id, label, area, rentalPrice, maxWashCycles = 300) =>
         set((state) => ({
-          sizes: [...state.sizes, { id, label, area, rentalPrice }],
+          sizes: [...state.sizes, { id, label, area, rentalPrice, maxWashCycles }],
         })),
 
       updateSize: (id, updates) =>
@@ -47,6 +47,7 @@ export const useMatSizeStore = create<MatSizeState>()(
         state.sizes = state.sizes.map((s) => ({
           ...s,
           rentalPrice: s.rentalPrice ?? 0,
+          maxWashCycles: s.maxWashCycles ?? 300,
         }))
         return state
       },
@@ -70,4 +71,10 @@ export function getMatLabel(sizeId: string): string {
 export function getMatRentalPrice(sizeId: string): number {
   const sizes = useMatSizeStore.getState().sizes
   return sizes.find((s) => s.id === sizeId)?.rentalPrice ?? 0
+}
+
+/** Получить порог износа размера по id */
+export function getMatMaxWashCycles(sizeId: string): number {
+  const sizes = useMatSizeStore.getState().sizes
+  return sizes.find((s) => s.id === sizeId)?.maxWashCycles ?? 300
 }

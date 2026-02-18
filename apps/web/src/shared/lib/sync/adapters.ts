@@ -21,12 +21,14 @@ export const matSizesAdapter: SyncAdapter<MatSizeConfig, Insert<'mat_sizes'>> = 
     label: local.label,
     area: local.area,
     rental_price: local.rentalPrice,
+    max_wash_cycles: local.maxWashCycles,
   }),
   toLocal: (remote) => ({
     id: remote.id!,
     label: remote.label!,
     area: remote.area!,
     rentalPrice: remote.rental_price ?? 0,
+    maxWashCycles: remote.max_wash_cycles ?? 300,
   }),
 }
 
