@@ -2,6 +2,13 @@
 
 All notable changes to Kover will be documented in this file.
 
+## v1.0.7 (2026-02-18)
+
+### Прочее
+
+- удалить неиспользуемые GitHub workflows
+- SPEC v4.2 — фазы 14-16, новые поля Client/Driver/MatBatch
+
 ## v1.0.6 (2026-02-18)
 
 ### Новое
