@@ -112,7 +112,7 @@ export function ClientsFilters({
       <PopoverContent align="start" className="w-80 space-y-4 p-4">
         {/* Day filter */}
         <div className="space-y-1.5">
-          <span className="text-xs font-medium text-muted-foreground">День</span>
+          <span className="text-sm font-medium text-muted-foreground">День</span>
           <div className="flex flex-wrap gap-1.5">
             {visibleDays.map((day) => (
               <button
@@ -134,7 +134,7 @@ export function ClientsFilters({
 
         {/* Frequency filter */}
         <div className="space-y-1.5">
-          <span className="text-xs font-medium text-muted-foreground">Частота</span>
+          <span className="text-sm font-medium text-muted-foreground">Частота</span>
           <div className="flex flex-wrap gap-1.5">
             {FREQUENCY_OPTIONS.map((freq) => (
               <button
@@ -156,7 +156,7 @@ export function ClientsFilters({
 
         {/* Mat size filter */}
         <div className="space-y-1.5">
-          <span className="text-xs font-medium text-muted-foreground">Коврик</span>
+          <span className="text-sm font-medium text-muted-foreground">Коврик</span>
           <div className="flex flex-wrap gap-1.5">
             {matSizes.map((s) => (
               <button
@@ -178,7 +178,7 @@ export function ClientsFilters({
 
         {/* Status filter */}
         <div className="space-y-1.5">
-          <span className="text-xs font-medium text-muted-foreground">Статус</span>
+          <span className="text-sm font-medium text-muted-foreground">Статус</span>
           <div className="flex flex-wrap gap-1.5">
             {STATUS_OPTIONS.map((opt) => (
               <button
@@ -200,7 +200,7 @@ export function ClientsFilters({
 
         {/* Category filter */}
         <div className="space-y-1.5">
-          <span className="text-xs font-medium text-muted-foreground">Категория</span>
+          <span className="text-sm font-medium text-muted-foreground">Категория</span>
           <div className="flex flex-wrap gap-1.5">
             {CLIENT_CATEGORIES.map((cat) => (
               <button
@@ -223,7 +223,7 @@ export function ClientsFilters({
         {/* Payment filter */}
         {hasPayments && onPaymentChange && (
           <div className="space-y-1.5">
-            <span className="text-xs font-medium text-muted-foreground">Оплата</span>
+            <span className="text-sm font-medium text-muted-foreground">Оплата</span>
             <div className="flex flex-wrap gap-1.5">
               {PAYMENT_OPTIONS.map((opt) => (
                 <button

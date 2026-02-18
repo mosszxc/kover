@@ -57,7 +57,7 @@ export function DaySummary() {
               </span>
               <span className="text-sm text-muted-foreground">{s.label}</span>
               {(summary.costBySize[s.id] ?? 0) > 0 && (
-                <span className="text-xs tabular-nums text-green-400">
+                <span className="text-sm tabular-nums text-green-400">
                   {summary.costBySize[s.id]} ₽
                 </span>
               )}
@@ -87,7 +87,7 @@ function SummaryCard({
         <p className="truncate text-2xl font-bold tabular-nums text-foreground">
           {value}
         </p>
-        <p className="text-xs text-muted-foreground">{label}</p>
+        <p className="text-sm text-muted-foreground">{label}</p>
       </div>
     </div>
   )

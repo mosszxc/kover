@@ -30,7 +30,7 @@ export function NotificationToggle() {
           <span className="text-sm font-medium text-foreground">
             Показывать уведомления
           </span>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Ошибки синхронизации, обновления приложения и другие важные события
           </p>
         </div>

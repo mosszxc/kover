@@ -17,7 +17,7 @@ export function FileSyncIndicator() {
 
   return (
     <div
-      className="flex items-center gap-1 text-xs text-emerald-400 px-2"
+      className="flex items-center gap-1 text-sm text-emerald-400 px-2"
       title={lastFileSyncAt ? `Сохранено на диск: ${formatTime(lastFileSyncAt)}` : 'Автосохранение на диск подключено'}
     >
       <HardDrive className="h-3.5 w-3.5" />

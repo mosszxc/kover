@@ -51,7 +51,7 @@ export function FileSyncStatus() {
 
   if (!isFileSyncSupported()) {
     return (
-      <div className="flex items-center gap-2 text-xs text-amber-400">
+      <div className="flex items-center gap-2 text-sm text-amber-400">
         <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
         <span>Автосохранение на диск недоступно в этом браузере</span>
       </div>
@@ -144,7 +144,7 @@ export function FileSyncStatus() {
             Восстановить из файла
           </Button>
         </div>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Данные будут автоматически сохраняться на диск при каждом изменении
         </p>
 
@@ -175,16 +175,16 @@ export function FileSyncStatus() {
           <span className="truncate max-w-40">{fileSyncFileName}</span>
         </div>
         {lastFileSyncAt && (
-          <span className="text-xs text-muted-foreground">
+          <span className="text-sm text-muted-foreground">
             {formatTime(lastFileSyncAt)}
           </span>
         )}
       </div>
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="sm" onClick={handleReconnect} className="h-7 text-xs">
+        <Button variant="ghost" size="sm" onClick={handleReconnect} className="h-7 text-sm">
           Переподключить
         </Button>
-        <Button variant="ghost" size="sm" onClick={handleDisconnect} className="h-7 text-xs text-muted-foreground">
+        <Button variant="ghost" size="sm" onClick={handleDisconnect} className="h-7 text-sm text-muted-foreground">
           <Unplug className="h-3.5 w-3.5" />
           Отключить
         </Button>

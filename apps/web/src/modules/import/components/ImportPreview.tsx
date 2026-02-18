@@ -145,7 +145,7 @@ export function ImportPreview({
                 }`}
               >
                 <td className="px-3 py-2 text-muted-foreground">{idx + 1}</td>
-                <td className="px-3 py-2 font-mono text-xs text-muted-foreground">
+                <td className="px-3 py-2 font-mono text-sm text-muted-foreground">
                   {client.originalName}
                 </td>
                 <td className="px-3 py-2">

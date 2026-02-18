@@ -23,7 +23,7 @@ export function ThemeToggle() {
             <span className="text-sm font-medium text-foreground">
               {isDark ? 'Тёмная тема' : 'Светлая тема'}
             </span>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               {isDark ? 'Переключить на светлую тему' : 'Переключить на тёмную тему'}
             </p>
           </div>

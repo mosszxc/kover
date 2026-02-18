@@ -196,7 +196,7 @@ export function OptimizeRouteDialog() {
               </p>
             )}
 
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Метод: {result.method === 'road' ? 'по дорогам (OSRM)' : 'по прямой (fallback)'}
             </p>
           </div>

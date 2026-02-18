@@ -22,7 +22,7 @@ export function MigrationPanel({ getLocalData }: MigrationPanelProps) {
           <Cloud className="h-5 w-5" />
           <div>
             <p className="text-sm font-medium">Supabase не настроен</p>
-            <p className="text-xs">
+            <p className="text-sm">
               Добавьте VITE_SUPABASE_URL и VITE_SUPABASE_ANON_KEY в .env
             </p>
           </div>
@@ -50,7 +50,7 @@ export function MigrationPanel({ getLocalData }: MigrationPanelProps) {
           <h2 className="text-sm font-medium text-foreground">
             Синхронизация с Supabase
           </h2>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Загрузка данных из localStorage в облако
           </p>
         </div>

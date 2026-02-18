@@ -171,7 +171,7 @@ export function EditDriverDialog({ driver, open, onOpenChange, onDelete }: EditD
                   className={`${inputClass} w-28 pr-8`}
                   aria-label="Грузоподъёмность в м²"
                 />
-                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">м²</span>
+                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">м²</span>
               </div>
             </div>
           </div>

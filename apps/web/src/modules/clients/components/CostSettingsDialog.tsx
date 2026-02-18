@@ -61,7 +61,7 @@ export function CostSettingsDialog() {
               onChange={(e) => setLaundry(e.target.value)}
               className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm tabular-nums text-foreground focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/50"
             />
-            <p className="text-xs text-muted-foreground">Стоимость стирки одного кв. метра коврика</p>
+            <p className="text-sm text-muted-foreground">Стоимость стирки одного кв. метра коврика</p>
           </div>
           <div className="space-y-1.5">
             <label htmlFor="logistics-cost" className="text-sm text-muted-foreground">
@@ -76,7 +76,7 @@ export function CostSettingsDialog() {
               onChange={(e) => setLogistics(e.target.value)}
               className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm tabular-nums text-foreground focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/50"
             />
-            <p className="text-xs text-muted-foreground">Средняя стоимость доставки на одну точку (топливо, амортизация)</p>
+            <p className="text-sm text-muted-foreground">Средняя стоимость доставки на одну точку (топливо, амортизация)</p>
           </div>
         </div>
         <DialogFooter>

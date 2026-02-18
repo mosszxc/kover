@@ -55,14 +55,14 @@ export function ServiceHistory({ clientId }: ServiceHistoryProps) {
       <div className="flex flex-col items-center justify-center gap-2 py-12 text-muted-foreground">
         <History className="h-8 w-8" />
         <p className="text-sm">История обслуживания пока пуста</p>
-        <p className="text-xs">Записи появятся при изменениях клиента или маршрутных событиях</p>
+        <p className="text-sm">Записи появятся при изменениях клиента или маршрутных событиях</p>
       </div>
     )
   }
 
   return (
     <div className="space-y-1">
-      <div className="grid grid-cols-[80px_36px_1fr] gap-x-3 px-2 pb-1 text-xs font-medium text-muted-foreground">
+      <div className="grid grid-cols-[80px_36px_1fr] gap-x-3 px-2 pb-1 text-sm font-medium text-muted-foreground">
         <span>Дата</span>
         <span>День</span>
         <span>Событие</span>
@@ -87,7 +87,7 @@ export function ServiceHistory({ clientId }: ServiceHistoryProps) {
                   )}
                 </div>
                 {entry.details && (
-                  <p className="mt-0.5 text-xs text-muted-foreground">{entry.details}</p>
+                  <p className="mt-0.5 text-sm text-muted-foreground">{entry.details}</p>
                 )}
               </div>
             </div>
