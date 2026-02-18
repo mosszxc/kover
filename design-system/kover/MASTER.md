@@ -9,7 +9,7 @@
 **Project:** Kover — Route Management Dashboard
 **Generated:** 2026-02-13
 **Type:** Internal operational tool / admin dashboard
-**Users:** Admin (business owner) + Courier (55 years old, prints only)
+**Users:** Admin (business owner) + Courier (prints only)
 
 ---
 
@@ -180,7 +180,7 @@ Base unit: 4px (Tailwind default)
 
 ---
 
-## Accessibility (Courier User, 55 years)
+## Accessibility
 
 - **Touch targets:** minimum 44x44px for all interactive elements
 - **Font size:** minimum 16px body, 14px only for labels/badges
