@@ -1,4 +1,10 @@
-import { AutostartToggle, NotificationToggle, ThemeToggle, WeekendToggle } from '@/modules/settings'
+import {
+  AutostartToggle,
+  MaxStopsPerDaySetting,
+  NotificationToggle,
+  ThemeToggle,
+  WeekendToggle,
+} from '@/modules/settings'
 
 export function SettingsPage() {
   return (
@@ -6,6 +12,7 @@ export function SettingsPage() {
       <h1 className="text-2xl font-bold text-foreground">Настройки</h1>
       <ThemeToggle />
       <WeekendToggle />
+      <MaxStopsPerDaySetting />
       <NotificationToggle />
       <AutostartToggle />
     </div>
