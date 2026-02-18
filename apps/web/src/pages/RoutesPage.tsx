@@ -13,6 +13,7 @@ const EMPTY_STOPS: never[] = []
 export function RoutesPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [driverFilter, setDriverFilter] = useState<string | 'unassigned' | null>(null)
+  const [printDriverIds, setPrintDriverIds] = useState<string[]>([])
   const [editingClient, setEditingClient] = useState<Client | null>(null)
   const [reportClient, setReportClient] = useState<Client | null>(null)
   const clients = useClientStore((s) => s.clients)
@@ -63,7 +64,7 @@ export function RoutesPage() {
           <DaySwitcher />
           <div className="flex items-center gap-2 ml-auto">
             <OptimizeRouteDialog />
-            <PrintButton />
+            <PrintButton drivers={driverOptions} selectedDriverIds={printDriverIds} onSelectedDriverIdsChange={setPrintDriverIds} />
           </div>
         </div>
         <RouteDashboard drivers={driverOptions} />
@@ -79,7 +80,7 @@ export function RoutesPage() {
           <AddOneTimeDialog clients={clients} />
         </div>
       </div>
-      <PrintSheet stops={activeStops} clients={clients} selectedDay={selectedDay} drivers={driverOptions} />
+      <PrintSheet stops={activeStops} clients={clients} selectedDay={selectedDay} drivers={driverOptions} selectedDriverIds={printDriverIds} />
       {editingClient && (
         <EditClientDialog
           client={editingClient}
