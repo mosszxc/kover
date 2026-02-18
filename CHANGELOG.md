@@ -2,6 +2,12 @@
 
 All notable changes to Kover will be documented in this file.
 
+## v1.0.11 (2026-02-18)
+
+### Исправления
+
+- Seed-механизм зависит от persist — не работает без него (#395) (#398)
+
 ## v1.0.10 (2026-02-18)
 
 ### Исправления
