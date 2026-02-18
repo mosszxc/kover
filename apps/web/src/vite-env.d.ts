@@ -2,6 +2,14 @@
 
 declare const __APP_VERSION__: string
 
+declare module "virtual:changelog" {
+  export const releases: {
+    version: string
+    date: string
+    items: { type: "feature" | "fix" | "improvement"; text: string }[]
+  }[]
+}
+
 interface ImportMetaEnv {
   readonly TAURI_ENV_PLATFORM?: string
   readonly TAURI_ENV_ARCH?: string

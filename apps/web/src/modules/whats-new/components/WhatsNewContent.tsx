@@ -1,17 +1,18 @@
 import { useEffect } from "react"
 import { Rocket, Bug, Zap } from "lucide-react"
 import { Badge } from "@/shared/ui/badge"
-import { releases } from "../data"
+import { releases } from "virtual:changelog"
 import { useWhatsNewStore } from "../store"
-import type { ReleaseEntry } from "../data"
 
-const typeConfig = {
-  feature: { label: "Новое", icon: Rocket, variant: "default" as const },
-  fix: { label: "Исправление", icon: Bug, variant: "secondary" as const },
-  improvement: { label: "Улучшение", icon: Zap, variant: "outline" as const },
+const typeConfig: Record<string, { label: string; icon: typeof Rocket; variant: "default" | "secondary" | "outline" }> = {
+  feature: { label: "Новое", icon: Rocket, variant: "default" },
+  fix: { label: "Исправление", icon: Bug, variant: "secondary" },
+  improvement: { label: "Улучшение", icon: Zap, variant: "outline" },
 }
 
-function ReleaseCard({ release }: { release: ReleaseEntry }) {
+type Release = (typeof releases)[number]
+
+function ReleaseCard({ release }: { release: Release }) {
   const formattedDate = new Date(release.date).toLocaleDateString("ru-RU", {
     day: "numeric",
     month: "long",
@@ -26,7 +27,7 @@ function ReleaseCard({ release }: { release: ReleaseEntry }) {
       </div>
       <ul className="space-y-2">
         {release.items.map((item, i) => {
-          const config = typeConfig[item.type]
+          const config = typeConfig[item.type] ?? { label: "Улучшение", icon: Zap, variant: "outline" as const }
           const Icon = config.icon
           return (
             <li key={i} className="flex items-start gap-2">
