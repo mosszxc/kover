@@ -395,26 +395,29 @@ function ScheduleSection({ form }: { form: ClientFormState }) {
           </p>
         </div>
 
-        <div>
-          <span className={labelClass}>
-            <FileText className="mr-1 inline size-3.5" />
-            Договор
-          </span>
-          <div className="flex items-center gap-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div>
+            <span className={labelClass}>
+              <FileText className="mr-1 inline size-3.5" />
+              Номер договора
+            </span>
             <input
               type="text"
               value={form.contractNumber}
               onChange={(e) => form.setContractNumber(e.target.value)}
-              placeholder="Номер договора"
-              className={`${inputClass} flex-1`}
-              aria-label="Номер договора"
+              placeholder="Например: 01/2025"
+              className={inputClass}
             />
+          </div>
+          <div>
+            <span className={labelClass}>
+              Дата договора
+            </span>
             <input
               type="date"
               value={form.contractDate}
               onChange={(e) => form.setContractDate(e.target.value)}
-              className={`${inputClass} w-40`}
-              aria-label="Дата договора"
+              className={inputClass}
             />
           </div>
         </div>

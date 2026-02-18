@@ -29,6 +29,15 @@ if ! git diff --quiet || ! git diff --cached --quiet; then
     exit 1
 fi
 
+# 1.5. Sync: pull latest master and merge into develop to prevent conflicts
+echo "[release] Syncing with remote..."
+git fetch origin
+git checkout master
+git pull --ff-only origin master
+git checkout develop
+git merge master --no-edit
+echo "[release] Develop synced with master ✓"
+
 # 2. Read current version
 PACKAGE_JSON="apps/web/package.json"
 CURRENT_VERSION=$(grep -oP '"version":\s*"\K[^"]+' "$PACKAGE_JSON")
