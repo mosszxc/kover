@@ -1,0 +1,156 @@
+#!/bin/bash
+# Release: bump version, generate changelog, merge develop → master, tag, push
+# Usage: ./scripts/release [patch|minor|major]   (default: patch)
+#
+# Prerequisites:
+#   - On branch develop
+#   - Clean working tree
+#   - master branch exists locally
+
+set -e
+
+BUMP_TYPE="${1:-patch}"
+
+# Validate bump type
+case "$BUMP_TYPE" in
+    patch|minor|major) ;;
+    *) echo "Usage: ./scripts/release [patch|minor|major]"; exit 1 ;;
+esac
+
+# 1. Check we're on develop with clean tree
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [ "$BRANCH" != "develop" ]; then
+    echo "❌ Must be on develop (currently on: $BRANCH)"
+    exit 1
+fi
+
+if ! git diff --quiet || ! git diff --cached --quiet; then
+    echo "❌ Working tree not clean. Commit or stash changes first."
+    exit 1
+fi
+
+# 2. Read current version
+PACKAGE_JSON="apps/web/package.json"
+CURRENT_VERSION=$(grep -oP '"version":\s*"\K[^"]+' "$PACKAGE_JSON")
+if [ -z "$CURRENT_VERSION" ]; then
+    echo "❌ Cannot read version from $PACKAGE_JSON"
+    exit 1
+fi
+
+echo "[release] Current version: $CURRENT_VERSION"
+
+# 3. Bump version
+IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+case "$BUMP_TYPE" in
+    patch) PATCH=$((PATCH + 1)) ;;
+    minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+    major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+esac
+NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+
+echo "[release] New version: $NEW_VERSION ($BUMP_TYPE)"
+
+# 4. Gather changelog from commits master..develop
+echo "[release] Generating changelog..."
+TODAY=$(date +%Y-%m-%d)
+
+FEAT_LINES=""
+FIX_LINES=""
+OTHER_LINES=""
+
+while IFS= read -r line; do
+    [ -z "$line" ] && continue
+    # Extract prefix and message
+    if echo "$line" | grep -qE '^feat(\(.+\))?:'; then
+        MSG=$(echo "$line" | sed 's/^feat\([^)]*\)\?:\s*//')
+        FEAT_LINES="$FEAT_LINES\n- $MSG"
+    elif echo "$line" | grep -qE '^fix(\(.+\))?:'; then
+        MSG=$(echo "$line" | sed 's/^fix\([^)]*\)\?:\s*//')
+        FIX_LINES="$FIX_LINES\n- $MSG"
+    elif echo "$line" | grep -qE '^(refactor|docs|chore|style|perf|test)(\(.+\))?:'; then
+        MSG=$(echo "$line" | sed 's/^[a-z]*\([^)]*\)\?:\s*//')
+        OTHER_LINES="$OTHER_LINES\n- $MSG"
+    else
+        OTHER_LINES="$OTHER_LINES\n- $line"
+    fi
+done <<< "$(git log master..develop --pretty=format:'%s' --no-merges 2>/dev/null)"
+
+# Build changelog block
+CHANGELOG_BLOCK="## v$NEW_VERSION ($TODAY)"
+if [ -n "$FEAT_LINES" ]; then
+    CHANGELOG_BLOCK="$CHANGELOG_BLOCK\n\n### Новое\n$FEAT_LINES"
+fi
+if [ -n "$FIX_LINES" ]; then
+    CHANGELOG_BLOCK="$CHANGELOG_BLOCK\n\n### Исправления\n$FIX_LINES"
+fi
+if [ -n "$OTHER_LINES" ]; then
+    CHANGELOG_BLOCK="$CHANGELOG_BLOCK\n\n### Прочее\n$OTHER_LINES"
+fi
+
+# Check if there are any changes to release
+if [ -z "$FEAT_LINES" ] && [ -z "$FIX_LINES" ] && [ -z "$OTHER_LINES" ]; then
+    echo "⚠️  No commits between master and develop. Nothing to release."
+    exit 0
+fi
+
+# 5. Prepend to CHANGELOG.md
+CHANGELOG_FILE="CHANGELOG.md"
+if [ ! -f "$CHANGELOG_FILE" ]; then
+    echo "# Changelog" > "$CHANGELOG_FILE"
+    echo "" >> "$CHANGELOG_FILE"
+    echo "All notable changes to Kover will be documented in this file." >> "$CHANGELOG_FILE"
+fi
+
+# Create temp file with new content prepended after header
+HEADER_LINES=3  # "# Changelog", empty line, description line
+{
+    head -n "$HEADER_LINES" "$CHANGELOG_FILE"
+    echo ""
+    echo -e "$CHANGELOG_BLOCK"
+    tail -n +"$((HEADER_LINES + 1))" "$CHANGELOG_FILE"
+} > "${CHANGELOG_FILE}.tmp"
+mv "${CHANGELOG_FILE}.tmp" "$CHANGELOG_FILE"
+
+echo "[release] Changelog updated ✓"
+
+# 6. Update version in package.json
+sed -i "s/\"version\": \"$CURRENT_VERSION\"/\"version\": \"$NEW_VERSION\"/" "$PACKAGE_JSON"
+echo "[release] Version bumped in $PACKAGE_JSON ✓"
+
+# 7. Commit release
+git add "$CHANGELOG_FILE" "$PACKAGE_JSON"
+git commit -m "release: v$NEW_VERSION"
+echo "[release] Release commit created ✓"
+
+# 8. Merge develop → master
+echo "[release] Merging develop → master..."
+git checkout master
+git merge develop --no-edit
+echo "[release] Merge to master ✓"
+
+# 9. Tag
+git tag "v$NEW_VERSION"
+echo "[release] Tagged v$NEW_VERSION ✓"
+
+# 10. Push master + tags
+echo "[release] Pushing master + tags..."
+git push origin master --tags
+echo "[release] Push complete ✓"
+
+# 11. Return to develop, merge master back
+echo "[release] Syncing develop with master..."
+git checkout develop
+git merge master --no-edit
+echo "[release] Develop synced ✓"
+
+# 12. Push develop
+git push origin develop
+echo "[release] Develop pushed ✓"
+
+echo ""
+echo "════════════════════════════════════════════════════════════"
+echo "Released v$NEW_VERSION"
+echo ""
+echo "Changelog, tag, and push complete."
+echo "Vercel will auto-deploy from master."
+echo "════════════════════════════════════════════════════════════"
