@@ -1,5 +1,4 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
 import type { DayOfWeek } from '@/shared/types'
 import { supabaseSync, serviceLogAdapter } from '@/shared/lib/sync'
 import { generateId } from '@/shared/lib/generateId'
@@ -45,31 +44,28 @@ function pruneOldEntries(entries: ServiceLogEntry[]): ServiceLogEntry[] {
 }
 
 export const useServiceLogStore = create<ServiceLogState>()(
-  persist(
-    supabaseSync(
-      {
-        adapter: serviceLogAdapter,
-        getItems: (state) => (state as ServiceLogState).entries,
-        itemsKey: 'entries',
-      },
-    (set, get) => ({
-      entries: [],
+  supabaseSync(
+    {
+      adapter: serviceLogAdapter,
+      getItems: (state) => (state as ServiceLogState).entries,
+      itemsKey: 'entries',
+    },
+  (set, get) => ({
+    entries: [],
 
-      addEntry: (entry) =>
-        set((state) => {
-          const newEntry: ServiceLogEntry = {
-            ...entry,
-            id: generateId(),
-            timestamp: new Date().toISOString(),
-          }
-          const entries = pruneOldEntries([newEntry, ...state.entries])
-          return { entries }
-        }),
+    addEntry: (entry) =>
+      set((state) => {
+        const newEntry: ServiceLogEntry = {
+          ...entry,
+          id: generateId(),
+          timestamp: new Date().toISOString(),
+        }
+        const entries = pruneOldEntries([newEntry, ...state.entries])
+        return { entries }
+      }),
 
-      getClientHistory: (clientId) =>
-        get().entries.filter((e) => e.clientId === clientId),
-    }),
-    ),
-    { name: 'kover-service-log' },
+    getClientHistory: (clientId) =>
+      get().entries.filter((e) => e.clientId === clientId),
+  }),
   ),
 )

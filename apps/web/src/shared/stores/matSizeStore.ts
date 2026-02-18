@@ -1,5 +1,4 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
 import type { MatSizeConfig } from '@/shared/types'
 import { DEFAULT_MAT_SIZES } from '@/shared/types'
 import { supabaseSync, matSizesAdapter } from '@/shared/lib/sync'
@@ -12,46 +11,32 @@ interface MatSizeState {
 }
 
 export const useMatSizeStore = create<MatSizeState>()(
-  persist(
-    supabaseSync(
-      {
-        adapter: matSizesAdapter,
-        getItems: (state) => (state as MatSizeState).sizes,
-        itemsKey: 'sizes',
-      },
-    (set) => ({
-      sizes: DEFAULT_MAT_SIZES,
-
-      addSize: (id, label, area, rentalPrice, maxWashCycles = 300) =>
-        set((state) => ({
-          sizes: [...state.sizes, { id, label, area, rentalPrice, maxWashCycles }],
-        })),
-
-      updateSize: (id, updates) =>
-        set((state) => ({
-          sizes: state.sizes.map((s) =>
-            s.id === id ? { ...s, ...updates } : s,
-          ),
-        })),
-
-      removeSize: (id) =>
-        set((state) => ({
-          sizes: state.sizes.filter((s) => s.id !== id),
-        })),
-    }),
-    ),
+  supabaseSync(
     {
-      name: 'kover-mat-sizes',
-      merge: (persisted, current) => {
-        const state = { ...current, ...(persisted as Partial<MatSizeState>) }
-        state.sizes = state.sizes.map((s) => ({
-          ...s,
-          rentalPrice: s.rentalPrice ?? 0,
-          maxWashCycles: s.maxWashCycles ?? 300,
-        }))
-        return state
-      },
+      adapter: matSizesAdapter,
+      getItems: (state) => (state as MatSizeState).sizes,
+      itemsKey: 'sizes',
     },
+  (set) => ({
+    sizes: DEFAULT_MAT_SIZES,
+
+    addSize: (id, label, area, rentalPrice, maxWashCycles = 300) =>
+      set((state) => ({
+        sizes: [...state.sizes, { id, label, area, rentalPrice, maxWashCycles }],
+      })),
+
+    updateSize: (id, updates) =>
+      set((state) => ({
+        sizes: state.sizes.map((s) =>
+          s.id === id ? { ...s, ...updates } : s,
+        ),
+      })),
+
+    removeSize: (id) =>
+      set((state) => ({
+        sizes: state.sizes.filter((s) => s.id !== id),
+      })),
+  }),
   ),
 )
 

@@ -47,6 +47,18 @@ export function useSyncProvider() {
 
     let cleanups: (() => void)[] = []
 
+    // One-time cleanup: remove stale localStorage keys from removed persist stores
+    const deprecatedKeys = [
+      'kover-routes',
+      'kover-drivers',
+      'kover-mat-sizes',
+      'kover-changelog',
+      'kover-service-log',
+    ]
+    for (const key of deprecatedKeys) {
+      localStorage.removeItem(key)
+    }
+
     async function hydrate() {
       setStatus('syncing')
       try {

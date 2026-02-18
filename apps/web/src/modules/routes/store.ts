@@ -1,5 +1,4 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
 import { temporal } from 'zundo'
 import type { DayOfWeek } from '@/shared/types'
 import type { DayRoute, RouteStop } from './types'
@@ -44,11 +43,10 @@ const initialRoutes: DayRoute[] = [
 ]
 
 export const useRouteStore = create<RouteState>()(
-  persist(
-    temporal(
-    (set) => ({
-      routes: initialRoutes,
-      selectedDay: 0 as DayOfWeek,
+  temporal(
+  (set) => ({
+    routes: initialRoutes,
+    selectedDay: 0 as DayOfWeek,
 
       selectDay: (day) => set({ selectedDay: day }),
 
@@ -262,30 +260,6 @@ export const useRouteStore = create<RouteState>()(
       partialize: (state) => {
         const { routes } = state
         return { routes } as RouteState
-      },
-    },
-    ),
-    {
-      name: 'kover-routes',
-      version: 4,
-      migrate: (persisted: unknown, version: number) => {
-        if (version < 2) {
-          // v1 had blocks, v2 is flat — force re-seed
-          return { routes: initialRoutes, selectedDay: 0 as DayOfWeek }
-        }
-        const state = persisted as { routes: DayRoute[]; selectedDay: DayOfWeek }
-        let routes = [...state.routes]
-        if (version < 3) {
-          // v2 → v3: add Saturday/Sunday routes if missing
-          const existingDays = new Set(routes.map((r) => r.day))
-          for (const day of [5, 6] as DayOfWeek[]) {
-            if (!existingDays.has(day)) {
-              routes.push({ day, stops: [] })
-            }
-          }
-        }
-        // v3 → v4: skippedUntil field is optional, no data migration needed
-        return { ...state, routes }
       },
     },
   ),
