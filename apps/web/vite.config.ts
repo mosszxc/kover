@@ -3,12 +3,16 @@ import tailwindcss from "@tailwindcss/vite"
 import react from "@vitejs/plugin-react"
 import { defineConfig } from "vite"
 import { VitePWA } from "vite-plugin-pwa"
+import pkg from "./package.json"
 
 const host = process.env.TAURI_DEV_HOST
 const isTauri = !!process.env.TAURI_ENV_PLATFORM
 const isDebug = process.env.TAURI_ENV_DEBUG === "true"
 
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
+  },
   clearScreen: false,
   server: {
     port: 5173,
