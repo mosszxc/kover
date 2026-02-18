@@ -31,16 +31,20 @@ export function useClientRouteSync() {
         }
       }
 
-      // Изменённые клиенты → синхронизировать days
+      // Новые и изменённые клиенты → синхронизировать days
       for (const nextClient of state.clients) {
-        const prevClient = prevMap.get(nextClient.id)
-        if (!prevClient) continue
+        if (!nextClient.isActive) continue
 
-        const prevDays = new Set(prevClient.days)
+        const prevClient = prevMap.get(nextClient.id)
+        const prevDays = prevClient ? new Set(prevClient.days) : new Set<DayOfWeek>()
         const nextDays = new Set(nextClient.days)
 
         // Если days не изменились — пропускаем
-        if (prevDays.size === nextDays.size && prevClient.days.every((d) => nextDays.has(d))) {
+        if (
+          prevClient &&
+          prevDays.size === nextDays.size &&
+          prevClient.days.every((d) => nextDays.has(d))
+        ) {
           continue
         }
 
@@ -57,20 +61,18 @@ export function useClientRouteSync() {
           }
         }
 
-        // Добавить stops в новые дни
+        // Добавить stops в новые дни (и в дни без stops)
         for (const day of nextDays) {
-          if (!prevDays.has(day)) {
-            const currentRoutes = useRouteStore.getState().routes
-            const route = currentRoutes.find((r) => r.day === day)
-            const alreadyExists = route?.stops.some((s) => s.clientId === nextClient.id)
-            if (!alreadyExists) {
-              useRouteStore.getState().addStop(day as DayOfWeek, {
-                id: generateId(),
-                clientId: nextClient.id,
-                position: route?.stops.length ?? 0,
-                isCompleted: false,
-              })
-            }
+          const currentRoutes = useRouteStore.getState().routes
+          const route = currentRoutes.find((r) => r.day === day)
+          const alreadyExists = route?.stops.some((s) => s.clientId === nextClient.id)
+          if (!alreadyExists) {
+            useRouteStore.getState().addStop(day as DayOfWeek, {
+              id: generateId(),
+              clientId: nextClient.id,
+              position: route?.stops.length ?? 0,
+              isCompleted: false,
+            })
           }
         }
       }
