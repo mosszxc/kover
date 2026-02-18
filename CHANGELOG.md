@@ -2,6 +2,12 @@
 
 All notable changes to Kover will be documented in this file.
 
+## v1.0.8 (2026-02-18)
+
+### Новое
+
+- Нельзя изменить порог износа ковров (#389) (#390)
+
 ## v1.0.7 (2026-02-18)
 
 ### Прочее
