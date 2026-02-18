@@ -83,7 +83,7 @@ export function RouteMap({ stops }: RouteMapProps) {
             </span>
           </span>
           {!isRoadBased && (
-            <span className="text-xs text-amber-500">(по прямой — OSRM недоступен)</span>
+            <span className="text-sm text-amber-500">(по прямой — OSRM недоступен)</span>
           )}
         </div>
       )}

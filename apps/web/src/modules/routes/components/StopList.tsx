@@ -224,12 +224,12 @@ export function StopList({ searchQuery = '', drivers = [], driverFilter = null, 
                 >
                   <span className="min-w-0 flex-1 truncate text-sm text-foreground">
                     {client.originalName}
-                    {ex.reason && <span className="ml-2 text-xs text-muted-foreground">({ex.reason})</span>}
+                    {ex.reason && <span className="ml-2 text-sm text-muted-foreground">({ex.reason})</span>}
                   </span>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="shrink-0 gap-1 text-xs text-red-400 hover:text-red-300"
+                    className="shrink-0 gap-1 text-sm text-red-400 hover:text-red-300"
                     onClick={() => removeException(ex.id)}
                   >
                     <X className="size-3" />
@@ -266,7 +266,7 @@ export function StopList({ searchQuery = '', drivers = [], driverFilter = null, 
                     <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
                       {client.originalName}
                       {dateException && (
-                        <span className="ml-2 inline-flex items-center gap-1 text-xs no-underline">
+                        <span className="ml-2 inline-flex items-center gap-1 text-sm no-underline">
                           <CalendarOff className="inline size-3" />
                           {formatDateRu(dateException.date)}
                           {dateException.reason && ` — ${dateException.reason}`}
@@ -277,7 +277,7 @@ export function StopList({ searchQuery = '', drivers = [], driverFilter = null, 
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="shrink-0 gap-1 text-xs"
+                        className="shrink-0 gap-1 text-sm"
                         onClick={() => removeException(dateException.id)}
                       >
                         <Undo2 className="size-3" />
@@ -287,7 +287,7 @@ export function StopList({ searchQuery = '', drivers = [], driverFilter = null, 
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="shrink-0 gap-1 text-xs"
+                        className="shrink-0 gap-1 text-sm"
                         onClick={() => unskipStop(selectedDay, stop.id)}
                       >
                         <Undo2 className="size-3" />

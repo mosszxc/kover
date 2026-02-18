@@ -59,14 +59,14 @@ export function ChangeLog() {
             <div className="min-w-0 flex-1">
               <p className="text-sm text-foreground">{entry.description}</p>
             </div>
-            <span className="shrink-0 text-xs text-muted-foreground">
+            <span className="shrink-0 text-sm text-muted-foreground">
               {formatTime(entry.timestamp)}
             </span>
           </div>
         ))}
       </div>
       {entries.length > 50 && (
-        <p className="text-center text-xs text-muted-foreground">
+        <p className="text-center text-sm text-muted-foreground">
           Показано 50 из {entries.length} записей
         </p>
       )}

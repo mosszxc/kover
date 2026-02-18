@@ -25,7 +25,7 @@ export function DebtAging() {
           <p className="text-lg font-bold tabular-nums text-red-400">
             {totalDebt.toLocaleString('ru-RU')} ₽
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             {totalDebtors} должник{totalDebtors === 1 ? '' : totalDebtors < 5 ? 'а' : 'ов'}
           </p>
         </div>
@@ -33,10 +33,10 @@ export function DebtAging() {
 
       {/* Aging buckets */}
       <div className="space-y-2">
-        <p className="text-xs font-medium text-muted-foreground">По срокам</p>
+        <p className="text-sm font-medium text-muted-foreground">По срокам</p>
         {buckets.map((bucket) => (
           <div key={bucket.label} className="space-y-1">
-            <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">{bucket.label}</span>
               <span className="tabular-nums text-foreground">
                 {bucket.totalDebt > 0
@@ -65,7 +65,7 @@ export function DebtAging() {
       {/* Top debtors */}
       {topDebtors.length > 0 && (
         <div className="space-y-2">
-          <p className="text-xs font-medium text-muted-foreground">Топ должников</p>
+          <p className="text-sm font-medium text-muted-foreground">Топ должников</p>
           <div className="space-y-1.5">
             {topDebtors.map((debtor) => (
               <div

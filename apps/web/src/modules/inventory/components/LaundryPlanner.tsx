@@ -35,7 +35,7 @@ export function LaundryPlanner({ forecasts, sizeLabels }: LaundryPlannerProps) {
           <AlertTriangle className="size-5 shrink-0 text-red-400" />
           <div>
             <p className="text-sm font-medium text-red-400">Не хватает ковриков</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               {forecasts
                 .filter((f) => f.shortages.length > 0)
                 .map((f) => {
@@ -112,7 +112,7 @@ export function LaundryPlanner({ forecasts, sizeLabels }: LaundryPlannerProps) {
         </table>
       </div>
 
-      <p className="text-xs text-muted-foreground">
+      <p className="text-sm text-muted-foreground">
         Потребность рассчитана по активным маршрутам. Красным отмечены дни с нехваткой (потребность &gt; склад).
       </p>
     </div>

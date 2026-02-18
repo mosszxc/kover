@@ -27,7 +27,7 @@ export function DriversList({ onRowClick }: DriversListProps) {
       <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border py-12 text-center">
         <User className="mb-3 h-10 w-10 text-muted-foreground" />
         <p className="text-sm text-muted-foreground">Водителей пока нет</p>
-        <p className="mt-1 text-xs text-muted-foreground">
+        <p className="mt-1 text-sm text-muted-foreground">
           Добавьте первого водителя кнопкой выше
         </p>
       </div>
@@ -75,13 +75,13 @@ export function DriversList({ onRowClick }: DriversListProps) {
                 </p>
               )}
               {driver.workDays && driver.workDays.length < ALL_DAYS_COUNT && (
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   {driver.workDays.map((d) => DAY_LABELS[d]).join(', ')}
                 </p>
               )}
             </div>
             {!driver.isActive && (
-              <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+              <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-sm text-muted-foreground">
                 Неактивен
               </span>
             )}

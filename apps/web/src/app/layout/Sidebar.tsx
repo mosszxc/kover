@@ -25,7 +25,7 @@ const systemItems = [
 function NavGroup({ label, items }: { label: string; items: ReadonlyArray<{ to: string; label: string; icon: React.ComponentType<{ className?: string }> }> }) {
   return (
     <div>
-      <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+      <div className="px-3 py-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
         {label}
       </div>
       <div className="space-y-1">

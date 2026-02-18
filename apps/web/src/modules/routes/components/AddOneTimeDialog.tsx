@@ -151,7 +151,7 @@ export function AddOneTimeDialog({ clients }: AddOneTimeDialogProps) {
                       className="flex min-h-11 w-full flex-col gap-0.5 px-6 py-2.5 text-left transition-colors hover:bg-accent"
                     >
                       <span className="text-sm text-foreground">{client.originalName}</span>
-                      <span className="text-xs text-muted-foreground">{client.address}</span>
+                      <span className="text-sm text-muted-foreground">{client.address}</span>
                     </button>
                   ))
                 )}
@@ -161,11 +161,11 @@ export function AddOneTimeDialog({ clients }: AddOneTimeDialogProps) {
             <>
               <div className="rounded-lg border border-border p-3">
                 <p className="text-sm font-medium">{selectedClient.originalName}</p>
-                <p className="text-xs text-muted-foreground">{selectedClient.address}</p>
+                <p className="text-sm text-muted-foreground">{selectedClient.address}</p>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="mt-1 h-auto px-0 py-0 text-xs text-blue-400"
+                  className="mt-1 h-auto px-0 py-0 text-sm text-blue-400"
                   onClick={() => setSelectedClient(null)}
                 >
                   Выбрать другого
@@ -184,7 +184,7 @@ export function AddOneTimeDialog({ clients }: AddOneTimeDialogProps) {
                   className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/50"
                 />
                 {date && (
-                  <p className="text-xs text-muted-foreground">{formatDateRu(date)}</p>
+                  <p className="text-sm text-muted-foreground">{formatDateRu(date)}</p>
                 )}
               </div>
               <div className="space-y-1.5">

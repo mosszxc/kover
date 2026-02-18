@@ -169,7 +169,7 @@ export function GenerateInvoicesDialog({ clients, sizes }: GenerateInvoicesDialo
             </div>
           </div>
           {!settings.companyName && (
-            <p className="text-xs text-amber-400">
+            <p className="text-sm text-amber-400">
               Реквизиты не заполнены. Счета будут без данных поставщика.
             </p>
           )}

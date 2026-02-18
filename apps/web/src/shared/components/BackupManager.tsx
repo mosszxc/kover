@@ -112,7 +112,7 @@ export function BackupManager() {
             >
               <div>
                 <div className="text-sm text-foreground">{formatDate(backup.timestamp)}</div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-sm text-muted-foreground">
                   <BackupSummary backup={backup} />
                 </div>
               </div>

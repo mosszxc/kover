@@ -161,13 +161,13 @@ export function ImportExcelDialog({
           {step === 'preview' && diff && (
             <div className="space-y-4">
               {fileName && (
-                <p className="text-xs text-muted-foreground">Файл: {fileName}</p>
+                <p className="text-sm text-muted-foreground">Файл: {fileName}</p>
               )}
 
               {errors.length > 0 && (
                 <button
                   onClick={() => setStep('errors')}
-                  className="flex items-center gap-1.5 text-xs text-amber-500 hover:underline"
+                  className="flex items-center gap-1.5 text-sm text-amber-500 hover:underline"
                 >
                   <AlertTriangle className="h-3.5 w-3.5" />
                   {errors.length} ошибок парсинга (пропущено)
@@ -214,9 +214,9 @@ function DiffSection<T extends { name?: string; label?: string; id?: string }>({
     <div className="rounded border border-border p-3">
       <h3 className="mb-2 text-sm font-medium text-foreground">{title}</h3>
       {!hasChanges ? (
-        <p className="text-xs text-muted-foreground">Без изменений ({diff.unchanged})</p>
+        <p className="text-sm text-muted-foreground">Без изменений ({diff.unchanged})</p>
       ) : (
-        <div className="space-y-1 text-xs">
+        <div className="space-y-1 text-sm">
           {diff.added.map((item, i) => (
             <div key={`a-${i}`} className="flex items-center gap-1.5 text-green-500">
               <Plus className="h-3 w-3" />
@@ -255,9 +255,9 @@ function RouteDiffSection({ diff }: { diff: ImportDiff['routes'] }) {
     <div className="rounded border border-border p-3">
       <h3 className="mb-2 text-sm font-medium text-foreground">Маршруты</h3>
       {!hasChanges ? (
-        <p className="text-xs text-muted-foreground">Без изменений ({diff.unchangedStops} остановок)</p>
+        <p className="text-sm text-muted-foreground">Без изменений ({diff.unchangedStops} остановок)</p>
       ) : (
-        <div className="space-y-1 text-xs">
+        <div className="space-y-1 text-sm">
           {diff.addedStops > 0 && (
             <div className="flex items-center gap-1.5 text-green-500">
               <Plus className="h-3 w-3" />
