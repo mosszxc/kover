@@ -9,6 +9,7 @@ import {
 } from '@tanstack/react-table'
 import { Check, ChevronDown, ChevronUp, ChevronsUpDown, Search, AlertTriangle, Pause, Play, MapPin, TriangleAlert, CalendarClock, Clock, Printer } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
+import { StatusHint } from '@/shared/ui/status-hint'
 import { toast } from 'sonner'
 import { useClientStore } from '../store'
 import type { Client, ClientCategory } from '../types'
@@ -366,27 +367,43 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                     </span>
                   )}
                   {paymentInfo && (
-                    <span
-                      className={cn('inline-block size-2 shrink-0 rounded-full', {
-                        'bg-emerald-400': paymentInfo.status === 'paid',
-                        'bg-amber-400': paymentInfo.status === 'partial',
-                        'bg-red-400': paymentInfo.status === 'overdue',
-                        'bg-muted-foreground': paymentInfo.status === 'pending',
-                      })}
-                      title={`Оплата: ${paymentInfo.status === 'paid' ? 'Оплачен' : paymentInfo.status === 'partial' ? 'Частично' : paymentInfo.status === 'overdue' ? 'Просрочен' : 'Ожидает'}${paymentInfo.debt > 0 ? ` (долг: ${paymentInfo.debt.toLocaleString('ru-RU')} ₽)` : ''}`}
-                    />
+                    <StatusHint
+                      title={paymentInfo.status === 'paid' ? 'Оплачен' : paymentInfo.status === 'partial' ? 'Частично оплачен' : paymentInfo.status === 'overdue' ? 'Просрочена оплата' : 'Ожидает оплаты'}
+                      description={paymentInfo.debt > 0 ? `Долг: ${paymentInfo.debt.toLocaleString('ru-RU')} ₽` : paymentInfo.status === 'paid' ? 'Все платежи внесены.' : 'Платёж ещё не зафиксирован.'}
+                      action={paymentInfo.status === 'overdue' ? 'Свяжитесь с клиентом или зафиксируйте оплату.' : paymentInfo.status === 'partial' ? 'Зафиксируйте остаток оплаты.' : undefined}
+                      variant={paymentInfo.status === 'overdue' ? 'error' : paymentInfo.status === 'partial' ? 'warning' : paymentInfo.status === 'paid' ? 'info' : 'muted'}
+                    >
+                      <span
+                        className={cn('inline-block size-2 rounded-full', {
+                          'bg-emerald-400': paymentInfo.status === 'paid',
+                          'bg-amber-400': paymentInfo.status === 'partial',
+                          'bg-red-400': paymentInfo.status === 'overdue',
+                          'bg-muted-foreground': paymentInfo.status === 'pending',
+                        })}
+                      />
+                    </StatusHint>
                   )}
                   <span className="hidden text-muted-foreground sm:inline">·</span>
                   <span className="hidden min-w-0 items-center gap-1 text-sm text-muted-foreground sm:inline-flex">
                     <span className={cn('truncate', isAnomaly && 'text-amber-400', hasNoCoords && !isAnomaly && 'text-red-400')}>{client.address}</span>
                     {isAnomaly ? (
-                      <span title="Далеко от остальных — проверьте адрес">
+                      <StatusHint
+                        title="Гео-аномалия"
+                        description="Адрес клиента далеко от остальных — возможно, указан неверно."
+                        action="Откройте карточку и проверьте адрес."
+                        variant="warning"
+                      >
                         <TriangleAlert className="size-3.5 shrink-0 text-amber-400" />
-                      </span>
+                      </StatusHint>
                     ) : hasNoCoords ? (
-                      <span title="Адрес не геокодирован">
+                      <StatusHint
+                        title="Нет координат"
+                        description="Адрес не геокодирован — клиент не отображается на карте и не учитывается в маршруте."
+                        action="Откройте карточку и укажите корректный адрес."
+                        variant="error"
+                      >
                         <MapPin className="size-3.5 shrink-0 text-red-400" />
-                      </span>
+                      </StatusHint>
                     ) : (
                       <MapPin className="size-3.5 shrink-0 text-green-400" />
                     )}
@@ -399,22 +416,29 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                     .map((d) => {
                       const inRoute = isClientInRoute?.(client.id, d) ?? false
                       return (
-                        <span
+                        <StatusHint
                           key={d}
-                          className={cn(
-                            'inline-flex items-center gap-0.5 rounded border px-1.5 py-0.5 text-xs font-semibold',
-                            inRoute
-                              ? 'border-green-500/30 bg-green-500/20 text-green-400'
-                              : 'border-orange-500/30 bg-orange-500/20 text-orange-400',
-                          )}
+                          title={inRoute ? 'В маршруте' : 'Не в маршруте'}
+                          description={inRoute ? 'Клиент добавлен в маршрут на этот день.' : 'Клиент запланирован на этот день, но ещё не добавлен в маршрут.'}
+                          action={inRoute ? undefined : 'Добавьте клиента в маршрут на этот день.'}
+                          variant={inRoute ? 'info' : 'warning'}
                         >
-                          {inRoute ? (
-                            <Check className="size-3" />
-                          ) : (
-                            <AlertTriangle className="size-3" />
-                          )}
-                          {DAY_LABELS[d]}
-                        </span>
+                          <span
+                            className={cn(
+                              'inline-flex items-center gap-0.5 rounded border px-1.5 py-0.5 text-xs font-semibold',
+                              inRoute
+                                ? 'border-green-500/30 bg-green-500/20 text-green-400'
+                                : 'border-orange-500/30 bg-orange-500/20 text-orange-400',
+                            )}
+                          >
+                            {inRoute ? (
+                              <Check className="size-3" />
+                            ) : (
+                              <AlertTriangle className="size-3" />
+                            )}
+                            {DAY_LABELS[d]}
+                          </span>
+                        </StatusHint>
                       )
                     })}
                 </div>
@@ -424,13 +448,23 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
               <div className="mt-1 flex items-center gap-1 text-sm text-muted-foreground sm:hidden">
                 <span className={cn('truncate', isAnomaly && 'text-amber-400', hasNoCoords && !isAnomaly && 'text-red-400')}>{client.address}</span>
                 {isAnomaly ? (
-                  <span title="Далеко от остальных — проверьте адрес">
+                  <StatusHint
+                    title="Гео-аномалия"
+                    description="Адрес клиента далеко от остальных — возможно, указан неверно."
+                    action="Откройте карточку и проверьте адрес."
+                    variant="warning"
+                  >
                     <TriangleAlert className="size-3.5 shrink-0 text-amber-400" />
-                  </span>
+                  </StatusHint>
                 ) : hasNoCoords ? (
-                  <span title="Адрес не геокодирован">
+                  <StatusHint
+                    title="Нет координат"
+                    description="Адрес не геокодирован — клиент не отображается на карте и не учитывается в маршруте."
+                    action="Откройте карточку и укажите корректный адрес."
+                    variant="error"
+                  >
                     <MapPin className="size-3.5 shrink-0 text-red-400" />
-                  </span>
+                  </StatusHint>
                 ) : (
                   <MapPin className="size-3.5 shrink-0 text-green-400" />
                 )}
