@@ -24,6 +24,7 @@ interface PrintSheetProps {
   clients: Client[]
   selectedDay: DayOfWeek
   drivers?: DriverInfo[]
+  selectedDriverIds?: string[]
 }
 
 function getMatQuantity(client: Client, sizeId: string, day: DayOfWeek): number {
@@ -118,7 +119,7 @@ function PrintTable({ title, rows, sizes, day }: PrintTableProps) {
   )
 }
 
-export function PrintSheet({ stops, clients, selectedDay, drivers = [] }: PrintSheetProps) {
+export function PrintSheet({ stops, clients, selectedDay, drivers = [], selectedDriverIds = [] }: PrintSheetProps) {
   const sizes = useMatSizeStore((s) => s.sizes)
   const clientMap = new Map(clients.map((c) => [c.id, c]))
   const sortedStops = [...stops].sort((a, b) => a.position - b.position)
@@ -144,20 +145,25 @@ export function PrintSheet({ stops, clients, selectedDay, drivers = [] }: PrintS
 
   // Group stops by driver
   const driverMap = new Map(drivers.map((d) => [d.id, d.name]))
+  const filterActive = selectedDriverIds.length > 0
+  const selectedSet = new Set(selectedDriverIds)
   const groups: { key: string; label: string; stops: RouteStop[] }[] = []
 
   // Per-driver groups
   for (const driver of drivers) {
+    if (filterActive && !selectedSet.has(driver.id)) continue
     const driverStops = sortedStops.filter((s) => s.driverId === driver.id)
     if (driverStops.length > 0) {
       groups.push({ key: driver.id, label: driver.name, stops: driverStops })
     }
   }
 
-  // Unassigned group
-  const unassigned = sortedStops.filter((s) => !s.driverId || !driverMap.has(s.driverId))
-  if (unassigned.length > 0) {
-    groups.push({ key: '__unassigned', label: 'Нераспределённые', stops: unassigned })
+  // Unassigned group (show when no filter or when '__unassigned' selected)
+  if (!filterActive || selectedSet.has('__unassigned')) {
+    const unassigned = sortedStops.filter((s) => !s.driverId || !driverMap.has(s.driverId))
+    if (unassigned.length > 0) {
+      groups.push({ key: '__unassigned', label: 'Нераспределённые', stops: unassigned })
+    }
   }
 
   return (
