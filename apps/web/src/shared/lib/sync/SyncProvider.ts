@@ -11,6 +11,7 @@ import {
   serviceLogAdapter,
   routeStopToLocal,
 } from './adapters'
+import { getUnsyncedIds } from './syncQueue'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 import { useDriverStore } from '@/modules/drivers'
 import { useClientStore } from '@/modules/clients'
@@ -58,21 +59,51 @@ export function useSyncProvider() {
           fetchAll(serviceLogAdapter),
         ])
 
-        // Only hydrate if we got data back (Supabase has records)
+        // Hydrate with per-record merge — protect unsynced local records
         if (matSizes && matSizes.length > 0) {
-          useMatSizeStore.setState({ sizes: matSizes as MatSizeConfig[] })
+          useMatSizeStore.setState({
+            sizes: mergeById(
+              useMatSizeStore.getState().sizes,
+              matSizes as MatSizeConfig[],
+              getUnsyncedIds('mat_sizes'),
+            ),
+          })
         }
         if (drivers && drivers.length > 0) {
-          useDriverStore.setState({ drivers: drivers as Driver[] })
+          useDriverStore.setState({
+            drivers: mergeById(
+              useDriverStore.getState().drivers,
+              drivers as Driver[],
+              getUnsyncedIds('drivers'),
+            ),
+          })
         }
         if (clients && clients.length > 0) {
-          useClientStore.setState({ clients: clients as Client[] })
+          useClientStore.setState({
+            clients: mergeById(
+              useClientStore.getState().clients,
+              clients as Client[],
+              getUnsyncedIds('clients'),
+            ),
+          })
         }
         if (changelog && changelog.length > 0) {
-          useChangeLogStore.setState({ entries: changelog })
+          useChangeLogStore.setState({
+            entries: mergeById(
+              useChangeLogStore.getState().entries,
+              changelog as ChangeLogEntry[],
+              getUnsyncedIds('changelog'),
+            ),
+          })
         }
         if (serviceLog && serviceLog.length > 0) {
-          useServiceLogStore.setState({ entries: serviceLog })
+          useServiceLogStore.setState({
+            entries: mergeById(
+              useServiceLogStore.getState().entries,
+              serviceLog as ServiceLogEntry[],
+              getUnsyncedIds('service_log'),
+            ),
+          })
         }
 
         // Hydrate routes (normalized: day_routes + route_stops)
@@ -397,4 +428,36 @@ function applySettingChange(row: Row<'settings'>) {
   if (storeKey) {
     useSettingsStore.setState({ [storeKey]: value })
   }
+}
+
+/**
+ * Per-record merge: remote wins by default, but local records
+ * that are in the unsynced set (failed to sync) are preserved.
+ * Records only in local (not in remote) are also preserved.
+ */
+function mergeById<T extends { id: string }>(
+  local: T[],
+  remote: T[],
+  unsynced: ReadonlySet<string>,
+): T[] {
+  const remoteMap = new Map(remote.map((r) => [r.id, r]))
+  const resultMap = new Map<string, T>()
+
+  // Start with all remote records
+  for (const r of remote) {
+    resultMap.set(r.id, r)
+  }
+
+  // Override with local records that are unsynced (protect pending changes)
+  for (const l of local) {
+    if (unsynced.has(l.id)) {
+      resultMap.set(l.id, l)
+    }
+    // Keep local-only records (not yet in Supabase)
+    if (!remoteMap.has(l.id)) {
+      resultMap.set(l.id, l)
+    }
+  }
+
+  return Array.from(resultMap.values())
 }
