@@ -2,6 +2,12 @@
 
 All notable changes to Kover will be documented in this file.
 
+## v1.0.4 (2026-02-18)
+
+### Новое
+
+- автогенерация нововведений из CHANGELOG.md
+
 ## v1.0.3 (2026-02-18)
 
 ### Новое
