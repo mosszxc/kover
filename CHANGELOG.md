@@ -2,6 +2,12 @@
 
 All notable changes to Kover will be documented in this file.
 
+## v1.0.10 (2026-02-18)
+
+### Исправления
+
+- Остальные data-сторы уязвимы к тому же persist/sync конфликту (#394) (#397)
+
 ## v1.0.9 (2026-02-18)
 
 ### Исправления
