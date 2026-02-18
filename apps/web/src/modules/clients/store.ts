@@ -1,5 +1,4 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
 import { temporal } from 'zundo'
 import type { Client, ClientNote } from './types'
 import { supabaseSync, clientsAdapter } from '@/shared/lib/sync'
@@ -16,64 +15,66 @@ interface ClientState {
 }
 
 export const useClientStore = create<ClientState>()(
-  persist(
-    temporal(
-      supabaseSync(
-        {
-          adapter: clientsAdapter,
-          getItems: (state) => (state as ClientState).clients,
-          itemsKey: 'clients',
-        },
-      (set) => ({
-        clients: [],
-
-        addClient: (client) =>
-          set((state) => ({ clients: [...state.clients, client] })),
-
-        updateClient: (id, data) =>
-          set((state) => ({
-            clients: state.clients.map((c) =>
-              c.id === id ? { ...c, ...data } : c,
-            ),
-          })),
-
-        deleteClient: (id) =>
-          set((state) => ({
-            clients: state.clients.filter((c) => c.id !== id),
-          })),
-
-        addNote: (clientId, text) =>
-          set((state) => ({
-            clients: state.clients.map((c) => {
-              if (c.id !== clientId) return c
-              const note: ClientNote = {
-                id: generateId(),
-                text,
-                createdAt: new Date().toISOString(),
-              }
-              return { ...c, clientNotes: [note, ...(c.clientNotes ?? [])] }
-            }),
-          })),
-
-        deleteNote: (clientId, noteId) =>
-          set((state) => ({
-            clients: state.clients.map((c) => {
-              if (c.id !== clientId) return c
-              return { ...c, clientNotes: (c.clientNotes ?? []).filter((n) => n.id !== noteId) }
-            }),
-          })),
-
-        seedClients: (clients) => set({ clients }),
-      }),
-      ),
+  temporal(
+    supabaseSync(
       {
-        limit: 20,
-        partialize: (state) => {
-          const { clients } = state
-          return { clients } as ClientState
-        },
+        adapter: clientsAdapter,
+        getItems: (state) => (state as ClientState).clients,
+        itemsKey: 'clients',
       },
+    (set) => ({
+      clients: [],
+
+      addClient: (client) =>
+        set((state) => ({ clients: [...state.clients, client] })),
+
+      updateClient: (id, data) =>
+        set((state) => ({
+          clients: state.clients.map((c) =>
+            c.id === id ? { ...c, ...data } : c,
+          ),
+        })),
+
+      deleteClient: (id) =>
+        set((state) => ({
+          clients: state.clients.filter((c) => c.id !== id),
+        })),
+
+      addNote: (clientId, text) =>
+        set((state) => ({
+          clients: state.clients.map((c) => {
+            if (c.id !== clientId) return c
+            const note: ClientNote = {
+              id: generateId(),
+              text,
+              createdAt: new Date().toISOString(),
+            }
+            return { ...c, clientNotes: [note, ...(c.clientNotes ?? [])] }
+          }),
+        })),
+
+      deleteNote: (clientId, noteId) =>
+        set((state) => ({
+          clients: state.clients.map((c) => {
+            if (c.id !== clientId) return c
+            return { ...c, clientNotes: (c.clientNotes ?? []).filter((n) => n.id !== noteId) }
+          }),
+        })),
+
+      seedClients: (clients) => set({ clients }),
+    }),
     ),
-    { name: 'kover-clients', version: 1 },
+    {
+      limit: 20,
+      partialize: (state) => {
+        const { clients } = state
+        return { clients } as ClientState
+      },
+    },
   ),
 )
+
+// Clean up legacy localStorage key left by removed persist middleware
+if (typeof window !== 'undefined') {
+  localStorage.removeItem('kover-clients')
+}
