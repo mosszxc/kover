@@ -150,6 +150,7 @@ export type Database = {
           created_at: string
           id: string
           label: string
+          max_wash_cycles: number
           rental_price: number
           updated_at: string
         }
@@ -158,6 +159,7 @@ export type Database = {
           created_at?: string
           id?: string
           label: string
+          max_wash_cycles?: number
           rental_price?: number
           updated_at?: string
         }
@@ -166,6 +168,7 @@ export type Database = {
           created_at?: string
           id?: string
           label?: string
+          max_wash_cycles?: number
           rental_price?: number
           updated_at?: string
         }

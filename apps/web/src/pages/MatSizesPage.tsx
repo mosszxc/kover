@@ -1,12 +1,14 @@
 import { useCallback } from 'react'
 import { MatSizeSettings } from '@/modules/settings'
 import { useClientStore } from '@/modules/clients'
+import { useInventoryStore } from '@/modules/inventory'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 
 export function MatSizesPage() {
   const clients = useClientStore((s) => s.clients)
   const updateClient = useClientStore((s) => s.updateClient)
   const removeSize = useMatSizeStore((s) => s.removeSize)
+  const updateInventoryMaxWashCycles = useInventoryStore((s) => s.updateMaxWashCycles)
 
   const isSizeUsed = useCallback(
     (sizeId: string) => clients.some((c) => c.mats.some((m) => m.size === sizeId)),
@@ -40,6 +42,7 @@ export function MatSizesPage() {
         isSizeUsed={isSizeUsed}
         getClientsUsing={getClientsUsing}
         onDeleteAndReplace={onDeleteAndReplace}
+        onMaxWashCyclesChange={updateInventoryMaxWashCycles}
       />
     </div>
   )

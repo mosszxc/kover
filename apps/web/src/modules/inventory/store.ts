@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { temporal } from 'zundo'
 import type { MatInventory, MatBatch, InventoryTransaction, TransactionType } from './types'
+import { getMatMaxWashCycles } from '@/shared/stores/matSizeStore'
 
 interface InventoryState {
   inventory: MatInventory[]
@@ -13,6 +14,7 @@ interface InventoryState {
   recordWriteOff: (sizeId: string, quantity: number, notes?: string) => void
   recordLaundryIn: (sizeId: string, quantity: number) => void
   recordLaundryOut: (sizeId: string, quantity: number) => void
+  updateMaxWashCycles: (sizeId: string, maxWashCycles: number) => void
 }
 
 function createTransaction(sizeId: string, type: TransactionType, quantity: number, notes = ''): InventoryTransaction {
@@ -28,7 +30,7 @@ function createTransaction(sizeId: string, type: TransactionType, quantity: numb
 
 function ensureSize(inventory: MatInventory[], sizeId: string): MatInventory[] {
   if (inventory.some((i) => i.sizeId === sizeId)) return inventory
-  return [...inventory, { sizeId, totalOwned: 0, inLaundry: 0, damaged: 0, washCycles: 0, maxWashCycles: 300 }]
+  return [...inventory, { sizeId, totalOwned: 0, inLaundry: 0, damaged: 0, washCycles: 0, maxWashCycles: getMatMaxWashCycles(sizeId) }]
 }
 
 function updateSize(inventory: MatInventory[], sizeId: string, updater: (item: MatInventory) => MatInventory): MatInventory[] {
@@ -98,7 +100,7 @@ export const useInventoryStore = create<InventoryState>()(
 
         recordPurchase: (sizeId, quantity, notes = '') =>
           set((state) => {
-            const maxWashCycles = state.inventory.find((i) => i.sizeId === sizeId)?.maxWashCycles ?? 300
+            const maxWashCycles = state.inventory.find((i) => i.sizeId === sizeId)?.maxWashCycles ?? getMatMaxWashCycles(sizeId)
             const newBatch: MatBatch = {
               id: crypto.randomUUID(),
               sizeId,
@@ -147,6 +149,16 @@ export const useInventoryStore = create<InventoryState>()(
             })),
             batches: distributeLaundryOut(state.batches, sizeId, quantity),
             transactions: [...state.transactions, createTransaction(sizeId, 'laundry_out', quantity)],
+          })),
+
+        updateMaxWashCycles: (sizeId, maxWashCycles) =>
+          set((state) => ({
+            inventory: state.inventory.map((i) =>
+              i.sizeId === sizeId ? { ...i, maxWashCycles } : i,
+            ),
+            batches: state.batches.map((b) =>
+              b.sizeId === sizeId ? { ...b, maxWashCycles } : b,
+            ),
           })),
       }),
       {

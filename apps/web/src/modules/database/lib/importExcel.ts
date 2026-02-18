@@ -126,7 +126,7 @@ export function parseExcelImport(buffer: ArrayBuffer): ParseResult {
         continue
       }
       const rentalPrice = parseFloat(cell(row, msCol, 'Цена (₽)')) || 0
-      matSizes.push({ id, label, area, rentalPrice })
+      matSizes.push({ id, label, area, rentalPrice, maxWashCycles: 300 })
     }
   }
 
