@@ -2,3 +2,4 @@
 // Print sheet @media print (Iteration 3)
 
 export { PrintSheet } from './components/PrintSheet'
+export { PrintFieldsToggle } from './components/PrintFieldsToggle'

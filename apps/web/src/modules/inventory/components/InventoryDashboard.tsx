@@ -73,7 +73,7 @@ export function InventoryDashboard({ summary, sizeLabels }: InventoryDashboardPr
 
             {item.totalOwned > 0 && item.batches.length > 0 && (
               <div className="mt-2 space-y-1.5">
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
                   <RotateCw className="size-4" />
                   Износ по партиям
                 </div>
@@ -81,7 +81,7 @@ export function InventoryDashboard({ summary, sizeLabels }: InventoryDashboardPr
                   const pct = Math.min(100, batch.wearPercent)
                   return (
                     <div key={batch.id}>
-                      <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">
                           {new Date(batch.purchasedAt).toLocaleDateString('ru-RU', { month: 'short', year: '2-digit' })}
                           {' '}({batch.remaining} шт)
@@ -107,7 +107,7 @@ export function InventoryDashboard({ summary, sizeLabels }: InventoryDashboardPr
                         />
                       </div>
                       {batch.wearPercent >= 100 && (
-                        <p className="mt-0.5 text-xs text-red-400">Пора менять эту партию!</p>
+                        <p className="mt-0.5 text-sm text-red-400">Пора менять эту партию!</p>
                       )}
                     </div>
                   )
@@ -116,7 +116,7 @@ export function InventoryDashboard({ summary, sizeLabels }: InventoryDashboardPr
             )}
             {item.totalOwned > 0 && item.batches.length === 0 && item.maxWashCycles > 0 && (
               <div className="mt-2">
-                <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center justify-between text-sm">
                   <span className="flex items-center gap-1 text-muted-foreground">
                     <RotateCw className="size-4" />
                     Износ
@@ -142,7 +142,7 @@ export function InventoryDashboard({ summary, sizeLabels }: InventoryDashboardPr
                   />
                 </div>
                 {item.washCycles >= item.maxWashCycles && (
-                  <p className="mt-1 text-xs text-red-400">Пора менять коврики!</p>
+                  <p className="mt-1 text-sm text-red-400">Пора менять коврики!</p>
                 )}
               </div>
             )}
@@ -189,7 +189,7 @@ export function InventoryDashboard({ summary, sizeLabels }: InventoryDashboardPr
                   <span>{sizeLabels.get(tx.sizeId) ?? tx.sizeId}</span>
                   <span className="tabular-nums text-muted-foreground">{tx.type === 'write_off' ? '-' : '+'}{tx.quantity} шт</span>
                 </div>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-sm text-muted-foreground">
                   {new Date(tx.createdAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}
                 </span>
               </div>

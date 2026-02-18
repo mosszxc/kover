@@ -3,6 +3,7 @@ import type { RouteStop } from '@/modules/routes'
 import type { Client } from '@/modules/clients'
 import { getClientReplacements } from '@/modules/clients'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
+import { usePrintSettingsStore } from '../store'
 
 const DAY_LABELS_FULL: Record<DayOfWeek, string> = {
   0: 'Понедельник',
@@ -24,6 +25,7 @@ interface PrintSheetProps {
   clients: Client[]
   selectedDay: DayOfWeek
   drivers?: DriverInfo[]
+  selectedDriverIds?: string[]
 }
 
 function getMatQuantity(client: Client, sizeId: string, day: DayOfWeek): number {
@@ -46,9 +48,10 @@ interface PrintTableProps {
   rows: { stop: RouteStop; client: Client | undefined }[]
   sizes: MatSizeConfig[]
   day: DayOfWeek
+  showPhone: boolean
 }
 
-function PrintTable({ title, rows, sizes, day }: PrintTableProps) {
+function PrintTable({ title, rows, sizes, day, showPhone }: PrintTableProps) {
   const totals = Object.fromEntries(
     sizes.map((s) => [
       s.id,
@@ -77,7 +80,7 @@ function PrintTable({ title, rows, sizes, day }: PrintTableProps) {
           <tr>
             <th className="num">#</th>
             <th className="col-name">Название</th>
-            <th className="col-name">Телефон</th>
+            {showPhone && <th className="col-name">Телефон</th>}
             {sizes.map((s) => (
               <th key={s.id} className="num">{s.label}</th>
             ))}
@@ -89,7 +92,7 @@ function PrintTable({ title, rows, sizes, day }: PrintTableProps) {
             <tr key={stop.id}>
               <td className="num stop-num">{index + 1}</td>
               <td>{client?.originalName ?? '—'}</td>
-              <td>{client?.contactPhone ?? ''}</td>
+              {showPhone && <td>{client?.contactPhone ?? ''}</td>}
               {sizes.map((s) => {
                 const qty = client ? getMatQuantity(client, s.id, day) : 0
                 return <td key={s.id} className="num">{qty > 0 ? qty : ''}</td>
@@ -104,7 +107,7 @@ function PrintTable({ title, rows, sizes, day }: PrintTableProps) {
           <tr>
             <td className="num" />
             <td>Итого: {rows.length} точек / {Math.round(totalArea * 100) / 100} м²</td>
-            <td />
+            {showPhone && <td />}
             {sizes.map((s) => (
               <td key={s.id} className="num">
                 {(totals[s.id] ?? 0) > 0 ? totals[s.id] : ''}
@@ -118,8 +121,9 @@ function PrintTable({ title, rows, sizes, day }: PrintTableProps) {
   )
 }
 
-export function PrintSheet({ stops, clients, selectedDay, drivers = [] }: PrintSheetProps) {
+export function PrintSheet({ stops, clients, selectedDay, drivers = [], selectedDriverIds = [] }: PrintSheetProps) {
   const sizes = useMatSizeStore((s) => s.sizes)
+  const showPhone = usePrintSettingsStore((s) => s.columns.phone)
   const clientMap = new Map(clients.map((c) => [c.id, c]))
   const sortedStops = [...stops].sort((a, b) => a.position - b.position)
   const dateStr = formatDate()
@@ -137,6 +141,7 @@ export function PrintSheet({ stops, clients, selectedDay, drivers = [] }: PrintS
           rows={toRows(sortedStops)}
           sizes={sizes}
           day={selectedDay}
+          showPhone={showPhone}
         />
       </div>
     )
@@ -144,20 +149,25 @@ export function PrintSheet({ stops, clients, selectedDay, drivers = [] }: PrintS
 
   // Group stops by driver
   const driverMap = new Map(drivers.map((d) => [d.id, d.name]))
+  const filterActive = selectedDriverIds.length > 0
+  const selectedSet = new Set(selectedDriverIds)
   const groups: { key: string; label: string; stops: RouteStop[] }[] = []
 
   // Per-driver groups
   for (const driver of drivers) {
+    if (filterActive && !selectedSet.has(driver.id)) continue
     const driverStops = sortedStops.filter((s) => s.driverId === driver.id)
     if (driverStops.length > 0) {
       groups.push({ key: driver.id, label: driver.name, stops: driverStops })
     }
   }
 
-  // Unassigned group
-  const unassigned = sortedStops.filter((s) => !s.driverId || !driverMap.has(s.driverId))
-  if (unassigned.length > 0) {
-    groups.push({ key: '__unassigned', label: 'Нераспределённые', stops: unassigned })
+  // Unassigned group (show when no filter or when '__unassigned' selected)
+  if (!filterActive || selectedSet.has('__unassigned')) {
+    const unassigned = sortedStops.filter((s) => !s.driverId || !driverMap.has(s.driverId))
+    if (unassigned.length > 0) {
+      groups.push({ key: '__unassigned', label: 'Нераспределённые', stops: unassigned })
+    }
   }
 
   return (
@@ -169,6 +179,7 @@ export function PrintSheet({ stops, clients, selectedDay, drivers = [] }: PrintS
             rows={toRows(group.stops)}
             sizes={sizes}
             day={selectedDay}
+            showPhone={showPhone}
           />
         </div>
       ))}

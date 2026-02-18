@@ -139,7 +139,7 @@ export function ServiceReportDialog({
                   </div>
                   <div className="mt-2 grid grid-cols-2 gap-3">
                     <div className="space-y-1">
-                      <label className="text-xs text-muted-foreground">Забрано</label>
+                      <label className="text-sm text-muted-foreground">Забрано</label>
                       <input
                         type="number"
                         min={0}
@@ -152,7 +152,7 @@ export function ServiceReportDialog({
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs text-muted-foreground">Оставлено</label>
+                      <label className="text-sm text-muted-foreground">Оставлено</label>
                       <input
                         type="number"
                         min={0}
@@ -166,7 +166,7 @@ export function ServiceReportDialog({
                     </div>
                   </div>
                   {hasIssue && (
-                    <div className="mt-2 flex items-center gap-1 text-xs text-amber-400">
+                    <div className="mt-2 flex items-center gap-1 text-sm text-amber-400">
                       <AlertTriangle className="size-3" />
                       Расхождение с ожидаемым
                     </div>
@@ -195,7 +195,7 @@ export function ServiceReportDialog({
               <p className="text-sm font-medium text-amber-400">
                 {discrepancies.length} расхождени{discrepancies.length === 1 ? 'е' : 'я'}
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Недостачи будут списаны из инвентаря
               </p>
             </div>

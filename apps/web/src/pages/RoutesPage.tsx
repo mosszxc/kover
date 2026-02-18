@@ -3,7 +3,7 @@ import { DaySwitcher, RouteDashboard, RouteSearch, StopList, AddStopDialog, AddO
 import { useClientStore, EditClientDialog } from '@/modules/clients'
 import type { Client } from '@/modules/clients'
 import { useDriverStore } from '@/modules/drivers'
-import { PrintSheet } from '@/modules/print'
+import { PrintSheet, PrintFieldsToggle } from '@/modules/print'
 import { OptimizeRouteDialog } from '@/modules/map'
 import { useClientPaymentStatus } from '@/modules/payments'
 import { useRouteExceptionsStore } from '@/shared/stores/routeExceptionsStore'
@@ -13,6 +13,7 @@ const EMPTY_STOPS: never[] = []
 export function RoutesPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [driverFilter, setDriverFilter] = useState<string | 'unassigned' | null>(null)
+  const [printDriverIds, setPrintDriverIds] = useState<string[]>([])
   const [editingClient, setEditingClient] = useState<Client | null>(null)
   const [reportClient, setReportClient] = useState<Client | null>(null)
   const clients = useClientStore((s) => s.clients)
@@ -63,7 +64,9 @@ export function RoutesPage() {
           <DaySwitcher />
           <div className="flex items-center gap-2 ml-auto">
             <OptimizeRouteDialog />
-            <PrintButton />
+            <PrintButton drivers={driverOptions} selectedDriverIds={printDriverIds} onSelectedDriverIdsChange={setPrintDriverIds}>
+              <PrintFieldsToggle />
+            </PrintButton>
           </div>
         </div>
         <RouteDashboard drivers={driverOptions} />
@@ -79,7 +82,7 @@ export function RoutesPage() {
           <AddOneTimeDialog clients={clients} />
         </div>
       </div>
-      <PrintSheet stops={activeStops} clients={clients} selectedDay={selectedDay} drivers={driverOptions} />
+      <PrintSheet stops={activeStops} clients={clients} selectedDay={selectedDay} drivers={driverOptions} selectedDriverIds={printDriverIds} />
       {editingClient && (
         <EditClientDialog
           client={editingClient}

@@ -51,7 +51,7 @@ export function RevenueChart() {
               )}
             >
               {revenueDelta > 0 ? '+' : ''}{revenueDelta.toLocaleString('ru-RU')} ₽
-              <span className="ml-1 text-xs font-normal">
+              <span className="ml-1 text-sm font-normal">
                 ({revenueDeltaPct > 0 ? '+' : ''}{revenueDeltaPct}%)
               </span>
             </span>
@@ -62,20 +62,20 @@ export function RevenueChart() {
       {/* Key metrics */}
       <div className={cn('grid gap-3', hasCosts ? 'grid-cols-3' : 'grid-cols-2')}>
         <div className="rounded-lg border border-border p-3">
-          <p className="text-xs text-muted-foreground">Текущий месяц</p>
+          <p className="text-sm text-muted-foreground">Текущий месяц</p>
           <p className="text-xl font-bold tabular-nums text-emerald-400">
             {(current?.revenue ?? 0).toLocaleString('ru-RU')} ₽
           </p>
         </div>
         <div className="rounded-lg border border-border p-3">
-          <p className="text-xs text-muted-foreground">Ожидается</p>
+          <p className="text-sm text-muted-foreground">Ожидается</p>
           <p className="text-xl font-bold tabular-nums">
             {(current?.expected ?? 0).toLocaleString('ru-RU')} ₽
           </p>
         </div>
         {hasCosts && (
           <div className="rounded-lg border border-border p-3">
-            <p className="text-xs text-muted-foreground">Маржа</p>
+            <p className="text-sm text-muted-foreground">Маржа</p>
             <p className={cn(
               'text-xl font-bold tabular-nums',
               (current?.margin ?? 0) >= 0 ? 'text-emerald-400' : 'text-red-400',
@@ -115,7 +115,7 @@ export function RevenueChart() {
                   />
                 </div>
                 <span className={cn(
-                  'text-xs',
+                  'text-sm',
                   isCurrent ? 'font-medium text-foreground' : 'text-muted-foreground',
                 )}>
                   {month.label}
@@ -124,7 +124,7 @@ export function RevenueChart() {
             )
           })}
         </div>
-        <div className="mt-2 flex items-center justify-center gap-4 text-xs text-muted-foreground">
+        <div className="mt-2 flex items-center justify-center gap-4 text-sm text-muted-foreground">
           <span className="flex items-center gap-1">
             <span className="inline-block h-2 w-3 rounded-sm bg-emerald-500/60" />
             Оплачено
@@ -139,7 +139,7 @@ export function RevenueChart() {
       {/* Margin chart if costs configured */}
       {hasCosts && months.some((m) => m.revenue > 0) && (
         <div>
-          <h4 className="mb-2 text-xs font-medium text-muted-foreground">Маржа по месяцам</h4>
+          <h4 className="mb-2 text-sm font-medium text-muted-foreground">Маржа по месяцам</h4>
           <div className="space-y-1">
             {months.filter((m) => m.revenue > 0).map((month) => {
               const maxMargin = Math.max(...months.map((m) => Math.abs(m.margin)), 1)
@@ -148,7 +148,7 @@ export function RevenueChart() {
 
               return (
                 <div key={month.period} className="flex items-center gap-2">
-                  <span className="w-8 text-xs text-muted-foreground">{month.label}</span>
+                  <span className="w-8 text-sm text-muted-foreground">{month.label}</span>
                   <div className="flex-1">
                     <div
                       className={cn(
@@ -159,7 +159,7 @@ export function RevenueChart() {
                     />
                   </div>
                   <span className={cn(
-                    'w-16 text-right text-xs tabular-nums',
+                    'w-16 text-right text-sm tabular-nums',
                     positive ? 'text-emerald-400' : 'text-red-400',
                   )}>
                     {month.margin.toLocaleString('ru-RU')}

@@ -143,7 +143,7 @@ export function BulkAssignDriverDialog({ drivers, driverFilter }: BulkAssignDriv
                   <>
                     <SelectSeparator />
                     <SelectGroup>
-                      <SelectLabel className="text-xs text-muted-foreground">Не работают сегодня</SelectLabel>
+                      <SelectLabel className="text-sm text-muted-foreground">Не работают сегодня</SelectLabel>
                       {notWorking.map((d) => (
                         <SelectItem key={d.id} value={d.id} className="text-muted-foreground">
                           {d.name}

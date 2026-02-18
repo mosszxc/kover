@@ -52,7 +52,7 @@ export function RemoveStopDialog({ stopId, clientId, clientName, day, driverName
             >
               <span className="flex flex-col items-start">
                 <span>Пропустить на конкретную дату</span>
-                <span className="text-xs font-normal text-muted-foreground">
+                <span className="text-sm font-normal text-muted-foreground">
                   Не приезжать в выбранный день, потом вернётся сам
                 </span>
               </span>
@@ -68,7 +68,7 @@ export function RemoveStopDialog({ stopId, clientId, clientName, day, driverName
             >
               <span className="flex flex-col items-start">
                 <span>Пропустить на эту неделю</span>
-                <span className="text-xs font-normal text-muted-foreground">
+                <span className="text-sm font-normal text-muted-foreground">
                   Вернётся автоматически в следующий {DAY_LABELS[day]}
                 </span>
               </span>
@@ -84,7 +84,7 @@ export function RemoveStopDialog({ stopId, clientId, clientName, day, driverName
             >
               <span className="flex flex-col items-start">
                 <span>Убрать навсегда</span>
-                <span className="text-xs font-normal text-destructive-foreground/70">
+                <span className="text-sm font-normal text-destructive-foreground/70">
                   Клиент останется в базе, но пропадёт из маршрута
                 </span>
               </span>

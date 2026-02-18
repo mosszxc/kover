@@ -19,7 +19,7 @@ export function DriverSummary({ drivers }: DriverSummaryProps) {
 
   return (
     <div className="space-y-1.5">
-      <p className="text-xs font-medium text-muted-foreground">Нагрузка по водителям</p>
+      <p className="text-sm font-medium text-muted-foreground">Нагрузка по водителям</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
         {unassigned && (
           <div className="flex items-center gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-2.5">
@@ -65,7 +65,7 @@ export function DriverSummary({ drivers }: DriverSummaryProps) {
 function DriverStats({ item, hasCosts, capacity }: { item: DriverSummaryItem; hasCosts: boolean; capacity?: number | null }) {
   const overloaded = capacity != null && capacity > 0 && item.totalArea > capacity
   return (
-    <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+    <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
       <span className="flex items-center gap-1">
         <MapPin className="h-3 w-3" />
         {item.stopCount}

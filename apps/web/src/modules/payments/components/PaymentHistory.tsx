@@ -37,7 +37,7 @@ export function PaymentHistory({ clientId }: PaymentHistoryProps) {
             <div>
               <p className="text-sm font-medium">{formatPeriod(payment.period)}</p>
               {payment.notes && (
-                <p className="text-xs text-muted-foreground">{payment.notes}</p>
+                <p className="text-sm text-muted-foreground">{payment.notes}</p>
               )}
             </div>
             <div className="flex items-center gap-3">

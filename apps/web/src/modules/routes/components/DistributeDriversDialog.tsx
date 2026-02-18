@@ -214,7 +214,7 @@ export function DistributeDriversDialog({ drivers, clients }: DistributeDriversD
           </div>
 
           {/* Информация о точках */}
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             {geoStops.length} точек с координатами будут распределены
           </p>
 
@@ -264,7 +264,7 @@ export function DistributeDriversDialog({ drivers, clients }: DistributeDriversD
                         </span>
                       </div>
                     </div>
-                    <div className="mt-2 flex gap-4 text-xs text-muted-foreground">
+                    <div className="mt-2 flex gap-4 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <MapPin className="size-3" />
                         {cluster.stopCount} точек

@@ -201,7 +201,7 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
               e.stopPropagation()
               onEditClient(client)
             }}
-            className="mt-1 h-auto gap-1 px-1.5 py-0.5 text-xs text-amber-400 hover:bg-amber-500/20 hover:text-amber-300 print:hidden"
+            className="mt-1 h-auto gap-1 px-1.5 py-0.5 text-sm text-amber-400 hover:bg-amber-500/20 hover:text-amber-300 print:hidden"
           >
             <Pencil className="size-3" />
             Исправить адрес
@@ -318,7 +318,7 @@ function DriverSelect({ drivers, selectedDay, driverId, onValueChange }: DriverS
         size="sm"
         aria-label="Назначить водителя"
         className={cn(
-          'w-34 shrink-0 cursor-pointer truncate text-xs print:hidden',
+          'w-34 shrink-0 cursor-pointer truncate text-sm print:hidden',
           driverId
             ? 'border-blue-600/50 bg-blue-950/50 text-blue-300'
             : 'border-border bg-card text-muted-foreground',
@@ -335,7 +335,7 @@ function DriverSelect({ drivers, selectedDay, driverId, onValueChange }: DriverS
           <>
             <SelectSeparator />
             <SelectGroup>
-              <SelectLabel className="text-xs text-muted-foreground">Не работают сегодня</SelectLabel>
+              <SelectLabel className="text-sm text-muted-foreground">Не работают сегодня</SelectLabel>
               {notWorking.map((d) => (
                 <SelectItem key={d.id} value={d.id} className="text-muted-foreground">
                   {d.name}

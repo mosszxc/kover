@@ -154,7 +154,7 @@ export function AddStopDialog({ clients }: AddStopDialogProps) {
                   className="flex min-h-11 w-full flex-col gap-0.5 px-6 py-2.5 text-left transition-colors hover:bg-accent"
                 >
                   <span className="text-sm text-foreground">{client.originalName}</span>
-                  <span className="text-xs text-muted-foreground">{client.address}</span>
+                  <span className="text-sm text-muted-foreground">{client.address}</span>
                 </button>
               ))
             )}

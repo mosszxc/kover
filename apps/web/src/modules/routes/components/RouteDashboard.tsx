@@ -74,7 +74,7 @@ export function RouteDashboard({ drivers }: RouteDashboardProps) {
               <span className="text-2xl font-bold tabular-nums leading-none">
                 {qty}
               </span>
-              <span className="mt-1 text-xs font-medium opacity-70">
+              <span className="mt-1 text-sm font-medium opacity-70">
                 {s.label}
               </span>
             </div>
@@ -86,7 +86,7 @@ export function RouteDashboard({ drivers }: RouteDashboardProps) {
       {driverItems.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 border-t border-border px-4 py-2.5">
           {unassigned && (
-            <span className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-xs">
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-sm">
               <AlertTriangle className="h-3 w-3 text-amber-400" />
               <span className="font-medium text-amber-400">Нераспред.</span>
               <span className="font-semibold tabular-nums text-amber-300">{unassigned.stopCount}</span>
@@ -103,7 +103,7 @@ export function RouteDashboard({ drivers }: RouteDashboardProps) {
             return (
               <span
                 key={item.driverId}
-                className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs ${
+                className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-sm ${
                   overloaded
                     ? 'border-red-500/30 bg-red-500/10'
                     : 'border-border bg-muted/40'

@@ -18,7 +18,7 @@ export function WeekendToggle() {
           <span className="text-sm font-medium text-foreground">
             Показывать субботу и воскресенье
           </span>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Выходные дни будут скрыты из переключателя дней, фильтров и статистики
           </p>
         </div>

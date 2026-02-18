@@ -55,7 +55,7 @@ function WizardProgress({ step }: { step: number }) {
             >
               {i < step ? '\u2713' : i + 1}
             </div>
-            <span className={`text-xs ${i === step ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>
+            <span className={`text-sm ${i === step ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>
               {label}
             </span>
           </div>
@@ -125,7 +125,7 @@ function BasicSection({
           className={inputClass}
         />
         {mode === 'add' && (
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p className="mt-1 text-sm text-muted-foreground">
             Координаты определятся автоматически при сохранении
           </p>
         )}
@@ -279,7 +279,7 @@ function ScheduleSection({ form }: { form: ClientFormState }) {
       {form.days.length > 1 && (
         <div className="space-y-3">
           <SectionDivider>Замены по дням</SectionDivider>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Сколько раз менять коврики в каждый день обслуживания
           </p>
           <div className="flex flex-wrap gap-3">
@@ -390,7 +390,7 @@ function ScheduleSection({ form }: { form: ClientFormState }) {
             placeholder="Автоматически из ковриков"
             className={inputClass}
           />
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p className="mt-1 text-sm text-muted-foreground">
             Если задана — используется вместо расчёта из ковриков
           </p>
         </div>

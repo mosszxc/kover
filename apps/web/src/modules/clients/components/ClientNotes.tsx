@@ -39,7 +39,7 @@ export function ClientNotes({ clientId, notes, pinnedNote }: ClientNotesProps) {
     <div className="space-y-4">
       {pinnedNote && (
         <div className="rounded-lg border border-border bg-muted/50 p-3">
-          <p className="mb-1 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+          <p className="mb-1 flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
             <StickyNote className="size-3" />
             Постоянная заметка
           </p>
@@ -88,7 +88,7 @@ export function ClientNotes({ clientId, notes, pinnedNote }: ClientNotesProps) {
                   <Trash2 className="size-3" />
                 </Button>
               </div>
-              <p className="mt-1 text-xs text-muted-foreground">{formatNoteDate(note.createdAt)}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{formatNoteDate(note.createdAt)}</p>
             </div>
           ))}
         </div>

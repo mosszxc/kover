@@ -64,7 +64,7 @@ export function PauseClientDialog({ open, onOpenChange, clientName, onPause }: P
                 Поставить
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Клиент автоматически вернётся в активные после этой даты
             </p>
           </div>
@@ -73,7 +73,7 @@ export function PauseClientDialog({ open, onOpenChange, clientName, onPause }: P
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t border-border" />
             </div>
-            <div className="relative flex justify-center text-xs">
+            <div className="relative flex justify-center text-sm">
               <span className="bg-card px-2 text-muted-foreground">или</span>
             </div>
           </div>

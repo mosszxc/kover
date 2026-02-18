@@ -59,7 +59,7 @@ export function AutostartToggle() {
           <span className="text-sm font-medium text-foreground">
             Запускать с Windows
           </span>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Kover стартует при входе в систему
           </p>
         </div>
@@ -86,7 +86,7 @@ export function AutostartToggle() {
             <span className="text-sm font-medium text-foreground">
               Запускать свёрнутым
             </span>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Окно скрыто в трей, доступ через иконку в панели задач
             </p>
           </div>

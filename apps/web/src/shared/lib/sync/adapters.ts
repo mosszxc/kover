@@ -47,7 +47,7 @@ export const driversAdapter: SyncAdapter<Driver, Insert<'drivers'>> = {
     name: remote.name!,
     phone: remote.phone ?? '',
     isActive: remote.is_active ?? true,
-    workDays: (remote.work_days ?? [0, 1, 2, 3, 4]) as DayOfWeek[],
+    workDays: (remote.work_days ?? [0, 1, 2, 3, 4, 5, 6]) as DayOfWeek[],
     createdAt: remote.created_at ?? new Date().toISOString(),
   }),
 }

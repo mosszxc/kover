@@ -20,7 +20,7 @@ export function BottomTabs() {
           end={to === "/"}
           className={({ isActive }) =>
             cn(
-              "flex flex-1 flex-col items-center gap-1 py-2.5 text-xs font-medium transition-colors duration-150 cursor-pointer",
+              "flex flex-1 flex-col items-center gap-1 py-2.5 text-sm font-medium transition-colors duration-150 cursor-pointer",
               isActive
                 ? "text-foreground"
                 : "text-muted-foreground"
