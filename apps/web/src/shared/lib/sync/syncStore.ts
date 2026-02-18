@@ -30,3 +30,18 @@ export const useSyncStore = create<SyncStoreState>()((set) => ({
       error: null,
     }),
 }))
+
+/**
+ * Hydration guard — подавляет write-through sync во время начальной загрузки данных.
+ * Без этого route store subscribe вызывает syncRouteChanges при гидратации из Supabase,
+ * создавая redundant mass upsert обратно в Supabase.
+ */
+let _hydrating = false
+
+export function setHydrating(value: boolean) {
+  _hydrating = value
+}
+
+export function isHydrating(): boolean {
+  return _hydrating
+}

@@ -1,5 +1,5 @@
 export { useSyncProvider } from './SyncProvider'
-export { useSyncStore } from './syncStore'
+export { useSyncStore, isHydrating, setHydrating } from './syncStore'
 export { supabaseSync } from './supabaseSync'
 export { migrateToSupabase } from './migrate'
 export { waitForSync } from './syncQueue'

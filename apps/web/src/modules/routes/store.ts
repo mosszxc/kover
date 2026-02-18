@@ -3,6 +3,7 @@ import { temporal } from 'zundo'
 import type { DayOfWeek } from '@/shared/types'
 import type { DayRoute, RouteStop } from './types'
 import { syncRouteChanges } from '@/shared/lib/sync/routeSync'
+import { isHydrating } from '@/shared/lib/sync/syncStore'
 
 function getNextMonday(): string {
   const now = new Date()
@@ -265,8 +266,11 @@ export const useRouteStore = create<RouteState>()(
   ),
 )
 
-// Write-through sync для routes → Supabase (day_routes + route_stops)
+// Write-through sync для routes → Supabase (day_routes + route_stops).
+// Пропускаем sync во время гидратации — данные уже в Supabase,
+// иначе subscribe на setState от hydrateRoutes вызовет mass upsert.
 useRouteStore.subscribe((state, prevState) => {
+  if (isHydrating()) return
   if (state.routes !== prevState.routes) {
     syncRouteChanges(prevState.routes, state.routes)
   }

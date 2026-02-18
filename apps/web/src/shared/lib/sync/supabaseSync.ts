@@ -3,6 +3,7 @@ import { supabase } from '@/shared/lib/supabase'
 import type { SyncAdapter } from './types'
 import type { Database } from '@/shared/types/database'
 import { trackSync } from './syncQueue'
+import { isHydrating } from './syncStore'
 
 type TableName = keyof Database['public']['Tables']
 
@@ -35,7 +36,7 @@ export function supabaseSync<
       ;(set as (...a: unknown[]) => void)(...args)
       const nextState = get()
 
-      if (!supabase) return
+      if (!supabase || isHydrating()) return
 
       const prevItems = config.getItems(prevState)
       const nextItems = config.getItems(nextState)
