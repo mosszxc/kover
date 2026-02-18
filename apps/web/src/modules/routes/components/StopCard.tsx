@@ -3,6 +3,7 @@ import { Button } from '@/shared/ui/button'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { cn } from '@/shared/lib/utils'
+import { StatusHint } from '@/shared/ui/status-hint'
 import {
   Select,
   SelectContent,
@@ -151,13 +152,27 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
           {isMissingCoords && (
-            <span title="Нет координат — не отображается на карте" className="shrink-0 print:hidden">
-              <MapPinOff className="size-4 text-muted-foreground" aria-label="Нет координат" />
+            <span className="shrink-0 print:hidden">
+              <StatusHint
+                title="Нет координат"
+                description="Адрес не геокодирован — остановка не отображается на карте."
+                action="Откройте карточку клиента и укажите корректный адрес."
+                variant="error"
+              >
+                <MapPinOff className="size-4 text-muted-foreground" aria-label="Нет координат" />
+              </StatusHint>
             </span>
           )}
           {isAnomaly && (
-            <span title="Далеко от остальных остановок" className="shrink-0 print:hidden">
-              <TriangleAlert className="size-4 text-amber-400" aria-label="Далеко от остальных остановок" />
+            <span className="shrink-0 print:hidden">
+              <StatusHint
+                title="Гео-аномалия"
+                description="Остановка далеко от остальных — возможно, адрес указан неверно."
+                action="Проверьте адрес клиента и исправьте координаты."
+                variant="warning"
+              >
+                <TriangleAlert className="size-4 text-amber-400" aria-label="Далеко от остальных остановок" />
+              </StatusHint>
             </span>
           )}
           <p className="truncate lg:whitespace-normal text-base text-foreground">
