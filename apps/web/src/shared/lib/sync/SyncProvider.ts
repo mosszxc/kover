@@ -11,6 +11,8 @@ import {
   serviceLogAdapter,
   routeStopToLocal,
 } from './adapters'
+import seedClientsData from '@/shared/data/seed-clients.json'
+import seedRoutesData from '@/shared/data/seed-routes.json'
 import { getUnsyncedIds } from './syncQueue'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 import { useDriverStore } from '@/modules/drivers'
@@ -54,6 +56,7 @@ export function useSyncProvider() {
       'kover-mat-sizes',
       'kover-changelog',
       'kover-service-log',
+      'kover-seed',
     ]
     for (const key of deprecatedKeys) {
       localStorage.removeItem(key)
@@ -70,6 +73,14 @@ export function useSyncProvider() {
           fetchAll(changelogAdapter),
           fetchAll(serviceLogAdapter),
         ])
+
+        // First launch: if Supabase has no clients, load seed data.
+        // seedClients/seedRoutes trigger supabaseSync/syncRouteChanges → data goes to Supabase.
+        // Hydration below skips empty arrays, so stores keep seeded data.
+        if (clients !== null && clients.length === 0) {
+          useClientStore.getState().seedClients(seedClientsData as Client[])
+          useRouteStore.getState().seedRoutes(seedRoutesData as DayRoute[])
+        }
 
         // Hydrate with per-record merge — protect unsynced local records
         if (matSizes && matSizes.length > 0) {

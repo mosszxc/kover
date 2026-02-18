@@ -1,11 +1,9 @@
 import { RouterProvider } from "react-router"
 import { router } from "@/app/router"
-import { seedIfNeeded } from "@/app/seed"
 import { applyStartMinimized } from "@/shared/lib/autostart"
 import { checkForUpdates } from "@/shared/lib/updater"
 import { useSettingsStore } from "@/shared/stores/settingsStore"
 
-seedIfNeeded()
 applyStartMinimized()
 checkForUpdates()
 
