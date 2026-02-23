@@ -1,4 +1,4 @@
-import { WeeklySummary, DayLoadChart, ClientStats, BusinessTrends, DebtAging, RevenueChart, ChurnRiskWidget } from '@/modules/stats'
+import { WeeklySummary, DayLoadChart, ClientStats, BusinessTrends, DebtAging, RevenueChart, ChurnRiskWidget, RouteStabilityWidget } from '@/modules/stats'
 import { useClientStore } from '@/modules/clients'
 import { useRouteStore } from '@/modules/routes'
 import { useRouteSettingsStore } from '@/shared/stores/routeSettingsStore'
@@ -14,6 +14,7 @@ export function StatsPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-foreground">Статистика</h1>
       <ChurnRiskWidget />
+      <RouteStabilityWidget />
       <RevenueChart />
       <DebtAging />
       <WeeklySummary />

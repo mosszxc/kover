@@ -7,6 +7,7 @@ import { useDriverStore } from '@/modules/drivers'
 import { PrintSheet, PrintFieldsToggle } from '@/modules/print'
 import { OptimizeRouteDialog } from '@/modules/map'
 import { useClientPaymentStatus } from '@/modules/payments'
+import { useRouteStability } from '@/modules/stats'
 import { useRouteExceptionsStore } from '@/shared/stores/routeExceptionsStore'
 import { useRouteExecutionStore } from '@/shared/stores/routeExecutionStore'
 import type { StopExecutionStatus } from '@/shared/stores/routeExecutionStore'
@@ -91,6 +92,14 @@ export function RoutesPage() {
     return { total, completed, skipped, problem }
   }, [activeStops, executionMap])
 
+  // Route stability for current day
+  const stabilityData = useRouteStability()
+  const dayStability = useMemo(() => {
+    const found = stabilityData.days.find((d) => d.day === selectedDay)
+    if (!found || found.totalStops === 0) return undefined
+    return { stabilityPct: found.stabilityPct, level: found.level }
+  }, [stabilityData, selectedDay])
+
   const handleSetExecution = useCallback(
     (stopId: string, clientId: string, status: StopExecutionStatus, note?: string) => {
       setExecution({ stopId, clientId, date: today, day: selectedDay, status, note })
@@ -117,7 +126,7 @@ export function RoutesPage() {
             </PrintButton>
           </div>
         </div>
-        <RouteDashboard drivers={driverOptions} executionSummary={executionSummary} />
+        <RouteDashboard drivers={driverOptions} executionSummary={executionSummary} stability={dayStability} />
         <div className="flex items-center gap-2">
           <DriverFilter drivers={driverOptions} value={driverFilter} onChange={setDriverFilter} />
           <BulkAssignDriverDialog drivers={driverOptions} driverFilter={driverFilter} />

@@ -1,8 +1,9 @@
-import { MapPin, Ruler, AlertTriangle, User, CirclePause, Check, SkipForward, AlertCircle } from 'lucide-react'
+import { MapPin, Ruler, AlertTriangle, User, CirclePause, Check, SkipForward, AlertCircle, Activity } from 'lucide-react'
 import { useRouteSummary } from '../hooks/useRouteSummary'
 import { useDriverSummary } from '../hooks/useDriverSummary'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 import { MAT_SIZE_STYLES } from '@/shared/constants'
+import { cn } from '@/shared/lib/utils'
 import type { MatSize } from '@/shared/types'
 import type { DriverOption } from './StopCard'
 
@@ -13,12 +14,24 @@ export interface ExecutionSummary {
   problem: number
 }
 
+export interface StabilityInfo {
+  stabilityPct: number
+  level: 'stable' | 'moderate' | 'unstable'
+}
+
 interface RouteDashboardProps {
   drivers: DriverOption[]
   executionSummary?: ExecutionSummary
+  stability?: StabilityInfo
 }
 
-export function RouteDashboard({ drivers, executionSummary }: RouteDashboardProps) {
+const STABILITY_STYLES = {
+  stable: { bg: 'bg-green-600/20', text: 'text-green-400', icon: 'text-green-400' },
+  moderate: { bg: 'bg-amber-600/20', text: 'text-amber-400', icon: 'text-amber-400' },
+  unstable: { bg: 'bg-red-600/20', text: 'text-red-400', icon: 'text-red-400' },
+}
+
+export function RouteDashboard({ drivers, executionSummary, stability }: RouteDashboardProps) {
   const summary = useRouteSummary()
   const driverItems = useDriverSummary()
   const sizes = useMatSizeStore((s) => s.sizes)
@@ -39,6 +52,8 @@ export function RouteDashboard({ drivers, executionSummary }: RouteDashboardProp
   const hasExecution = executionSummary && executionSummary.total > 0
   const executedCount = hasExecution ? executionSummary.completed + executionSummary.skipped + executionSummary.problem : 0
   const progressPct = hasExecution ? Math.round((executionSummary.completed / executionSummary.total) * 100) : 0
+
+  const stabStyle = stability ? STABILITY_STYLES[stability.level] : null
 
   return (
     <div className="rounded-lg border border-border bg-card/50">
@@ -67,6 +82,15 @@ export function RouteDashboard({ drivers, executionSummary }: RouteDashboardProp
               <CirclePause className="h-3.5 w-3.5 text-muted-foreground" />
               <span className="font-semibold tabular-nums text-muted-foreground">{summary.skippedCount}</span>
               <span className="text-muted-foreground">пропущено</span>
+            </span>
+          </>
+        )}
+        {stability && stabStyle && (
+          <>
+            <span className="text-border">|</span>
+            <span className={cn('inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold', stabStyle.bg, stabStyle.text)}>
+              <Activity className={cn('size-3', stabStyle.icon)} />
+              {stability.stabilityPct}%
             </span>
           </>
         )}
