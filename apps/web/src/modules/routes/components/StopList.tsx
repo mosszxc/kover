@@ -21,7 +21,8 @@ import type { Client } from '@/modules/clients'
 import { useGeoAnomalies } from '../hooks/useGeoAnomalies'
 import { isStopSkipped } from '../utils'
 import { useRouteExceptionsStore } from '@/shared/stores/routeExceptionsStore'
-import { StopCard, type DriverOption, type StopPaymentInfo } from './StopCard'
+import { StopCard, type DriverOption, type StopPaymentInfo, type StopExecutionInfo } from './StopCard'
+import type { StopExecutionStatus } from '@/shared/stores/routeExecutionStore'
 
 interface StopListProps {
   searchQuery?: string
@@ -30,6 +31,9 @@ interface StopListProps {
   onEditClient?: (client: Client) => void
   paymentStatusMap?: Map<string, StopPaymentInfo>
   onServiceReport?: (client: Client) => void
+  executionMap?: Map<string, StopExecutionInfo>
+  onSetExecution?: (stopId: string, clientId: string, status: StopExecutionStatus, note?: string) => void
+  onRemoveExecution?: (stopId: string) => void
 }
 
 function getTodayISO(): string {
@@ -41,7 +45,7 @@ function formatDateRu(dateStr: string): string {
   return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })
 }
 
-export function StopList({ searchQuery = '', drivers = [], driverFilter = null, onEditClient, paymentStatusMap, onServiceReport }: StopListProps) {
+export function StopList({ searchQuery = '', drivers = [], driverFilter = null, onEditClient, paymentStatusMap, onServiceReport, executionMap, onSetExecution, onRemoveExecution }: StopListProps) {
   const routes = useRouteStore((s) => s.routes)
   const selectedDay = useRouteStore((s) => s.selectedDay)
   const reorderStop = useRouteStore((s) => s.reorderStop)
@@ -200,6 +204,9 @@ export function StopList({ searchQuery = '', drivers = [], driverFilter = null, 
                   onEditClient={onEditClient}
                   paymentInfo={paymentStatusMap?.get(client.id)}
                   onServiceReport={onServiceReport}
+                  executionInfo={executionMap?.get(stop.id)}
+                  onSetExecution={onSetExecution}
+                  onRemoveExecution={onRemoveExecution}
                 />
               )
             })}

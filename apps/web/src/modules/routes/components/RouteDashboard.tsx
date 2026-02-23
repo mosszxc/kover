@@ -1,4 +1,4 @@
-import { MapPin, Ruler, AlertTriangle, User, CirclePause } from 'lucide-react'
+import { MapPin, Ruler, AlertTriangle, User, CirclePause, Check, SkipForward, AlertCircle } from 'lucide-react'
 import { useRouteSummary } from '../hooks/useRouteSummary'
 import { useDriverSummary } from '../hooks/useDriverSummary'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
@@ -6,11 +6,19 @@ import { MAT_SIZE_STYLES } from '@/shared/constants'
 import type { MatSize } from '@/shared/types'
 import type { DriverOption } from './StopCard'
 
-interface RouteDashboardProps {
-  drivers: DriverOption[]
+export interface ExecutionSummary {
+  total: number
+  completed: number
+  skipped: number
+  problem: number
 }
 
-export function RouteDashboard({ drivers }: RouteDashboardProps) {
+interface RouteDashboardProps {
+  drivers: DriverOption[]
+  executionSummary?: ExecutionSummary
+}
+
+export function RouteDashboard({ drivers, executionSummary }: RouteDashboardProps) {
   const summary = useRouteSummary()
   const driverItems = useDriverSummary()
   const sizes = useMatSizeStore((s) => s.sizes)
@@ -27,6 +35,10 @@ export function RouteDashboard({ drivers }: RouteDashboardProps) {
   const unassigned = driverItems.find((i) => i.driverId === null)
   const assigned = driverItems.filter((i) => i.driverId !== null)
   const totalMats = Object.values(summary.matsBySize).reduce<number>((a, b) => a + (b ?? 0), 0)
+
+  const hasExecution = executionSummary && executionSummary.total > 0
+  const executedCount = hasExecution ? executionSummary.completed + executionSummary.skipped + executionSummary.problem : 0
+  const progressPct = hasExecution ? Math.round((executionSummary.completed / executionSummary.total) * 100) : 0
 
   return (
     <div className="rounded-lg border border-border bg-card/50">
@@ -59,6 +71,53 @@ export function RouteDashboard({ drivers }: RouteDashboardProps) {
           </>
         )}
       </div>
+
+      {/* Execution progress bar */}
+      {hasExecution && (
+        <div className="px-4 pb-2">
+          <div className="flex items-center gap-3 text-sm">
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-muted-foreground">Выполнение</span>
+                <span className="font-semibold tabular-nums text-foreground">
+                  {executionSummary.completed}/{executionSummary.total}
+                </span>
+              </div>
+              <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-green-500 transition-all duration-300"
+                  style={{ width: `${progressPct}%` }}
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              {executionSummary.completed > 0 && (
+                <span className="flex items-center gap-1 text-green-500">
+                  <Check className="size-3" />
+                  {executionSummary.completed}
+                </span>
+              )}
+              {executionSummary.skipped > 0 && (
+                <span className="flex items-center gap-1 text-muted-foreground">
+                  <SkipForward className="size-3" />
+                  {executionSummary.skipped}
+                </span>
+              )}
+              {executionSummary.problem > 0 && (
+                <span className="flex items-center gap-1 text-red-500">
+                  <AlertCircle className="size-3" />
+                  {executionSummary.problem}
+                </span>
+              )}
+              {executedCount < executionSummary.total && (
+                <span className="text-muted-foreground">
+                  {executionSummary.total - executedCount} осталось
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Row 2: Mat sizes — hero section */}
       <div className="flex gap-2 px-4 pb-3">
