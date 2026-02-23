@@ -67,17 +67,35 @@ FEAT_LINES=""
 FIX_LINES=""
 OTHER_LINES=""
 
+# Extract release note from issue body (looks for "Release Note: <text>" line)
+get_release_note() {
+    local issue_num="$1"
+    [ -z "$issue_num" ] && return 1
+    local note
+    note=$(gh api "repos/{owner}/{repo}/issues/$issue_num" --cache 60s --jq '.body // ""' 2>/dev/null \
+        | grep -iE '^\s*Release Note:\s*' | head -1 | sed 's/^[[:space:]]*[Rr]elease [Nn]ote:[[:space:]]*//')
+    [ -n "$note" ] && echo "$note" && return 0
+    return 1
+}
+
 while IFS= read -r line; do
     [ -z "$line" ] && continue
     # Extract prefix and message
     if echo "$line" | grep -qE '^feat(\(.+\))?:'; then
         MSG=$(echo "$line" | sed 's/^feat\([^)]*\)\?:\s*//')
+        # Try to get user-facing release note from issue body
+        ISSUE_NUM=$(echo "$MSG" | grep -oE '#[0-9]+' | tail -1 | tr -d '#')
+        RNOTE=$(get_release_note "$ISSUE_NUM") && MSG="$RNOTE"
         FEAT_LINES="$FEAT_LINES\n- $MSG"
     elif echo "$line" | grep -qE '^fix(\(.+\))?:'; then
         MSG=$(echo "$line" | sed 's/^fix\([^)]*\)\?:\s*//')
+        ISSUE_NUM=$(echo "$MSG" | grep -oE '#[0-9]+' | tail -1 | tr -d '#')
+        RNOTE=$(get_release_note "$ISSUE_NUM") && MSG="$RNOTE"
         FIX_LINES="$FIX_LINES\n- $MSG"
     elif echo "$line" | grep -qE '^(refactor|docs|chore|style|perf|test)(\(.+\))?:'; then
         MSG=$(echo "$line" | sed 's/^[a-z]*\([^)]*\)\?:\s*//')
+        ISSUE_NUM=$(echo "$MSG" | grep -oE '#[0-9]+' | tail -1 | tr -d '#')
+        RNOTE=$(get_release_note "$ISSUE_NUM") && MSG="$RNOTE"
         OTHER_LINES="$OTHER_LINES\n- $MSG"
     else
         OTHER_LINES="$OTHER_LINES\n- $line"
