@@ -4,7 +4,7 @@ import { toast } from 'sonner'
 import { cn } from '@/shared/lib/utils'
 import { diffClient } from '@/shared/lib/clientDiff'
 import { useServiceLogStore } from '@/shared/stores/serviceLogStore'
-import { geocodeAddress } from '@/shared/lib/geocode'
+import { geocodeAddress, type GeocodeResult } from '@/shared/lib/geocode'
 import { useSettingsStore } from '@/shared/stores/settingsStore'
 import { Button } from '@/shared/ui/button'
 import {
@@ -55,6 +55,11 @@ export function EditClientDialog({ client, open, onOpenChange, onDelete }: EditC
   const [pauseDialogOpen, setPauseDialogOpen] = useState(false)
   const [wizardStep, setWizardStep] = useState(0)
   const form = useClientForm()
+
+  const handleAddressSelect = useCallback((result: GeocodeResult) => {
+    updateClient(client.id, { lat: result.lat, lng: result.lng })
+    toast.success(`Координаты определены: ${result.displayName}`, { duration: 3000 })
+  }, [client.id, updateClient])
 
   const isLastStep = wizardStep === TOTAL_STEPS - 1
 
@@ -285,6 +290,8 @@ export function EditClientDialog({ client, open, onOpenChange, onDelete }: EditC
             coordinates={coordinates}
             onGeocode={handleGeocode}
             geocoding={geocoding}
+            geocodeCity={geocodeCity || undefined}
+            onAddressSelect={handleAddressSelect}
             wizardStep={isMobile ? wizardStep : undefined}
             onWizardStepChange={isMobile ? setWizardStep : undefined}
           />

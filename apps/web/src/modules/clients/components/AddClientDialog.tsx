@@ -1,8 +1,8 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { Plus, Loader2, ChevronLeft, ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
 import { generateId } from '@/shared/lib/generateId'
-import { geocodeAddress } from '@/shared/lib/geocode'
+import { geocodeAddress, type GeocodeResult } from '@/shared/lib/geocode'
 import { Button } from '@/shared/ui/button'
 import {
   Dialog,
@@ -31,6 +31,11 @@ export function AddClientDialog() {
   const [saving, setSaving] = useState(false)
   const [wizardStep, setWizardStep] = useState(0)
   const form = useClientForm()
+  const selectedCoordsRef = useRef<{ lat: number; lng: number } | null>(null)
+
+  const handleAddressSelect = useCallback((result: GeocodeResult) => {
+    selectedCoordsRef.current = { lat: result.lat, lng: result.lng }
+  }, [])
 
   const isLastStep = wizardStep === TOTAL_STEPS - 1
 
@@ -61,7 +66,12 @@ export function AddClientDialog() {
 
     let lat: number | undefined
     let lng: number | undefined
-    if (form.address.trim()) {
+
+    // Use coords from autocomplete selection if available
+    if (selectedCoordsRef.current) {
+      lat = selectedCoordsRef.current.lat
+      lng = selectedCoordsRef.current.lng
+    } else if (form.address.trim()) {
       try {
         const result = await geocodeAddress(form.address.trim(), geocodeCity || undefined)
         if (result) {
@@ -117,6 +127,7 @@ export function AddClientDialog() {
         if (!v) {
           form.resetForm()
           setWizardStep(0)
+          selectedCoordsRef.current = null
         }
       }}
     >
@@ -135,6 +146,8 @@ export function AddClientDialog() {
         <ClientForm
           form={form}
           mode="add"
+          geocodeCity={geocodeCity || undefined}
+          onAddressSelect={handleAddressSelect}
           wizardStep={isMobile ? wizardStep : undefined}
           onWizardStepChange={isMobile ? setWizardStep : undefined}
         />
