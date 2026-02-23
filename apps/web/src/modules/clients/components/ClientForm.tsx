@@ -276,7 +276,7 @@ function ScheduleSection({ form }: { form: ClientFormState }) {
         </div>
       </div>
 
-      {form.days.length > 1 && (
+      {form.days.length > 0 && (
         <div className="space-y-3">
           <SectionDivider>Замены по дням</SectionDivider>
           <p className="text-sm text-muted-foreground">
