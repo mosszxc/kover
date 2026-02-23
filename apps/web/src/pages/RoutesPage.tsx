@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import { DaySwitcher, RouteDashboard, RouteSearch, StopList, AddStopDialog, AddOneTimeDialog, useRouteStore, PrintButton, DriverFilter, BulkAssignDriverDialog, DistributeDriversDialog, isStopSkipped, ServiceReportDialog } from '@/modules/routes'
+import type { StopExecutionInfo, ExecutionSummary } from '@/modules/routes'
 import { useClientStore, EditClientDialog } from '@/modules/clients'
 import type { Client } from '@/modules/clients'
 import { useDriverStore } from '@/modules/drivers'
@@ -7,6 +8,8 @@ import { PrintSheet, PrintFieldsToggle } from '@/modules/print'
 import { OptimizeRouteDialog } from '@/modules/map'
 import { useClientPaymentStatus } from '@/modules/payments'
 import { useRouteExceptionsStore } from '@/shared/stores/routeExceptionsStore'
+import { useRouteExecutionStore } from '@/shared/stores/routeExecutionStore'
+import type { StopExecutionStatus } from '@/shared/stores/routeExecutionStore'
 
 const EMPTY_STOPS: never[] = []
 
@@ -57,6 +60,51 @@ export function RoutesPage() {
     return map
   }, [paymentStatusRaw])
 
+  // Route execution
+  const executions = useRouteExecutionStore((s) => s.executions)
+  const setExecution = useRouteExecutionStore((s) => s.setExecution)
+  const removeExecution = useRouteExecutionStore((s) => s.removeExecution)
+
+  const executionMap = useMemo(() => {
+    const map = new Map<string, StopExecutionInfo>()
+    for (const ex of executions) {
+      if (ex.date === today && ex.day === selectedDay) {
+        map.set(ex.stopId, { status: ex.status, note: ex.note })
+      }
+    }
+    return map
+  }, [executions, today, selectedDay])
+
+  const executionSummary = useMemo((): ExecutionSummary => {
+    const total = activeStops.length
+    let completed = 0
+    let skipped = 0
+    let problem = 0
+    for (const stop of activeStops) {
+      const ex = executionMap.get(stop.id)
+      if (ex) {
+        if (ex.status === 'completed') completed++
+        else if (ex.status === 'skipped') skipped++
+        else if (ex.status === 'problem') problem++
+      }
+    }
+    return { total, completed, skipped, problem }
+  }, [activeStops, executionMap])
+
+  const handleSetExecution = useCallback(
+    (stopId: string, clientId: string, status: StopExecutionStatus, note?: string) => {
+      setExecution({ stopId, clientId, date: today, day: selectedDay, status, note })
+    },
+    [setExecution, today, selectedDay],
+  )
+
+  const handleRemoveExecution = useCallback(
+    (stopId: string) => {
+      removeExecution(stopId, today)
+    },
+    [removeExecution, today],
+  )
+
   return (
     <div>
       <div className="space-y-4 print:hidden">
@@ -69,14 +117,14 @@ export function RoutesPage() {
             </PrintButton>
           </div>
         </div>
-        <RouteDashboard drivers={driverOptions} />
+        <RouteDashboard drivers={driverOptions} executionSummary={executionSummary} />
         <div className="flex items-center gap-2">
           <DriverFilter drivers={driverOptions} value={driverFilter} onChange={setDriverFilter} />
           <BulkAssignDriverDialog drivers={driverOptions} driverFilter={driverFilter} />
           <DistributeDriversDialog drivers={driverOptions} clients={clients} />
         </div>
         <RouteSearch value={searchQuery} onChange={setSearchQuery} />
-        <StopList searchQuery={searchQuery} drivers={driverOptions} driverFilter={driverFilter} onEditClient={setEditingClient} paymentStatusMap={paymentStatusMap} onServiceReport={setReportClient} />
+        <StopList searchQuery={searchQuery} drivers={driverOptions} driverFilter={driverFilter} onEditClient={setEditingClient} paymentStatusMap={paymentStatusMap} onServiceReport={setReportClient} executionMap={executionMap} onSetExecution={handleSetExecution} onRemoveExecution={handleRemoveExecution} />
         <div className="flex gap-2">
           <AddStopDialog clients={clients} />
           <AddOneTimeDialog clients={clients} />

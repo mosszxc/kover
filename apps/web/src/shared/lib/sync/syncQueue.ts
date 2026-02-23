@@ -28,6 +28,7 @@ export function trackSync(
         for (const id of ids) set.delete(id)
         if (set.size === 0) unsyncedIds.delete(table)
       }
+      window.dispatchEvent(new CustomEvent('kover-synced'))
     }
   })
   pendingPromises.push(p)

@@ -1,5 +1,5 @@
-import { create } from "zustand"
-import { persist } from "zustand/middleware"
+import { create } from 'zustand'
+import { syncSettingChange } from '@/shared/lib/sync/settingsSync'
 
 interface WhatsNewState {
   lastSeenVersion: string | null
@@ -7,11 +7,11 @@ interface WhatsNewState {
 }
 
 export const useWhatsNewStore = create<WhatsNewState>()(
-  persist(
-    (set) => ({
-      lastSeenVersion: null,
-      setLastSeenVersion: (version) => set({ lastSeenVersion: version }),
-    }),
-    { name: "kover-whats-new" },
-  ),
+  (set) => ({
+    lastSeenVersion: null,
+    setLastSeenVersion: (version) => {
+      set({ lastSeenVersion: version })
+      syncSettingChange('lastSeenVersion', version)
+    },
+  }),
 )

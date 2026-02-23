@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { syncSettingChange } from '@/shared/lib/sync/settingsSync'
 
 export interface PrintColumnConfig {
   phone: boolean
@@ -15,15 +15,15 @@ interface PrintSettingsState {
 }
 
 export const usePrintSettingsStore = create<PrintSettingsState>()(
-  persist(
-    (set) => ({
-      columns: DEFAULT_COLUMNS,
+  (set) => ({
+    columns: DEFAULT_COLUMNS,
 
-      setColumn: (key, visible) =>
-        set((state) => ({
-          columns: { ...state.columns, [key]: visible },
-        })),
-    }),
-    { name: 'kover-print' },
-  ),
+    setColumn: (key, visible) => {
+      set((state) => {
+        const columns = { ...state.columns, [key]: visible }
+        syncSettingChange('printSettings', columns)
+        return { columns }
+      })
+    },
+  }),
 )

@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ClientsTable, EditClientDialog, AddClientDialog, useClientStore, BatchGeocode, GeocodeSettings, isClientPaused, CostSettingsDialog } from '@/modules/clients'
-import type { PaymentInfo } from '@/modules/clients'
+import type { PaymentInfo, ChurnRiskClientInfo } from '@/modules/clients'
 import { useRouteStore } from '@/modules/routes'
 import { usePaymentStore, useClientPaymentStatus, RecordPaymentDialog, getCurrentPeriod } from '@/modules/payments'
 import { toast } from 'sonner'
+import { useChurnRisk } from '@/modules/stats'
 import { InvoiceSettingsDialog, GenerateInvoicesDialog } from '@/modules/invoices'
 import type { Client } from '@/modules/clients'
 import type { DayOfWeek } from '@/shared/types'
@@ -153,6 +154,15 @@ export function ClientsPage() {
     [payments, updatePayment],
   )
 
+  const { riskMap: churnRiskData } = useChurnRisk()
+  const churnRiskMap = useMemo(() => {
+    const map = new Map<string, ChurnRiskClientInfo>()
+    for (const [clientId, info] of churnRiskData) {
+      map.set(clientId, { level: info.level, reasons: info.reasons, isDismissed: info.isDismissed })
+    }
+    return map
+  }, [churnRiskData])
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between print:hidden">
@@ -175,6 +185,7 @@ export function ClientsPage() {
         paymentStatusMap={hasPrices ? paymentInfoMap : undefined}
         onRecordPayment={hasPrices ? setPaymentClient : undefined}
         onQuickPay={hasPrices ? handleQuickPay : undefined}
+        churnRiskMap={churnRiskMap}
       />
       {selectedClient && (
         <EditClientDialog

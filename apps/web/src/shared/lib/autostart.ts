@@ -1,4 +1,5 @@
 import { isTauri } from '@/shared/lib/platform'
+import { useSettingsStore } from '@/shared/stores/settingsStore'
 
 /**
  * If the app was launched with startMinimized enabled, hide the window to tray.
@@ -8,15 +9,13 @@ export function applyStartMinimized(): void {
   if (!isTauri()) return
 
   try {
-    const raw = localStorage.getItem('kover-settings')
-    if (!raw) return
-    const parsed = JSON.parse(raw)
-    if (parsed?.state?.startMinimized) {
+    const { startMinimized } = useSettingsStore.getState()
+    if (startMinimized) {
       import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
         getCurrentWindow().hide()
       })
     }
   } catch {
-    // ignore parse errors
+    // ignore errors
   }
 }
