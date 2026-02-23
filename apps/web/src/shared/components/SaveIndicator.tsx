@@ -1,23 +1,22 @@
 import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
-import { initSaveInterceptor, onSave } from '@/shared/lib/saveEvent'
 
 export function SaveIndicator() {
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   useEffect(() => {
-    initSaveInterceptor()
-
-    return onSave(() => {
+    const handler = () => {
       clearTimeout(debounceRef.current)
       debounceRef.current = setTimeout(() => {
         toast.success('Сохранено', { duration: 1500 })
       }, 300)
-    })
-  }, [])
+    }
 
-  useEffect(() => {
-    return () => clearTimeout(debounceRef.current)
+    window.addEventListener('kover-synced', handler)
+    return () => {
+      window.removeEventListener('kover-synced', handler)
+      clearTimeout(debounceRef.current)
+    }
   }, [])
 
   return null

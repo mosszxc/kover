@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { supabaseSync } from '@/shared/lib/sync/supabaseSync'
+import { routeExceptionsAdapter } from '@/shared/lib/sync/adapters'
 import type { DayOfWeek } from '@/shared/types'
 import { generateId } from '@/shared/lib/generateId'
 
@@ -28,13 +29,13 @@ interface RouteExceptionsState {
   getAddsForDate: (date: string, day: DayOfWeek) => RouteException[]
 }
 
-function pruneExpiredExceptions(exceptions: RouteException[]): RouteException[] {
-  const today = new Date().toISOString().slice(0, 10)
-  return exceptions.filter((e) => e.date >= today)
-}
-
 export const useRouteExceptionsStore = create<RouteExceptionsState>()(
-  persist(
+  supabaseSync(
+    {
+      adapter: routeExceptionsAdapter,
+      getItems: (state: RouteExceptionsState) => state.exceptions,
+      itemsKey: 'exceptions',
+    },
     (set, get) => ({
       exceptions: [],
 
@@ -62,13 +63,5 @@ export const useRouteExceptionsStore = create<RouteExceptionsState>()(
       getAddsForDate: (date, day) =>
         get().exceptions.filter((e) => e.date === date && e.day === day && e.type === 'add'),
     }),
-    {
-      name: 'kover-route-exceptions',
-      merge: (persisted, current) => {
-        const merged = { ...current, ...(persisted as Partial<RouteExceptionsState>) }
-        merged.exceptions = pruneExpiredExceptions(merged.exceptions)
-        return merged
-      },
-    },
   ),
 )

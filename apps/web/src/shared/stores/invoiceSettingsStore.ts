@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { syncSettingChange } from '@/shared/lib/sync/settingsSync'
 
 export interface InvoiceSettings {
   companyName: string
@@ -16,18 +16,18 @@ interface InvoiceSettingsState extends InvoiceSettings {
 }
 
 export const useInvoiceSettingsStore = create<InvoiceSettingsState>()(
-  persist(
-    (set) => ({
-      companyName: '',
-      inn: '',
-      bankName: '',
-      bankAccount: '',
-      bik: '',
-      corrAccount: '',
-      invoicePrefix: 'К',
+  (set) => ({
+    companyName: '',
+    inn: '',
+    bankName: '',
+    bankAccount: '',
+    bik: '',
+    corrAccount: '',
+    invoicePrefix: 'К',
 
-      update: (settings) => set((state) => ({ ...state, ...settings })),
-    }),
-    { name: 'kover-invoice-settings' },
-  ),
+    update: (settings) => {
+      set((state) => ({ ...state, ...settings }))
+      syncSettingChange('invoiceSettings', settings)
+    },
+  }),
 )

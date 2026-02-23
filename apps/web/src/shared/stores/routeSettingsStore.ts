@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { syncSettingChange } from '@/shared/lib/sync/settingsSync'
 
 interface RouteSettingsState {
   maxStopsPerDay: number
@@ -7,11 +7,11 @@ interface RouteSettingsState {
 }
 
 export const useRouteSettingsStore = create<RouteSettingsState>()(
-  persist(
-    (set) => ({
-      maxStopsPerDay: 50,
-      setMaxStopsPerDay: (value) => set({ maxStopsPerDay: value }),
-    }),
-    { name: 'kover-route-settings' },
-  ),
+  (set) => ({
+    maxStopsPerDay: 50,
+    setMaxStopsPerDay: (value) => {
+      set({ maxStopsPerDay: value })
+      syncSettingChange('maxStopsPerDay', value)
+    },
+  }),
 )

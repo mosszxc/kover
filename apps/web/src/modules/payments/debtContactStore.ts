@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { supabaseSync } from '@/shared/lib/sync/supabaseSync'
+import { debtContactsAdapter } from '@/shared/lib/sync/adapters'
 
 export type DebtContactStatus = 'not_contacted' | 'reminded' | 'promised' | 'problematic'
 
@@ -10,6 +11,7 @@ export interface DebtContactNote {
 }
 
 export interface DebtContact {
+  id: string
   clientId: string
   status: DebtContactStatus
   lastContactedAt: string | null
@@ -40,6 +42,7 @@ function ensureContact(contacts: DebtContact[], clientId: string): DebtContact[]
   return [
     ...contacts,
     {
+      id: crypto.randomUUID(),
       clientId,
       status: 'not_contacted',
       lastContactedAt: null,
@@ -50,7 +53,12 @@ function ensureContact(contacts: DebtContact[], clientId: string): DebtContact[]
 }
 
 export const useDebtContactStore = create<DebtContactState>()(
-  persist(
+  supabaseSync(
+    {
+      adapter: debtContactsAdapter,
+      getItems: (state: DebtContactState) => state.contacts,
+      itemsKey: 'contacts',
+    },
     (set, get) => ({
       contacts: [],
 
@@ -105,6 +113,5 @@ export const useDebtContactStore = create<DebtContactState>()(
           ),
         })),
     }),
-    { name: 'kover-debt-contacts', version: 1 },
   ),
 )

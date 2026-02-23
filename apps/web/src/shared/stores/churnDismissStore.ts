@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { syncSettingChange } from '@/shared/lib/sync/settingsSync'
 
 export interface ChurnDismiss {
   clientId: string
@@ -25,42 +25,41 @@ function pruneExpired(dismissals: ChurnDismiss[]): ChurnDismiss[] {
 }
 
 export const useChurnDismissStore = create<ChurnDismissState>()(
-  persist(
-    (set, get) => ({
-      dismissals: [],
+  (set, get) => ({
+    dismissals: [],
 
-      dismiss: (clientId) =>
-        set((state) => {
-          const pruned = pruneExpired(state.dismissals)
-          const existing = pruned.find((d) => d.clientId === clientId)
-          if (existing) {
-            return {
-              dismissals: pruned.map((d) =>
-                d.clientId === clientId
-                  ? { ...d, dismissedAt: new Date().toISOString() }
-                  : d,
-              ),
-            }
-          }
-          return {
-            dismissals: [
-              ...pruned,
-              { clientId, dismissedAt: new Date().toISOString() },
-            ],
-          }
-        }),
+    dismiss: (clientId) =>
+      set((state) => {
+        const pruned = pruneExpired(state.dismissals)
+        const existing = pruned.find((d) => d.clientId === clientId)
+        let dismissals: ChurnDismiss[]
+        if (existing) {
+          dismissals = pruned.map((d) =>
+            d.clientId === clientId
+              ? { ...d, dismissedAt: new Date().toISOString() }
+              : d,
+          )
+        } else {
+          dismissals = [
+            ...pruned,
+            { clientId, dismissedAt: new Date().toISOString() },
+          ]
+        }
+        syncSettingChange('churnDismissals', dismissals as unknown as import('@/shared/types/database').Json)
+        return { dismissals }
+      }),
 
-      undismiss: (clientId) =>
-        set((state) => ({
-          dismissals: state.dismissals.filter((d) => d.clientId !== clientId),
-        })),
+    undismiss: (clientId) =>
+      set((state) => {
+        const dismissals = state.dismissals.filter((d) => d.clientId !== clientId)
+        syncSettingChange('churnDismissals', dismissals as unknown as import('@/shared/types/database').Json)
+        return { dismissals }
+      }),
 
-      isDismissed: (clientId) => {
-        const d = get().dismissals.find((d) => d.clientId === clientId)
-        if (!d) return false
-        return !isExpired(d.dismissedAt)
-      },
-    }),
-    { name: 'kover-churn-dismiss', version: 1 },
-  ),
+    isDismissed: (clientId) => {
+      const d = get().dismissals.find((d) => d.clientId === clientId)
+      if (!d) return false
+      return !isExpired(d.dismissedAt)
+    },
+  }),
 )

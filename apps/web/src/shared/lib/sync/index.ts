@@ -11,4 +11,11 @@ export {
   clientsAdapter,
   changelogAdapter,
   serviceLogAdapter,
+  paymentsAdapter,
+  routeExceptionsAdapter,
+  serviceReportsAdapter,
+  debtContactsAdapter,
+  matInventoryAdapter,
+  matBatchesAdapter,
+  inventoryTransactionsAdapter,
 } from './adapters'

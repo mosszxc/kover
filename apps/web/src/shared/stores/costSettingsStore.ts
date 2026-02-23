@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { syncSettingChange } from '@/shared/lib/sync/settingsSync'
 
 export interface CostSettings {
   laundryCostPerSqm: number
@@ -11,13 +11,13 @@ interface CostSettingsState extends CostSettings {
 }
 
 export const useCostSettingsStore = create<CostSettingsState>()(
-  persist(
-    (set) => ({
-      laundryCostPerSqm: 0,
-      logisticsCostPerStop: 0,
+  (set) => ({
+    laundryCostPerSqm: 0,
+    logisticsCostPerStop: 0,
 
-      update: (settings) => set((state) => ({ ...state, ...settings })),
-    }),
-    { name: 'kover-cost-settings' },
-  ),
+    update: (settings) => {
+      set((state) => ({ ...state, ...settings }))
+      syncSettingChange('costSettings', settings)
+    },
+  }),
 )

@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { supabaseSync } from '@/shared/lib/sync/supabaseSync'
+import { serviceReportsAdapter } from '@/shared/lib/sync/adapters'
 
 export interface MatCount {
   sizeId: string
@@ -25,28 +26,23 @@ interface ServiceReportState {
   getClientReports: (clientId: string) => ServiceReport[]
 }
 
-const RETENTION_DAYS = 90
-
-function pruneOldReports(reports: ServiceReport[]): ServiceReport[] {
-  const cutoff = new Date()
-  cutoff.setDate(cutoff.getDate() - RETENTION_DAYS)
-  const cutoffStr = cutoff.toISOString()
-  return reports.filter((r) => r.createdAt >= cutoffStr)
-}
-
 export const useServiceReportStore = create<ServiceReportState>()(
-  persist(
+  supabaseSync(
+    {
+      adapter: serviceReportsAdapter,
+      getItems: (state: ServiceReportState) => state.reports,
+      itemsKey: 'reports',
+    },
     (set, get) => ({
       reports: [],
 
       addReport: (report) =>
         set((state) => ({
-          reports: pruneOldReports([...state.reports, report]),
+          reports: [...state.reports, report],
         })),
 
       getClientReports: (clientId) =>
         get().reports.filter((r) => r.clientId === clientId),
     }),
-    { name: 'kover-service-reports', version: 1 },
   ),
 )

@@ -1,6 +1,7 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
 import { temporal } from 'zundo'
+import { supabaseSync } from '@/shared/lib/sync/supabaseSync'
+import { paymentsAdapter } from '@/shared/lib/sync/adapters'
 import type { Payment } from './types'
 
 interface PaymentState {
@@ -11,7 +12,12 @@ interface PaymentState {
 }
 
 export const usePaymentStore = create<PaymentState>()(
-  persist(
+  supabaseSync(
+    {
+      adapter: paymentsAdapter,
+      getItems: (state: PaymentState) => state.payments,
+      itemsKey: 'payments',
+    },
     temporal(
       (set) => ({
         payments: [],
@@ -39,6 +45,5 @@ export const usePaymentStore = create<PaymentState>()(
         },
       },
     ),
-    { name: 'kover-payments', version: 1 },
   ),
 )
