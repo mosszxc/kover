@@ -43,6 +43,36 @@ export async function geocodeAddress(address: string, city?: string): Promise<Ge
   }
 }
 
+export async function searchAddresses(query: string, city?: string): Promise<GeocodeResult[]> {
+  if (query.trim().length < 3) return []
+
+  const addressAlreadyHasCity = city ? query.toLowerCase().includes(city.toLowerCase()) : false
+  const fullQuery = city && !addressAlreadyHasCity ? `${city}, ${query}` : query
+  const params = new URLSearchParams({
+    q: fullQuery,
+    format: 'json',
+    limit: '5',
+    countrycodes: 'ru',
+  })
+
+  try {
+    const res = await fetch(`${NOMINATIM_URL}?${params}`, {
+      headers: { 'User-Agent': 'Kover Route Manager (dev)' },
+    })
+
+    if (!res.ok) return []
+
+    const data: NominatimResult[] = await res.json()
+    return data.map((item) => ({
+      lat: parseFloat(item.lat),
+      lng: parseFloat(item.lon),
+      displayName: item.display_name,
+    }))
+  } catch {
+    return []
+  }
+}
+
 export function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
