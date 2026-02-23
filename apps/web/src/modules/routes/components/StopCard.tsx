@@ -1,4 +1,4 @@
-import { ChevronUp, ChevronDown, GripVertical, MapPinOff, Pencil, TriangleAlert, Clock, MoreHorizontal, ArrowRightLeft, X, ClipboardCheck, Phone } from 'lucide-react'
+import { ChevronUp, ChevronDown, GripVertical, MapPinOff, Pencil, TriangleAlert, Clock, MoreHorizontal, ArrowRightLeft, X, ClipboardCheck, Phone, StickyNote } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -208,6 +208,22 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
             </a>
           )}
         </div>
+        {(client.notes || (client.clientNotes && client.clientNotes.length > 0)) && (
+          <p className="mt-0.5 flex items-start gap-1 text-sm text-muted-foreground">
+            <StickyNote className="mt-0.5 size-3 shrink-0" />
+            <span className="line-clamp-2">
+              {[
+                client.notes,
+                ...(client.clientNotes ?? [])
+                  .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+                  .slice(0, 2)
+                  .map((n) => n.text),
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+            </span>
+          </p>
+        )}
         {isAnomaly && onEditClient && (
           <Button
             variant="ghost"
