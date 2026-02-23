@@ -393,7 +393,10 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                         action="Откройте карточку и проверьте адрес."
                         variant="warning"
                       >
-                        <TriangleAlert className="size-3.5 shrink-0 text-amber-400" />
+                        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-600/20 px-2 py-0.5 text-xs font-semibold text-amber-400">
+                          <TriangleAlert className="size-3" />
+                          Гео-аномалия
+                        </span>
                       </StatusHint>
                     ) : hasNoCoords ? (
                       <StatusHint
@@ -402,7 +405,10 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                         action="Откройте карточку и укажите корректный адрес."
                         variant="error"
                       >
-                        <MapPin className="size-3.5 shrink-0 text-red-400" />
+                        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-red-600/20 px-2 py-0.5 text-xs font-semibold text-red-400">
+                          <MapPin className="size-3" />
+                          Нет координат
+                        </span>
                       </StatusHint>
                     ) : (
                       <MapPin className="size-3.5 shrink-0 text-green-400" />
@@ -454,7 +460,10 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                     action="Откройте карточку и проверьте адрес."
                     variant="warning"
                   >
-                    <TriangleAlert className="size-3.5 shrink-0 text-amber-400" />
+                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-600/20 px-2 py-0.5 text-xs font-semibold text-amber-400">
+                      <TriangleAlert className="size-3" />
+                      Гео-аномалия
+                    </span>
                   </StatusHint>
                 ) : hasNoCoords ? (
                   <StatusHint
@@ -463,7 +472,10 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                     action="Откройте карточку и укажите корректный адрес."
                     variant="error"
                   >
-                    <MapPin className="size-3.5 shrink-0 text-red-400" />
+                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-red-600/20 px-2 py-0.5 text-xs font-semibold text-red-400">
+                      <MapPin className="size-3" />
+                      Нет координат
+                    </span>
                   </StatusHint>
                 ) : (
                   <MapPin className="size-3.5 shrink-0 text-green-400" />
