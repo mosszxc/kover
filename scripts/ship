@@ -415,34 +415,6 @@ if [ "$PR_STATE" != "MERGED" ] || [ "$ISSUE_STATE" != "CLOSED" ]; then
     exit 1
 fi
 
-# ============================================================
-# PHASE 6: AUTO-RELEASE (non-blocking)
-# ============================================================
-
-echo ""
-echo "[PHASE 6] Auto-release..."
-
-# Run release from main repo on develop branch (non-blocking: ship succeeds even if release fails)
-MAIN_REPO=$(git worktree list | head -1 | awk '{print $1}')
-if [ -x "$MAIN_REPO/scripts/release" ]; then
-    # Release needs to run from main repo on develop
-    if (cd "$MAIN_REPO" && git rev-parse --abbrev-ref HEAD 2>/dev/null) | grep -q '^develop$'; then
-        if (cd "$MAIN_REPO" && ./scripts/release patch) 2>&1; then
-            RELEASE_STATUS="released"
-            echo "[PHASE 6] Release complete ✓"
-        else
-            RELEASE_STATUS="FAILED (non-blocking)"
-            echo "⚠️  Release failed (non-blocking, ship still successful)"
-        fi
-    else
-        RELEASE_STATUS="skipped (main repo not on develop)"
-        echo "[PHASE 6] Skipped: main repo not on develop branch"
-    fi
-else
-    RELEASE_STATUS="skipped (scripts/release not found)"
-    echo "[PHASE 6] Skipped: scripts/release not found"
-fi
-
 # Extract Acceptance Criteria from issue body
 AC=$(echo "$BODY" | sed -n '/## Acceptance Criteria/,/##/p' | grep -E '^\s*-\s*\[.\]' | sed 's/\[.\]/✓/' | sed 's/^[[:space:]]*/  /')
 if [ -z "$AC" ]; then
@@ -460,7 +432,6 @@ echo "PR: $PR_URL"
 echo "PR state: MERGED ✓"
 echo "Issue #$ISSUE: CLOSED ✓"
 echo "Local develop: $SYNC_STATUS"
-echo "Release: ${RELEASE_STATUS:-skipped}"
 echo ""
 
 if [ -n "$AC" ]; then
