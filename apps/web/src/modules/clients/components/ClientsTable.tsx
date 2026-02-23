@@ -346,6 +346,18 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                 isActive ? 'hover:bg-muted/50' : 'border-l-2 border-amber-400 hover:bg-muted/30',
               )}
             >
+              {/* Warning banner */}
+              {isAnomaly ? (
+                <div className="mb-1 flex items-center gap-1.5 text-xs text-amber-400">
+                  <TriangleAlert className="size-3" />
+                  Гео-аномалия — проверьте адрес
+                </div>
+              ) : hasNoCoords ? (
+                <div className="mb-1 flex items-center gap-1.5 text-xs text-red-400">
+                  <MapPin className="size-3" />
+                  Нет координат — не отображается на карте
+                </div>
+              ) : null}
               {/* Line 1: name · address | days */}
               <div className="flex items-center justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-2">
