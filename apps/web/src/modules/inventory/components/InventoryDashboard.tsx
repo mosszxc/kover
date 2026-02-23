@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
-import { Package, Plus, Minus, AlertTriangle, RotateCw, Users, WashingMachine, HelpCircle } from 'lucide-react'
+import { Package, Plus, Minus, AlertTriangle, RotateCw, Users, WashingMachine, HelpCircle, ChevronDown, Check } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/shared/ui/tooltip'
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/shared/ui/collapsible'
 import { cn } from '@/shared/lib/utils'
 import type { SizeInventorySummary } from '../hooks/useInventorySummary'
 import { useInventoryStore } from '../store'
@@ -75,182 +76,219 @@ export function InventoryDashboard({ summary, sizeLabels }: InventoryDashboardPr
 
       {/* Size Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {summary.map((item) => (
-          <div
-            key={item.sizeId}
-            className={cn(
-              'rounded-lg border p-4',
-              item.inStock <= 0 ? 'border-red-500/40 bg-red-500/5' : 'border-border',
-            )}
-          >
-            {/* Header: size label + tooltip */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Package className="size-5 text-muted-foreground" />
-                <span className="text-lg font-semibold">{sizeLabels.get(item.sizeId) ?? item.sizeId}</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                {item.inStock <= 0 && (
-                  <AlertTriangle className="size-5 text-red-400" aria-label="Нет на складе" />
-                )}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button type="button" className="text-muted-foreground hover:text-foreground">
-                      <HelpCircle className="size-4" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <div className="space-y-1">
-                      <div>Всего в парке: {item.totalOwned}</div>
-                      <div>Списано: {item.damaged}</div>
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            </div>
+        {summary.map((item) => {
+          const hasWearWarning = item.batches.length > 0
+            ? item.batches.some((b) => b.wearPercent >= 80)
+            : item.maxWashCycles > 0 && item.washCycles >= item.maxWashCycles * 0.8
 
-            {/* Main metric: In Stock */}
-            <div className="mt-3">
-              <span className={cn(
-                'text-3xl font-bold tabular-nums',
-                item.inStock > 0 ? 'text-emerald-400' : 'text-red-400',
-              )}>
-                {item.inStock}
-              </span>
-              <span className="ml-2 text-sm text-muted-foreground">на складе</span>
-            </div>
-
-            {/* Secondary metrics */}
-            <div className="mt-1 text-sm text-muted-foreground">
-              У клиентов: {item.atClients} · В стирке: {item.inLaundry}
-            </div>
-
-            {/* Wear section */}
-            {item.totalOwned > 0 && item.batches.length > 0 && (
-              <div className="mt-3 space-y-1.5 border-t border-border pt-3">
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <RotateCw className="size-4" />
-                  Износ по партиям
+          return (
+            <div
+              key={item.sizeId}
+              className={cn(
+                'rounded-lg border p-4',
+                item.inStock <= 0 ? 'border-red-500/40 bg-red-500/5' : 'border-border',
+              )}
+            >
+              {/* Header: size label + tooltip */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Package className="size-5 text-muted-foreground" />
+                  <span className="text-lg font-semibold">{sizeLabels.get(item.sizeId) ?? item.sizeId}</span>
                 </div>
-                {item.batches.map((batch) => {
-                  const pct = Math.min(100, batch.wearPercent)
-                  return (
-                    <div key={batch.id}>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">
-                          {new Date(batch.purchasedAt).toLocaleDateString('ru-RU', { month: 'short', year: '2-digit' })}
-                          {' '}({batch.remaining} шт)
-                        </span>
-                        <span className={cn(
-                          'tabular-nums font-medium',
-                          batch.wearPercent >= 100 ? 'text-red-400'
-                            : batch.wearPercent >= 80 ? 'text-amber-400'
-                            : 'text-muted-foreground',
-                        )}>
-                          {batch.washCycles}/{batch.maxWashCycles}
-                        </span>
+                <div className="flex items-center gap-1.5">
+                  {item.inStock <= 0 && (
+                    <AlertTriangle className="size-5 text-red-400" aria-label="Нет на складе" />
+                  )}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button type="button" className="text-muted-foreground hover:text-foreground">
+                        <HelpCircle className="size-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <div className="space-y-1">
+                        <div>Всего в парке: {item.totalOwned}</div>
+                        <div>Списано: {item.damaged}</div>
                       </div>
-                      <div
-                        className="mt-0.5 h-1.5 rounded-full bg-muted"
-                        role="progressbar"
-                        aria-valuenow={Math.round(pct)}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                        aria-label="Износ партии"
-                      >
-                        <div
-                          className={cn(
-                            'h-full rounded-full transition-all',
-                            batch.wearPercent >= 100 ? 'bg-red-500'
-                              : batch.wearPercent >= 80 ? 'bg-amber-500'
-                              : 'bg-emerald-500',
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              </div>
+
+              {/* Main metric: In Stock */}
+              <div className="mt-3">
+                <span className={cn(
+                  'text-3xl font-bold tabular-nums',
+                  item.inStock > 0 ? 'text-emerald-400' : 'text-red-400',
+                )}>
+                  {item.inStock}
+                </span>
+                <span className="ml-2 text-sm text-muted-foreground">на складе</span>
+              </div>
+
+              {/* Secondary metrics */}
+              <div className="mt-1 text-sm text-muted-foreground">
+                У клиентов: {item.atClients} · В стирке: {item.inLaundry}
+              </div>
+
+              {/* Wear section — collapsible */}
+              {item.totalOwned > 0 && item.batches.length > 0 && (
+                <Collapsible defaultOpen={hasWearWarning} className="mt-3 border-t border-border pt-3">
+                  <CollapsibleTrigger className="flex w-full items-center gap-1.5 text-sm">
+                    <ChevronDown className="size-4 text-muted-foreground transition-transform [[data-state=closed]_&]:-rotate-90" />
+                    {hasWearWarning ? (
+                      <span className="flex items-center gap-1 text-amber-400">
+                        <RotateCw className="size-4" />
+                        Износ: требует внимания
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1 text-emerald-400">
+                        <Check className="size-4" />
+                        Износ: в норме
+                      </span>
+                    )}
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-1.5 space-y-1.5">
+                    {item.batches.map((batch) => {
+                      const pct = Math.min(100, batch.wearPercent)
+                      return (
+                        <div key={batch.id}>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground">
+                              {new Date(batch.purchasedAt).toLocaleDateString('ru-RU', { month: 'short', year: '2-digit' })}
+                              {' '}({batch.remaining} шт)
+                            </span>
+                            <span className={cn(
+                              'tabular-nums font-medium',
+                              batch.wearPercent >= 100 ? 'text-red-400'
+                                : batch.wearPercent >= 80 ? 'text-amber-400'
+                                : 'text-muted-foreground',
+                            )}>
+                              {batch.washCycles} / {batch.maxWashCycles} стирок
+                            </span>
+                          </div>
+                          <div
+                            className="mt-0.5 h-2 rounded-full bg-muted"
+                            role="progressbar"
+                            aria-valuenow={Math.round(pct)}
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                            aria-label="Износ партии"
+                          >
+                            <div
+                              className={cn(
+                                'h-full rounded-full transition-all',
+                                batch.wearPercent >= 100 ? 'bg-red-500'
+                                  : batch.wearPercent >= 80 ? 'bg-amber-500'
+                                  : 'bg-emerald-500',
+                              )}
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                          {batch.wearPercent >= 100 && (
+                            <p className="mt-0.5 text-sm text-red-400">Пора менять эту партию!</p>
                           )}
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-                      {batch.wearPercent >= 100 && (
-                        <p className="mt-0.5 text-sm text-red-400">Пора менять эту партию!</p>
-                      )}
+                        </div>
+                      )
+                    })}
+                  </CollapsibleContent>
+                </Collapsible>
+              )}
+              {item.totalOwned > 0 && item.batches.length === 0 && item.maxWashCycles > 0 && (
+                <Collapsible defaultOpen={hasWearWarning} className="mt-3 border-t border-border pt-3">
+                  <CollapsibleTrigger className="flex w-full items-center gap-1.5 text-sm">
+                    <ChevronDown className="size-4 text-muted-foreground transition-transform [[data-state=closed]_&]:-rotate-90" />
+                    {hasWearWarning ? (
+                      <span className="flex items-center gap-1 text-amber-400">
+                        <RotateCw className="size-4" />
+                        Износ: требует внимания
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1 text-emerald-400">
+                        <Check className="size-4" />
+                        Износ: в норме
+                      </span>
+                    )}
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-1.5">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="flex items-center gap-1 text-muted-foreground">
+                        <RotateCw className="size-4" />
+                        Износ
+                      </span>
+                      <span className={cn(
+                        'tabular-nums font-medium',
+                        item.washCycles >= item.maxWashCycles ? 'text-red-400'
+                          : item.washCycles >= item.maxWashCycles * 0.8 ? 'text-amber-400'
+                          : 'text-muted-foreground',
+                      )}>
+                        {item.washCycles} / {item.maxWashCycles} стирок
+                      </span>
                     </div>
-                  )
-                })}
-              </div>
-            )}
-            {item.totalOwned > 0 && item.batches.length === 0 && item.maxWashCycles > 0 && (
-              <div className="mt-3 border-t border-border pt-3">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="flex items-center gap-1 text-muted-foreground">
-                    <RotateCw className="size-4" />
-                    Износ
-                  </span>
-                  <span className={cn(
-                    'tabular-nums font-medium',
-                    item.washCycles >= item.maxWashCycles ? 'text-red-400'
-                      : item.washCycles >= item.maxWashCycles * 0.8 ? 'text-amber-400'
-                      : 'text-muted-foreground',
-                  )}>
-                    {item.washCycles}/{item.maxWashCycles}
-                  </span>
-                </div>
-                {(() => {
-                  const pct = Math.min(100, (item.washCycles / item.maxWashCycles) * 100)
-                  return (
-                    <div
-                      className="mt-1 h-1.5 rounded-full bg-muted"
-                      role="progressbar"
-                      aria-valuenow={Math.round(pct)}
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                      aria-label="Износ партии"
-                    >
-                      <div
-                        className={cn(
-                          'h-full rounded-full transition-all',
-                          item.washCycles >= item.maxWashCycles ? 'bg-red-500'
-                            : item.washCycles >= item.maxWashCycles * 0.8 ? 'bg-amber-500'
-                            : 'bg-emerald-500',
-                        )}
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                  )
-                })()}
-                {item.washCycles >= item.maxWashCycles && (
-                  <p className="mt-1 text-sm text-red-400">Пора менять коврики!</p>
-                )}
-              </div>
-            )}
+                    {(() => {
+                      const pct = Math.min(100, (item.washCycles / item.maxWashCycles) * 100)
+                      return (
+                        <div
+                          className="mt-1 h-2 rounded-full bg-muted"
+                          role="progressbar"
+                          aria-valuenow={Math.round(pct)}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-label="Износ партии"
+                        >
+                          <div
+                            className={cn(
+                              'h-full rounded-full transition-all',
+                              item.washCycles >= item.maxWashCycles ? 'bg-red-500'
+                                : item.washCycles >= item.maxWashCycles * 0.8 ? 'bg-amber-500'
+                                : 'bg-emerald-500',
+                            )}
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      )
+                    })()}
+                    {item.washCycles >= item.maxWashCycles && (
+                      <p className="mt-1 text-sm text-red-400">Пора менять коврики!</p>
+                    )}
+                  </CollapsibleContent>
+                </Collapsible>
+              )}
 
-            {/* Action buttons */}
-            <div className="mt-3 flex gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                className="flex-1 gap-1"
-                onClick={() => setStockDialog({ sizeId: item.sizeId, mode: 'purchase' })}
-              >
-                <Plus className="size-3" />
-                Поступление
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="flex-1 gap-1"
-                onClick={() => setStockDialog({ sizeId: item.sizeId, mode: 'write_off' })}
-              >
-                <Minus className="size-3" />
-                Списание
-              </Button>
+              {/* Action buttons */}
+              <div className="mt-3 flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 gap-1"
+                  onClick={() => setStockDialog({ sizeId: item.sizeId, mode: 'purchase' })}
+                >
+                  <Plus className="size-3" />
+                  Поступление
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 gap-1"
+                  onClick={() => setStockDialog({ sizeId: item.sizeId, mode: 'write_off' })}
+                >
+                  <Minus className="size-3" />
+                  Списание
+                </Button>
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
-      {/* Recent Transactions */}
+      {/* Recent Transactions — collapsible */}
       {recentTransactions.length > 0 && (
-        <div>
-          <h3 className="mb-2 text-sm font-medium text-muted-foreground">Последние операции</h3>
-          <div className="space-y-1">
+        <Collapsible defaultOpen={false}>
+          <CollapsibleTrigger className="flex w-full items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground">
+            <ChevronDown className="size-4 transition-transform [[data-state=closed]_&]:-rotate-90" />
+            Последние операции ({recentTransactions.length})
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-2 space-y-1">
             {recentTransactions.map((tx) => (
               <div key={tx.id} className="flex items-center justify-between rounded border border-border px-3 py-2 text-sm">
                 <div className="flex items-center gap-2">
@@ -270,8 +308,8 @@ export function InventoryDashboard({ summary, sizeLabels }: InventoryDashboardPr
                 </span>
               </div>
             ))}
-          </div>
-        </div>
+          </CollapsibleContent>
+        </Collapsible>
       )}
 
       {stockDialog && (
