@@ -1,6 +1,7 @@
-import { useState } from 'react'
-import { Package, Plus, Minus, AlertTriangle, RotateCw } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { Package, Plus, Minus, AlertTriangle, RotateCw, Users, WashingMachine, HelpCircle } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/shared/ui/tooltip'
 import { cn } from '@/shared/lib/utils'
 import type { SizeInventorySummary } from '../hooks/useInventorySummary'
 import { useInventoryStore } from '../store'
@@ -18,6 +19,20 @@ export function InventoryDashboard({ summary, sizeLabels }: InventoryDashboardPr
   const recordWriteOff = useInventoryStore((s) => s.recordWriteOff)
   const transactions = useInventoryStore((s) => s.transactions)
 
+  const totals = useMemo(() => {
+    let totalInStock = 0
+    let totalAtClients = 0
+    let totalInLaundry = 0
+    let hasOutOfStock = false
+    for (const item of summary) {
+      totalInStock += item.inStock
+      totalAtClients += item.atClients
+      totalInLaundry += item.inLaundry
+      if (item.inStock <= 0) hasOutOfStock = true
+    }
+    return { totalInStock, totalAtClients, totalInLaundry, hasOutOfStock }
+  }, [summary])
+
   const recentTransactions = transactions
     .slice()
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
@@ -25,6 +40,40 @@ export function InventoryDashboard({ summary, sizeLabels }: InventoryDashboardPr
 
   return (
     <div className="space-y-6">
+      {/* Summary Bar */}
+      <div className="space-y-3">
+        <div className="grid grid-cols-3 gap-4">
+          <div className="flex items-center gap-3 rounded-lg border border-border p-4">
+            <Package className="size-5 text-emerald-400" />
+            <div>
+              <div className="text-2xl font-bold tabular-nums">{totals.totalInStock}</div>
+              <div className="text-sm text-muted-foreground">На складе</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 rounded-lg border border-border p-4">
+            <Users className="size-5 text-blue-400" />
+            <div>
+              <div className="text-2xl font-bold tabular-nums">{totals.totalAtClients}</div>
+              <div className="text-sm text-muted-foreground">У клиентов</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 rounded-lg border border-border p-4">
+            <WashingMachine className="size-5 text-violet-400" />
+            <div>
+              <div className="text-2xl font-bold tabular-nums">{totals.totalInLaundry}</div>
+              <div className="text-sm text-muted-foreground">В стирке</div>
+            </div>
+          </div>
+        </div>
+        {totals.hasOutOfStock && (
+          <div className="flex items-center gap-2 rounded-lg border border-red-500/40 bg-red-500/5 px-4 py-2 text-sm text-red-400">
+            <AlertTriangle className="size-4 shrink-0" aria-label="Нет на складе" />
+            Есть размеры с нулевым остатком на складе
+          </div>
+        )}
+      </div>
+
+      {/* Size Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {summary.map((item) => (
           <div
@@ -34,45 +83,51 @@ export function InventoryDashboard({ summary, sizeLabels }: InventoryDashboardPr
               item.inStock <= 0 ? 'border-red-500/40 bg-red-500/5' : 'border-border',
             )}
           >
+            {/* Header: size label + tooltip */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Package className="size-5 text-muted-foreground" />
                 <span className="text-lg font-semibold">{sizeLabels.get(item.sizeId) ?? item.sizeId}</span>
               </div>
-              {item.inStock <= 0 && (
-                <AlertTriangle className="size-5 text-red-400" />
-              )}
-            </div>
-
-            <div className="mt-3 space-y-1 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Всего в парке</span>
-                <span className="font-medium tabular-nums">{item.totalOwned}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">У клиентов</span>
-                <span className="tabular-nums">{item.atClients}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">В стирке</span>
-                <span className="tabular-nums">{item.inLaundry}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Списано</span>
-                <span className="tabular-nums">{item.damaged}</span>
-              </div>
-              <div className="flex justify-between border-t border-border pt-1">
-                <span className={cn('font-medium', item.inStock <= 0 ? 'text-red-400' : 'text-emerald-400')}>
-                  На складе
-                </span>
-                <span className={cn('font-semibold tabular-nums', item.inStock <= 0 ? 'text-red-400' : 'text-emerald-400')}>
-                  {item.inStock}
-                </span>
+              <div className="flex items-center gap-1.5">
+                {item.inStock <= 0 && (
+                  <AlertTriangle className="size-5 text-red-400" aria-label="Нет на складе" />
+                )}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button type="button" className="text-muted-foreground hover:text-foreground">
+                      <HelpCircle className="size-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <div className="space-y-1">
+                      <div>Всего в парке: {item.totalOwned}</div>
+                      <div>Списано: {item.damaged}</div>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </div>
 
+            {/* Main metric: In Stock */}
+            <div className="mt-3">
+              <span className={cn(
+                'text-3xl font-bold tabular-nums',
+                item.inStock > 0 ? 'text-emerald-400' : 'text-red-400',
+              )}>
+                {item.inStock}
+              </span>
+              <span className="ml-2 text-sm text-muted-foreground">на складе</span>
+            </div>
+
+            {/* Secondary metrics */}
+            <div className="mt-1 text-sm text-muted-foreground">
+              У клиентов: {item.atClients} · В стирке: {item.inLaundry}
+            </div>
+
+            {/* Wear section */}
             {item.totalOwned > 0 && item.batches.length > 0 && (
-              <div className="mt-2 space-y-1.5">
+              <div className="mt-3 space-y-1.5 border-t border-border pt-3">
                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
                   <RotateCw className="size-4" />
                   Износ по партиям
@@ -95,7 +150,14 @@ export function InventoryDashboard({ summary, sizeLabels }: InventoryDashboardPr
                           {batch.washCycles}/{batch.maxWashCycles}
                         </span>
                       </div>
-                      <div className="mt-0.5 h-1.5 rounded-full bg-muted">
+                      <div
+                        className="mt-0.5 h-1.5 rounded-full bg-muted"
+                        role="progressbar"
+                        aria-valuenow={Math.round(pct)}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-label="Износ партии"
+                      >
                         <div
                           className={cn(
                             'h-full rounded-full transition-all',
@@ -115,7 +177,7 @@ export function InventoryDashboard({ summary, sizeLabels }: InventoryDashboardPr
               </div>
             )}
             {item.totalOwned > 0 && item.batches.length === 0 && item.maxWashCycles > 0 && (
-              <div className="mt-2">
+              <div className="mt-3 border-t border-border pt-3">
                 <div className="flex items-center justify-between text-sm">
                   <span className="flex items-center gap-1 text-muted-foreground">
                     <RotateCw className="size-4" />
@@ -130,23 +192,36 @@ export function InventoryDashboard({ summary, sizeLabels }: InventoryDashboardPr
                     {item.washCycles}/{item.maxWashCycles}
                   </span>
                 </div>
-                <div className="mt-1 h-1.5 rounded-full bg-muted">
-                  <div
-                    className={cn(
-                      'h-full rounded-full transition-all',
-                      item.washCycles >= item.maxWashCycles ? 'bg-red-500'
-                        : item.washCycles >= item.maxWashCycles * 0.8 ? 'bg-amber-500'
-                        : 'bg-emerald-500',
-                    )}
-                    style={{ width: `${Math.min(100, (item.washCycles / item.maxWashCycles) * 100)}%` }}
-                  />
-                </div>
+                {(() => {
+                  const pct = Math.min(100, (item.washCycles / item.maxWashCycles) * 100)
+                  return (
+                    <div
+                      className="mt-1 h-1.5 rounded-full bg-muted"
+                      role="progressbar"
+                      aria-valuenow={Math.round(pct)}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-label="Износ партии"
+                    >
+                      <div
+                        className={cn(
+                          'h-full rounded-full transition-all',
+                          item.washCycles >= item.maxWashCycles ? 'bg-red-500'
+                            : item.washCycles >= item.maxWashCycles * 0.8 ? 'bg-amber-500'
+                            : 'bg-emerald-500',
+                        )}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  )
+                })()}
                 {item.washCycles >= item.maxWashCycles && (
                   <p className="mt-1 text-sm text-red-400">Пора менять коврики!</p>
                 )}
               </div>
             )}
 
+            {/* Action buttons */}
             <div className="mt-3 flex gap-2">
               <Button
                 size="sm"
@@ -171,6 +246,7 @@ export function InventoryDashboard({ summary, sizeLabels }: InventoryDashboardPr
         ))}
       </div>
 
+      {/* Recent Transactions */}
       {recentTransactions.length > 0 && (
         <div>
           <h3 className="mb-2 text-sm font-medium text-muted-foreground">Последние операции</h3>
