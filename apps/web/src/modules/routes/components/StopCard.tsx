@@ -1,4 +1,4 @@
-import { ChevronUp, ChevronDown, GripVertical, MapPinOff, Pencil, TriangleAlert, Clock, MoreHorizontal, ArrowRightLeft, X, ClipboardCheck, Phone, StickyNote } from 'lucide-react'
+import { ChevronUp, ChevronDown, GripVertical, MapPinOff, Pencil, TriangleAlert, Clock, MoreHorizontal, ArrowRightLeft, X, ClipboardCheck, Phone, StickyNote, Check, SkipForward, AlertCircle } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -18,6 +18,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/shared/ui/popover'
 import type { Client } from '@/modules/clients'
 import { getClientReplacements, formatWorkingHours } from '@/modules/clients'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
@@ -32,6 +37,7 @@ import {
   SelectLabel,
   SelectSeparator,
 } from '@/shared/ui/select'
+import type { StopExecutionStatus } from '@/shared/stores/routeExecutionStore'
 
 export interface DriverOption {
   id: string
@@ -43,6 +49,11 @@ export interface DriverOption {
 export interface StopPaymentInfo {
   status: 'paid' | 'partial' | 'overdue' | 'pending'
   debt: number
+}
+
+export interface StopExecutionInfo {
+  status: StopExecutionStatus
+  note?: string
 }
 
 interface StopCardProps {
@@ -60,9 +71,12 @@ interface StopCardProps {
   onEditClient?: (client: Client) => void
   paymentInfo?: StopPaymentInfo
   onServiceReport?: (client: Client) => void
+  executionInfo?: StopExecutionInfo
+  onSetExecution?: (stopId: string, clientId: string, status: StopExecutionStatus, note?: string) => void
+  onRemoveExecution?: (stopId: string) => void
 }
 
-export function StopCard({ number, client, stopId, driverId, drivers, stopIndex, isFirst, isLast, isDndEnabled = true, isAnomaly = false, isMissingCoords = false, onEditClient, paymentInfo, onServiceReport }: StopCardProps) {
+export function StopCard({ number, client, stopId, driverId, drivers, stopIndex, isFirst, isLast, isDndEnabled = true, isAnomaly = false, isMissingCoords = false, onEditClient, paymentInfo, onServiceReport, executionInfo, onSetExecution, onRemoveExecution }: StopCardProps) {
   const sizes = useMatSizeStore((s) => s.sizes)
   const areaMap = Object.fromEntries(sizes.map((s) => [s.id, s.area]))
   const labelMap = Object.fromEntries(sizes.map((s) => [s.id, s.label]))
@@ -74,6 +88,8 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
 
   const [removeOpen, setRemoveOpen] = useState(false)
   const [transferOpen, setTransferOpen] = useState(false)
+  const [notePopoverOpen, setNotePopoverOpen] = useState(false)
+  const [noteText, setNoteText] = useState(executionInfo?.note ?? '')
 
   const {
     attributes,
@@ -95,19 +111,49 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
 
   const driverName = drivers.find((d) => d.id === driverId)?.name
 
+  const executionStatus = executionInfo?.status
+
+  const borderClass = executionStatus === 'completed'
+    ? 'border-l-green-500 bg-green-500/5'
+    : executionStatus === 'skipped'
+      ? 'border-l-muted-foreground bg-muted/10'
+      : executionStatus === 'problem'
+        ? 'border-l-red-500 bg-red-500/5'
+        : isAnomaly
+          ? 'border-l-amber-500 bg-amber-500/5'
+          : isMissingCoords
+            ? 'border-l-muted-foreground bg-muted/5'
+            : driverId
+              ? 'border-l-blue-500'
+              : 'border-l-border'
+
+  function handleExecutionClick(status: StopExecutionStatus) {
+    if (executionStatus === status) {
+      // Toggle off
+      onRemoveExecution?.(stopId)
+    } else if (status === 'completed') {
+      onSetExecution?.(stopId, client.id, 'completed')
+    } else {
+      // For skipped/problem, open note popover
+      setNoteText(executionInfo?.note ?? '')
+      setNotePopoverOpen(true)
+      // Set status immediately, note can be added via popover
+      onSetExecution?.(stopId, client.id, status)
+    }
+  }
+
+  function handleNoteSave(status: StopExecutionStatus) {
+    onSetExecution?.(stopId, client.id, status, noteText.trim() || undefined)
+    setNotePopoverOpen(false)
+  }
+
   return (
     <div
       ref={setNodeRef}
       style={style}
       className={cn(
         'group flex items-center gap-3 border-l-3 p-3 transition-colors hover:bg-accent',
-        isAnomaly
-          ? 'border-l-amber-500 bg-amber-500/5'
-          : isMissingCoords
-            ? 'border-l-muted-foreground bg-muted/5'
-            : driverId
-              ? 'border-l-blue-500'
-              : 'border-l-border',
+        borderClass,
         isDragging && 'z-10 opacity-50 ring-2 ring-blue-500',
       )}
       {...attributes}
@@ -149,6 +195,92 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
         {number}
       </span>
 
+      {/* Execution status button */}
+      {onSetExecution && (
+        <div className="flex shrink-0 items-center gap-0.5 print:hidden">
+          <button
+            type="button"
+            onClick={() => handleExecutionClick('completed')}
+            aria-label="Выполнено"
+            className={cn(
+              'flex size-8 items-center justify-center rounded-full transition-colors',
+              executionStatus === 'completed'
+                ? 'bg-green-500 text-white'
+                : 'text-muted-foreground hover:bg-green-500/20 hover:text-green-500',
+            )}
+          >
+            <Check className="size-4" />
+          </button>
+          <Popover open={notePopoverOpen && (executionStatus === 'skipped' || executionStatus === 'problem')} onOpenChange={setNotePopoverOpen}>
+            <PopoverTrigger asChild>
+              <span className="inline-flex gap-0.5">
+                <button
+                  type="button"
+                  onClick={() => handleExecutionClick('skipped')}
+                  aria-label="Пропущено"
+                  className={cn(
+                    'flex size-8 items-center justify-center rounded-full transition-colors',
+                    executionStatus === 'skipped'
+                      ? 'bg-muted-foreground text-white'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                  )}
+                >
+                  <SkipForward className="size-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleExecutionClick('problem')}
+                  aria-label="Проблема"
+                  className={cn(
+                    'flex size-8 items-center justify-center rounded-full transition-colors',
+                    executionStatus === 'problem'
+                      ? 'bg-red-500 text-white'
+                      : 'text-muted-foreground hover:bg-red-500/20 hover:text-red-500',
+                  )}
+                >
+                  <AlertCircle className="size-4" />
+                </button>
+              </span>
+            </PopoverTrigger>
+            <PopoverContent className="w-72 p-3" align="start">
+              <div className="space-y-2">
+                <p className="text-sm font-medium">
+                  {executionStatus === 'skipped' ? 'Причина пропуска' : 'Описание проблемы'}
+                </p>
+                <input
+                  type="text"
+                  value={noteText}
+                  onChange={(e) => setNoteText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && executionStatus) {
+                      handleNoteSave(executionStatus)
+                    }
+                  }}
+                  placeholder="Короткая заметка..."
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                  autoFocus
+                />
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setNotePopoverOpen(false)}
+                  >
+                    Отмена
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => executionStatus && handleNoteSave(executionStatus)}
+                  >
+                    Сохранить
+                  </Button>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+      )}
+
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
           {isMissingCoords && (
@@ -175,7 +307,10 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
               </StatusHint>
             </span>
           )}
-          <p className="truncate lg:whitespace-normal text-base text-foreground">
+          <p className={cn(
+            'truncate lg:whitespace-normal text-base',
+            executionStatus === 'completed' ? 'text-muted-foreground line-through' : 'text-foreground',
+          )}>
             {client.originalName}
           </p>
           {paymentInfo && paymentInfo.status !== 'paid' && paymentInfo.status !== 'pending' && (
@@ -208,6 +343,14 @@ export function StopCard({ number, client, stopId, driverId, drivers, stopIndex,
             </a>
           )}
         </div>
+        {executionInfo?.note && (
+          <p className={cn(
+            'mt-0.5 text-sm italic',
+            executionStatus === 'problem' ? 'text-red-400' : 'text-muted-foreground',
+          )}>
+            {executionInfo.note}
+          </p>
+        )}
         {(client.notes || (client.clientNotes && client.clientNotes.length > 0)) && (
           <p className="mt-0.5 flex items-start gap-1 text-sm text-muted-foreground">
             <StickyNote className="mt-0.5 size-3 shrink-0" />
