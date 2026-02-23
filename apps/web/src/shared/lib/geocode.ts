@@ -13,7 +13,8 @@ export interface GeocodeResult {
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search'
 
 export async function geocodeAddress(address: string, city?: string): Promise<GeocodeResult | null> {
-  const query = city ? `${city}, ${address}` : address
+  const addressAlreadyHasCity = city ? address.toLowerCase().includes(city.toLowerCase()) : false
+  const query = city && !addressAlreadyHasCity ? `${city}, ${address}` : address
   const params = new URLSearchParams({
     q: query,
     format: 'json',
