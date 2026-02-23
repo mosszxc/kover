@@ -1,6 +1,7 @@
 export type { Client, MatSpec, ClientNote, ClientCategory } from './types'
 export { CLIENT_CATEGORIES } from './types'
-export type { PaymentInfo } from './components/ClientsTable'
+export type { PaymentInfo, ChurnRiskClientInfo, ChurnRiskLevel, ChurnRiskReason } from './components/ClientsTable'
+export { CHURN_REASON_LABELS } from './components/ClientsTable'
 export { getClientReplacements, isClientPaused, formatPausedUntil, formatWorkingHours } from './types'
 export { useClientStore } from './store'
 export { ClientsTable } from './components/ClientsTable'
