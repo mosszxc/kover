@@ -7,7 +7,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { Check, ChevronDown, ChevronUp, ChevronsUpDown, Search, AlertTriangle, Pause, Play, MapPin, TriangleAlert, CalendarClock, Clock, Printer, ShieldAlert, CheckCircle2 } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, ChevronsUpDown, Search, AlertTriangle, Pause, Play, MapPin, TriangleAlert, CalendarClock, Clock, Printer, ShieldAlert, CheckCircle2, TrendingDown, Info } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { StatusHint } from '@/shared/ui/status-hint'
 import { toast } from 'sonner'
@@ -20,7 +20,7 @@ import type { DayOfWeek } from '@/shared/types'
 import { useMatSizeStore } from '@/shared/stores/matSizeStore'
 import { MAT_SIZE_STYLES } from '@/shared/constants'
 import type { MatSize } from '@/shared/types'
-import { ClientsFilters, type StatusFilter, type PaymentFilter } from './ClientsFilters'
+import { ClientsFilters, type StatusFilter, type PaymentFilter, type ProfitabilityFilter } from './ClientsFilters'
 import { Banknote } from 'lucide-react'
 import { ClientsPrintView } from './ClientsPrintView'
 import { useCostSettingsStore } from '@/shared/stores/costSettingsStore'
@@ -140,6 +140,12 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
     return Math.round((getClientMonthlyRevenue(client) - getClientMonthlyCostOfService(client)) * 100) / 100
   }
 
+  function getMarginPercent(client: Client): number {
+    const revenue = getClientMonthlyRevenue(client)
+    if (revenue === 0) return 0
+    return Math.round((getClientMargin(client) / revenue) * 100)
+  }
+
   const columns = useMemo<ColumnDef<Client>[]>(() => {
     const cols: ColumnDef<Client>[] = [
       { accessorKey: 'name', header: 'Название' },
@@ -174,6 +180,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
   const [selectedPayment, setSelectedPayment] = useState<PaymentFilter>('all')
   const hasPayments = (paymentStatusMap?.size ?? 0) > 0
   const [showRiskOnly, setShowRiskOnly] = useState(false)
+  const [selectedProfitability, setSelectedProfitability] = useState<ProfitabilityFilter>('all')
   const dismissChurn = useChurnDismissStore((s) => s.dismiss)
   const hasRiskClients = (churnRiskMap?.size ?? 0) > 0
 
@@ -215,8 +222,16 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
         return risk && !risk.isDismissed && risk.level !== 'none'
       })
     }
+    if (selectedProfitability !== 'all' && hasCostSettings) {
+      result = result.filter((c) => {
+        const m = getClientMargin(c)
+        if (selectedProfitability === 'profitable') return m > 0
+        if (selectedProfitability === 'unprofitable') return m <= 0
+        return true
+      })
+    }
     return result
-  }, [clients, selectedDays, selectedFrequency, selectedMatSize, selectedStatus, selectedCategory, selectedPayment, paymentStatusMap, showRiskOnly, churnRiskMap])
+  }, [clients, selectedDays, selectedFrequency, selectedMatSize, selectedStatus, selectedCategory, selectedPayment, paymentStatusMap, showRiskOnly, churnRiskMap, selectedProfitability, hasCostSettings])
 
   const table = useReactTable({
     data: filteredClients,
@@ -269,7 +284,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
   const rows = table.getRowModel().rows
   const finalFilteredClients = table.getFilteredRowModel().rows.map((r) => r.original)
 
-  const hasActiveFilters = selectedDays.length > 0 || selectedFrequency !== null || selectedMatSize !== null || selectedStatus !== 'all' || selectedPayment !== 'all' || showRiskOnly || globalFilter !== ''
+  const hasActiveFilters = selectedDays.length > 0 || selectedFrequency !== null || selectedMatSize !== null || selectedStatus !== 'all' || selectedPayment !== 'all' || showRiskOnly || selectedProfitability !== 'all' || globalFilter !== ''
 
   function getPrintTitle(): string {
     const parts: string[] = []
@@ -313,7 +328,17 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
         showRiskOnly={showRiskOnly}
         onRiskFilterChange={setShowRiskOnly}
         hasRiskClients={hasRiskClients}
+        selectedProfitability={selectedProfitability}
+        onProfitabilityChange={setSelectedProfitability}
+        hasCostSettings={hasCostSettings}
       />
+
+      {!hasCostSettings && (
+        <div className="flex items-center gap-2 rounded-lg border border-blue-500/20 bg-blue-500/5 px-3 py-2 text-sm text-blue-400">
+          <Info className="size-4 shrink-0" />
+          <span>Настройте себестоимость в настройках, чтобы видеть прибыльность клиентов</span>
+        </div>
+      )}
 
       <div className="flex items-center justify-between text-sm text-muted-foreground">
       <div className="flex items-center gap-1">
@@ -458,6 +483,19 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                       </span>
                     </StatusHint>
                   )}
+                  {margin !== null && margin < 0 && (
+                    <StatusHint
+                      title="Убыточный клиент"
+                      description={`Маржа: ${margin.toLocaleString('ru-RU')} ₽/мес (${getMarginPercent(client)}%)`}
+                      action="Рассмотрите повышение цены или оптимизацию маршрута."
+                      variant="error"
+                    >
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-red-600/20 px-2 py-0.5 text-xs font-semibold text-red-400">
+                        <TrendingDown className="size-3" />
+                        Убыток
+                      </span>
+                    </StatusHint>
+                  )}
                   <span className="hidden text-muted-foreground sm:inline">·</span>
                   <span className="hidden min-w-0 items-center gap-1 text-sm text-muted-foreground sm:inline-flex">
                     <span className={cn('truncate', isAnomaly && 'text-amber-400', hasNoCoords && !isAnomaly && 'text-red-400')}>{client.address}</span>
@@ -597,7 +635,8 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                         <>
                           <span className="text-muted-foreground">·</span>
                           <span className={cn('font-medium', margin > 0 ? 'text-emerald-400' : margin < 0 ? 'text-red-400' : 'text-muted-foreground')}>
-                            {margin > 0 ? '+' : ''}{margin.toLocaleString('ru-RU')}{'\u00a0'}₽
+                            {margin > 0 ? '+' : ''}{margin.toLocaleString('ru-RU')}{'\u00a0'}₽{' '}
+                            <span className="font-normal">({getMarginPercent(client)}%)</span>
                           </span>
                         </>
                       )}
@@ -726,14 +765,20 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
               ) / 100).toLocaleString('ru-RU')}{'\u00a0'}₽
             </span>
             {hasCostSettings && (() => {
+              const totalRevenue = Math.round(
+                table.getFilteredRowModel().rows.reduce(
+                  (sum, row) => sum + getClientMonthlyRevenue(row.original), 0
+                ) * 100
+              ) / 100
               const totalMargin = Math.round(
                 table.getFilteredRowModel().rows.reduce(
                   (sum, row) => sum + getClientMargin(row.original), 0
                 ) * 100
               ) / 100
+              const totalPct = totalRevenue > 0 ? Math.round((totalMargin / totalRevenue) * 100) : 0
               return (
                 <span className={cn('font-medium', totalMargin > 0 ? 'text-emerald-400' : totalMargin < 0 ? 'text-red-400' : 'text-muted-foreground')}>
-                  Маржа: {totalMargin > 0 ? '+' : ''}{totalMargin.toLocaleString('ru-RU')}{'\u00a0'}₽
+                  Маржа: {totalMargin > 0 ? '+' : ''}{totalMargin.toLocaleString('ru-RU')}{'\u00a0'}₽ ({totalPct}%)
                 </span>
               )
             })()}

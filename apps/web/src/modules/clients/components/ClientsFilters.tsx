@@ -14,6 +14,7 @@ import type { ClientCategory } from '../types'
 
 export type StatusFilter = 'all' | 'active' | 'paused'
 export type PaymentFilter = 'all' | 'paid' | 'unpaid' | 'overdue'
+export type ProfitabilityFilter = 'all' | 'profitable' | 'unprofitable'
 
 interface ClientsFiltersProps {
   selectedDays: DayOfWeek[]
@@ -32,6 +33,9 @@ interface ClientsFiltersProps {
   showRiskOnly?: boolean
   onRiskFilterChange?: (value: boolean) => void
   hasRiskClients?: boolean
+  selectedProfitability?: ProfitabilityFilter
+  onProfitabilityChange?: (value: ProfitabilityFilter) => void
+  hasCostSettings?: boolean
 }
 
 const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
@@ -45,6 +49,12 @@ const PAYMENT_OPTIONS: { value: PaymentFilter; label: string }[] = [
   { value: 'paid', label: 'Оплачен' },
   { value: 'unpaid', label: 'Не оплачен' },
   { value: 'overdue', label: 'Просрочен' },
+]
+
+const PROFITABILITY_OPTIONS: { value: ProfitabilityFilter; label: string }[] = [
+  { value: 'all', label: 'Все' },
+  { value: 'profitable', label: 'Прибыльные' },
+  { value: 'unprofitable', label: 'Убыточные' },
 ]
 
 export function ClientsFilters({
@@ -64,6 +74,9 @@ export function ClientsFilters({
   showRiskOnly = false,
   onRiskFilterChange,
   hasRiskClients = false,
+  selectedProfitability = 'all',
+  onProfitabilityChange,
+  hasCostSettings = false,
 }: ClientsFiltersProps) {
   const [open, setOpen] = useState(false)
   const visibleDays = useVisibleDays()
@@ -76,7 +89,8 @@ export function ClientsFilters({
     (selectedStatus !== 'all' ? 1 : 0) +
     (selectedCategory !== null ? 1 : 0) +
     (selectedPayment !== 'all' ? 1 : 0) +
-    (showRiskOnly ? 1 : 0)
+    (showRiskOnly ? 1 : 0) +
+    (selectedProfitability !== 'all' ? 1 : 0)
 
   function toggleDay(day: DayOfWeek) {
     if (selectedDays.includes(day)) {
@@ -102,6 +116,7 @@ export function ClientsFilters({
     onCategoryChange(null)
     onPaymentChange?.('all')
     onRiskFilterChange?.(false)
+    onProfitabilityChange?.('all')
   }
 
   return (
@@ -269,6 +284,30 @@ export function ClientsFilters({
               >
                 В зоне риска
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* Profitability filter */}
+        {hasCostSettings && onProfitabilityChange && (
+          <div className="space-y-1.5">
+            <span className="text-sm font-medium text-muted-foreground">Прибыльность</span>
+            <div className="flex flex-wrap gap-1.5">
+              {PROFITABILITY_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => onProfitabilityChange(opt.value)}
+                  className={cn(
+                    'min-h-[36px] rounded-full px-2.5 py-1 text-sm font-medium transition-colors',
+                    selectedProfitability === opt.value
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+                  )}
+                >
+                  {opt.label}
+                </button>
+              ))}
             </div>
           </div>
         )}
