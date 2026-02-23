@@ -2,6 +2,7 @@ import { FeedbackDialog } from '@/shared/components/FeedbackDialog'
 import { UndoRedo } from '@/shared/components/UndoRedo'
 import { FileSyncIndicator } from '@/shared/components/FileSyncIndicator'
 import { SyncStatusIndicator } from '@/shared/components/SyncStatusIndicator'
+import { SaveIndicator } from '@/shared/components/SaveIndicator'
 
 export function TopBar() {
   return (
@@ -11,6 +12,7 @@ export function TopBar() {
         <span className="text-xs text-muted-foreground ml-1.5">{__APP_VERSION__}</span>
       </div>
       <div className="ml-auto flex items-center gap-1">
+        <SaveIndicator />
         <SyncStatusIndicator />
         <FileSyncIndicator />
         <FeedbackDialog />
