@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useState } from 'react'
+import { useMemo, useCallback } from 'react'
 import {
   DndContext,
   closestCenter,
@@ -13,7 +13,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
-import { ChevronDown, ChevronRight, Undo2, CalendarOff, CalendarPlus, X } from 'lucide-react'
+import { CalendarPlus, X } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { useRouteStore } from '../store'
 import { useClientStore } from '@/modules/clients'
@@ -21,8 +21,7 @@ import type { Client } from '@/modules/clients'
 import { useGeoAnomalies } from '../hooks/useGeoAnomalies'
 import { isStopSkipped } from '../utils'
 import { useRouteExceptionsStore } from '@/shared/stores/routeExceptionsStore'
-import { StopCard, type DriverOption, type StopPaymentInfo, type StopExecutionInfo } from './StopCard'
-import type { StopExecutionStatus } from '@/shared/stores/routeExecutionStore'
+import { StopCard, type DriverOption, type StopPaymentInfo } from './StopCard'
 
 interface StopListProps {
   searchQuery?: string
@@ -31,21 +30,13 @@ interface StopListProps {
   onEditClient?: (client: Client) => void
   paymentStatusMap?: Map<string, StopPaymentInfo>
   onServiceReport?: (client: Client) => void
-  executionMap?: Map<string, StopExecutionInfo>
-  onSetExecution?: (stopId: string, clientId: string, status: StopExecutionStatus, note?: string) => void
-  onRemoveExecution?: (stopId: string) => void
 }
 
 function getTodayISO(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
-function formatDateRu(dateStr: string): string {
-  const d = new Date(dateStr + 'T00:00:00')
-  return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })
-}
-
-export function StopList({ searchQuery = '', drivers = [], driverFilter = null, onEditClient, paymentStatusMap, onServiceReport, executionMap, onSetExecution, onRemoveExecution }: StopListProps) {
+export function StopList({ searchQuery = '', drivers = [], driverFilter = null, onEditClient, paymentStatusMap, onServiceReport }: StopListProps) {
   const routes = useRouteStore((s) => s.routes)
   const selectedDay = useRouteStore((s) => s.selectedDay)
   const reorderStop = useRouteStore((s) => s.reorderStop)
@@ -78,11 +69,6 @@ export function StopList({ searchQuery = '', drivers = [], driverFilter = null, 
     [exceptions, today, selectedDay],
   )
 
-  const todaySkipExceptions = useMemo(
-    () => exceptions.filter((ex) => ex.date === today && ex.day === selectedDay && ex.type === 'skip'),
-    [exceptions, today, selectedDay],
-  )
-
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 },
@@ -110,25 +96,17 @@ export function StopList({ searchQuery = '', drivers = [], driverFilter = null, 
     [dayRoute, selectedDay, reorderStop],
   )
 
-  const unskipStop = useRouteStore((s) => s.unskipStop)
-  const [showSkipped, setShowSkipped] = useState(false)
-
-  const { activeStops, skippedStops } = useMemo(() => {
-    if (!dayRoute) return { activeStops: [], skippedStops: [] }
+  const activeStops = useMemo(() => {
+    if (!dayRoute) return []
     const active: typeof dayRoute.stops = []
-    const skipped: typeof dayRoute.stops = []
     for (const stop of dayRoute.stops) {
       const client = clientMap.get(stop.clientId)
       if (client?.isActive === false) continue
-      if (todaySkipIds.has(stop.clientId)) {
-        skipped.push(stop)
-      } else if (isStopSkipped(stop)) {
-        skipped.push(stop)
-      } else {
-        active.push(stop)
-      }
+      if (todaySkipIds.has(stop.clientId)) continue
+      if (isStopSkipped(stop)) continue
+      active.push(stop)
     }
-    return { activeStops: active, skippedStops: skipped }
+    return active
   }, [dayRoute, clientMap, todaySkipIds])
 
   const activeClients = useMemo(
@@ -137,7 +115,7 @@ export function StopList({ searchQuery = '', drivers = [], driverFilter = null, 
   )
   const anomalies = useGeoAnomalies(activeClients)
 
-  if (!dayRoute || (activeStops.length === 0 && skippedStops.length === 0)) {
+  if (!dayRoute || activeStops.length === 0) {
     return (
       <div className="py-12 text-center text-sm text-muted-foreground">
         Нет точек на этот день
@@ -164,7 +142,7 @@ export function StopList({ searchQuery = '', drivers = [], driverFilter = null, 
       )
     })
 
-  if (stops.length === 0 && skippedStops.length === 0) {
+  if (stops.length === 0) {
     return (
       <div className="py-12 text-center text-sm text-muted-foreground">
         Ничего не найдено
@@ -204,9 +182,6 @@ export function StopList({ searchQuery = '', drivers = [], driverFilter = null, 
                   onEditClient={onEditClient}
                   paymentInfo={paymentStatusMap?.get(client.id)}
                   onServiceReport={onServiceReport}
-                  executionInfo={executionMap?.get(stop.id)}
-                  onSetExecution={onSetExecution}
-                  onRemoveExecution={onRemoveExecution}
                 />
               )
             })}
@@ -246,66 +221,6 @@ export function StopList({ searchQuery = '', drivers = [], driverFilter = null, 
               )
             })}
           </div>
-        </div>
-      )}
-
-      {skippedStops.length > 0 && (
-        <div className="mt-4 print:hidden">
-          <button
-            type="button"
-            onClick={() => setShowSkipped((v) => !v)}
-            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent"
-          >
-            {showSkipped ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
-            Пропущены ({skippedStops.length})
-          </button>
-          {showSkipped && (
-            <div className="mt-1 space-y-px">
-              {skippedStops.map((stop) => {
-                const client = clientMap.get(stop.clientId)
-                if (!client) return null
-                const dateException = todaySkipExceptions.find((ex) => ex.clientId === stop.clientId)
-                return (
-                  <div
-                    key={stop.id}
-                    className="flex items-center gap-3 border-l-3 border-l-border p-3"
-                  >
-                    <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
-                      {client.originalName}
-                      {dateException && (
-                        <span className="ml-2 inline-flex items-center gap-1 text-sm no-underline">
-                          <CalendarOff className="inline size-3" />
-                          {formatDateRu(dateException.date)}
-                          {dateException.reason && ` — ${dateException.reason}`}
-                        </span>
-                      )}
-                    </span>
-                    {dateException ? (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="shrink-0 gap-1 text-sm"
-                        onClick={() => removeException(dateException.id)}
-                      >
-                        <Undo2 className="size-3" />
-                        Отменить
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="shrink-0 gap-1 text-sm"
-                        onClick={() => unskipStop(selectedDay, stop.id)}
-                      >
-                        <Undo2 className="size-3" />
-                        Вернуть
-                      </Button>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          )}
         </div>
       )}
     </>
