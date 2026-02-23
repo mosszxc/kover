@@ -7,7 +7,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { Check, ChevronDown, ChevronUp, ChevronsUpDown, Search, AlertTriangle, Pause, Play, MapPin, TriangleAlert, CalendarClock, Clock, Printer } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, ChevronsUpDown, Search, AlertTriangle, Pause, Play, MapPin, TriangleAlert, CalendarClock, Clock, Printer, ShieldAlert, CheckCircle2 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { StatusHint } from '@/shared/ui/status-hint'
 import { toast } from 'sonner'
@@ -24,10 +24,27 @@ import { ClientsFilters, type StatusFilter, type PaymentFilter } from './Clients
 import { Banknote } from 'lucide-react'
 import { ClientsPrintView } from './ClientsPrintView'
 import { useCostSettingsStore } from '@/shared/stores/costSettingsStore'
+import { useChurnDismissStore } from '@/shared/stores/churnDismissStore'
 
 export interface PaymentInfo {
   status: 'paid' | 'partial' | 'overdue' | 'pending'
   debt: number
+}
+
+export type ChurnRiskLevel = 'high' | 'medium' | 'none'
+export type ChurnRiskReason = 'debt_overdue_90' | 'debt_overdue_60' | 'long_pause' | 'multiple_skips'
+
+export const CHURN_REASON_LABELS: Record<ChurnRiskReason, string> = {
+  debt_overdue_90: 'Долг просрочен 90+ дней',
+  debt_overdue_60: 'Долг просрочен 60+ дней',
+  long_pause: 'Долгая пауза (30+ дней)',
+  multiple_skips: '3+ пропуска за 30 дней',
+}
+
+export interface ChurnRiskClientInfo {
+  level: ChurnRiskLevel
+  reasons: ChurnRiskReason[]
+  isDismissed: boolean
 }
 
 interface ClientsTableProps {
@@ -39,11 +56,12 @@ interface ClientsTableProps {
   paymentStatusMap?: Map<string, PaymentInfo>
   onRecordPayment?: (client: Client) => void
   onQuickPay?: (client: Client) => void
+  churnRiskMap?: Map<string, ChurnRiskClientInfo>
 }
 
 type SortField = 'name' | 'address' | 'mats' | 'area' | 'cost' | 'revenue' | 'margin' | 'frequency' | 'days'
 
-export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPauseClient, anomalyIds, paymentStatusMap, onRecordPayment, onQuickPay }: ClientsTableProps) {
+export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPauseClient, anomalyIds, paymentStatusMap, onRecordPayment, onQuickPay, churnRiskMap }: ClientsTableProps) {
   const clients = useClientStore((s) => s.clients)
   const updateClient = useClientStore((s) => s.updateClient)
   const sizes = useMatSizeStore((s) => s.sizes)
@@ -155,6 +173,9 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
   const [selectedCategory, setSelectedCategory] = useState<ClientCategory | null>(null)
   const [selectedPayment, setSelectedPayment] = useState<PaymentFilter>('all')
   const hasPayments = (paymentStatusMap?.size ?? 0) > 0
+  const [showRiskOnly, setShowRiskOnly] = useState(false)
+  const dismissChurn = useChurnDismissStore((s) => s.dismiss)
+  const hasRiskClients = (churnRiskMap?.size ?? 0) > 0
 
   const filteredClients = useMemo(() => {
     let result = clients
@@ -188,8 +209,14 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
         return true
       })
     }
+    if (showRiskOnly && churnRiskMap) {
+      result = result.filter((c) => {
+        const risk = churnRiskMap.get(c.id)
+        return risk && !risk.isDismissed && risk.level !== 'none'
+      })
+    }
     return result
-  }, [clients, selectedDays, selectedFrequency, selectedMatSize, selectedStatus, selectedCategory, selectedPayment, paymentStatusMap])
+  }, [clients, selectedDays, selectedFrequency, selectedMatSize, selectedStatus, selectedCategory, selectedPayment, paymentStatusMap, showRiskOnly, churnRiskMap])
 
   const table = useReactTable({
     data: filteredClients,
@@ -242,7 +269,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
   const rows = table.getRowModel().rows
   const finalFilteredClients = table.getFilteredRowModel().rows.map((r) => r.original)
 
-  const hasActiveFilters = selectedDays.length > 0 || selectedFrequency !== null || selectedMatSize !== null || selectedStatus !== 'all' || selectedPayment !== 'all' || globalFilter !== ''
+  const hasActiveFilters = selectedDays.length > 0 || selectedFrequency !== null || selectedMatSize !== null || selectedStatus !== 'all' || selectedPayment !== 'all' || showRiskOnly || globalFilter !== ''
 
   function getPrintTitle(): string {
     const parts: string[] = []
@@ -251,6 +278,7 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
     else if (selectedPayment === 'paid') parts.push('Оплаченные')
     if (selectedStatus === 'paused') parts.push('На паузе')
     else if (selectedStatus === 'active') parts.push('Активные')
+    if (showRiskOnly) parts.push('В зоне риска')
     return parts.length > 0 ? parts.join(' · ') : 'Список клиентов'
   }
 
@@ -282,6 +310,9 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
         selectedPayment={selectedPayment}
         onPaymentChange={setSelectedPayment}
         hasPayments={hasPayments}
+        showRiskOnly={showRiskOnly}
+        onRiskFilterChange={setShowRiskOnly}
+        hasRiskClients={hasRiskClients}
       />
 
       <div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -319,6 +350,8 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
         {rows.map((row) => {
           const client = row.original
           const isAnomaly = anomalyIds?.has(client.id) ?? false
+          const churnRisk = churnRiskMap?.get(client.id)
+          const hasActiveChurnRisk = churnRisk && !churnRisk.isDismissed && churnRisk.level !== 'none'
           const hasNoCoords = client.lat == null || client.lng == null
           const paused = isClientPaused(client)
           const isActive = !paused
@@ -342,7 +375,11 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                   ? 'border-amber-500/40 bg-amber-500/5'
                   : hasNoCoords
                     ? 'border-red-500/30 bg-red-500/5'
-                    : 'border-border',
+                    : hasActiveChurnRisk && churnRisk.level === 'high'
+                      ? 'border-red-500/30 bg-red-500/5'
+                      : hasActiveChurnRisk
+                        ? 'border-amber-500/30 bg-amber-500/5'
+                        : 'border-border',
                 isActive ? 'hover:bg-muted/50' : 'border-l-2 border-amber-400 hover:bg-muted/30',
               )}
             >
@@ -358,6 +395,12 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                   Нет координат — не отображается на карте
                 </div>
               ) : null}
+              {hasActiveChurnRisk && (
+                <div className={cn("mb-1 flex items-center gap-1.5 text-xs", churnRisk.level === 'high' ? "text-red-400" : "text-amber-400")}>
+                  <ShieldAlert className="size-3" />
+                  {churnRisk.level === 'high' ? 'Высокий риск оттока' : 'Средний риск оттока'} — {churnRisk.reasons.map((r: ChurnRiskReason) => CHURN_REASON_LABELS[r]).join(', ')}
+                </div>
+              )}
               {/* Line 1: name · address | days */}
               <div className="flex items-center justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-2">
@@ -393,6 +436,26 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
                           'bg-muted-foreground': paymentInfo.status === 'pending',
                         })}
                       />
+                    </StatusHint>
+                  )}
+                  {hasActiveChurnRisk && (
+                    <StatusHint
+                      title={churnRisk.level === 'high' ? 'Высокий риск оттока' : 'Средний риск оттока'}
+                      description={churnRisk.reasons.map((r: ChurnRiskReason) => CHURN_REASON_LABELS[r]).join(', ')}
+                      action="Нажмите 'Обработано' чтобы скрыть на 30 дней."
+                      variant={churnRisk.level === 'high' ? 'error' : 'warning'}
+                    >
+                      <span
+                        className={cn(
+                          'inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold',
+                          churnRisk.level === 'high'
+                            ? 'bg-red-600/20 text-red-400'
+                            : 'bg-amber-600/20 text-amber-400',
+                        )}
+                      >
+                        <ShieldAlert className="size-3" />
+                        Риск
+                      </span>
                     </StatusHint>
                   )}
                   <span className="hidden text-muted-foreground sm:inline">·</span>
@@ -590,7 +653,21 @@ export function ClientsTable({ onRowClick, isClientInRoute, onToggleActive, onPa
               </div>
 
               {/* Status button — always visible */}
-              <div className="mt-1.5 flex items-center justify-end">
+              <div className="mt-1.5 flex items-center justify-end gap-2">
+                {hasActiveChurnRisk && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      dismissChurn(client.id)
+                      toast.success('Сигнал риска скрыт на 30 дней', { duration: 2000 })
+                    }}
+                    className="inline-flex shrink-0 items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                  >
+                    <CheckCircle2 className="size-3" />
+                    Обработано
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={(e) => {

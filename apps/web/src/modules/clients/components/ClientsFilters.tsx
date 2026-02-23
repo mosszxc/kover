@@ -29,6 +29,9 @@ interface ClientsFiltersProps {
   selectedPayment?: PaymentFilter
   onPaymentChange?: (payment: PaymentFilter) => void
   hasPayments?: boolean
+  showRiskOnly?: boolean
+  onRiskFilterChange?: (value: boolean) => void
+  hasRiskClients?: boolean
 }
 
 const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
@@ -58,6 +61,9 @@ export function ClientsFilters({
   selectedPayment = 'all',
   onPaymentChange,
   hasPayments = false,
+  showRiskOnly = false,
+  onRiskFilterChange,
+  hasRiskClients = false,
 }: ClientsFiltersProps) {
   const [open, setOpen] = useState(false)
   const visibleDays = useVisibleDays()
@@ -69,7 +75,8 @@ export function ClientsFilters({
     (selectedMatSize !== null ? 1 : 0) +
     (selectedStatus !== 'all' ? 1 : 0) +
     (selectedCategory !== null ? 1 : 0) +
-    (selectedPayment !== 'all' ? 1 : 0)
+    (selectedPayment !== 'all' ? 1 : 0) +
+    (showRiskOnly ? 1 : 0)
 
   function toggleDay(day: DayOfWeek) {
     if (selectedDays.includes(day)) {
@@ -94,6 +101,7 @@ export function ClientsFilters({
     onStatusChange('all')
     onCategoryChange(null)
     onPaymentChange?.('all')
+    onRiskFilterChange?.(false)
   }
 
   return (
@@ -240,6 +248,27 @@ export function ClientsFilters({
                   {opt.label}
                 </button>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Risk filter */}
+        {hasRiskClients && onRiskFilterChange && (
+          <div className="space-y-1.5">
+            <span className="text-sm font-medium text-muted-foreground">Риск оттока</span>
+            <div className="flex flex-wrap gap-1.5">
+              <button
+                type="button"
+                onClick={() => onRiskFilterChange(!showRiskOnly)}
+                className={cn(
+                  'min-h-[36px] rounded-full px-2.5 py-1 text-sm font-medium transition-colors',
+                  showRiskOnly
+                    ? 'bg-red-600 text-white'
+                    : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+                )}
+              >
+                В зоне риска
+              </button>
             </div>
           </div>
         )}
