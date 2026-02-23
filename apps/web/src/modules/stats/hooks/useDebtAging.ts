@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
-import { usePaymentStore } from '@/modules/payments'
+import { usePaymentStore, useDebtContactStore } from '@/modules/payments'
+import type { DebtContactStatus, DebtContactNote } from '@/modules/payments'
 import { useClientStore } from '@/modules/clients'
 
 export interface AgingBucket {
@@ -13,6 +14,10 @@ export interface TopDebtor {
   clientName: string
   totalDebt: number
   oldestDays: number
+  contactStatus: DebtContactStatus
+  lastContactedAt: string | null
+  contactNotes: DebtContactNote[]
+  daysSinceContact: number | null
 }
 
 export interface DebtAgingData {
@@ -32,12 +37,20 @@ function getDaysOverdue(period: string): number {
   return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)))
 }
 
+function getDaysSince(dateStr: string | null): number | null {
+  if (!dateStr) return null
+  const diff = new Date().getTime() - new Date(dateStr).getTime()
+  return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)))
+}
+
 export function useDebtAging(): DebtAgingData {
   const payments = usePaymentStore((s) => s.payments)
   const clients = useClientStore((s) => s.clients)
+  const contacts = useDebtContactStore((s) => s.contacts)
 
   return useMemo(() => {
     const clientMap = new Map(clients.map((c) => [c.id, c.name]))
+    const contactMap = new Map(contacts.map((c) => [c.clientId, c]))
 
     // Find all unpaid/partially paid payments that are overdue
     const overduePayments = payments.filter((p) => {
@@ -85,14 +98,21 @@ export function useDebtAging(): DebtAgingData {
       }
     })
 
-    // Top 5 debtors
+    // Top 5 debtors — enriched with contact info
     const topDebtors: TopDebtor[] = [...clientDebts.entries()]
-      .map(([clientId, data]) => ({
-        clientId,
-        clientName: clientMap.get(clientId) ?? 'Неизвестный',
-        totalDebt: Math.round(data.totalDebt * 100) / 100,
-        oldestDays: data.oldestDays,
-      }))
+      .map(([clientId, data]) => {
+        const contact = contactMap.get(clientId)
+        return {
+          clientId,
+          clientName: clientMap.get(clientId) ?? 'Неизвестный',
+          totalDebt: Math.round(data.totalDebt * 100) / 100,
+          oldestDays: data.oldestDays,
+          contactStatus: contact?.status ?? ('not_contacted' as DebtContactStatus),
+          lastContactedAt: contact?.lastContactedAt ?? null,
+          contactNotes: contact?.notes ?? [],
+          daysSinceContact: getDaysSince(contact?.lastContactedAt ?? null),
+        }
+      })
       .sort((a, b) => b.totalDebt - a.totalDebt)
       .slice(0, 5)
 
@@ -106,5 +126,5 @@ export function useDebtAging(): DebtAgingData {
       buckets,
       topDebtors,
     }
-  }, [payments, clients])
+  }, [payments, clients, contacts])
 }
