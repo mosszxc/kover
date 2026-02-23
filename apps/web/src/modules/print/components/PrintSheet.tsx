@@ -35,6 +35,20 @@ function getMatQuantity(client: Client, sizeId: string, day: DayOfWeek): number 
     .reduce((sum, m) => sum + m.quantity, 0) * replacements
 }
 
+function getClientNotesSummary(client: Client): string | null {
+  const parts: string[] = []
+  if (client.notes) parts.push(client.notes)
+  if (client.clientNotes && client.clientNotes.length > 0) {
+    const sorted = [...client.clientNotes].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    for (const n of sorted.slice(0, 2)) {
+      parts.push(n.text)
+    }
+  }
+  if (parts.length === 0) return null
+  const text = parts.join(' · ')
+  return text.length > 120 ? text.slice(0, 117) + '...' : text
+}
+
 function formatDate(): string {
   return new Date().toLocaleDateString('ru-RU', {
     day: 'numeric',
@@ -91,7 +105,12 @@ function PrintTable({ title, rows, sizes, day, showPhone }: PrintTableProps) {
           {rows.map(({ stop, client }, index) => (
             <tr key={stop.id}>
               <td className="num stop-num">{index + 1}</td>
-              <td>{client?.originalName ?? '—'}</td>
+              <td>
+                {client?.originalName ?? '—'}
+                {client && getClientNotesSummary(client) && (
+                  <div className="print-notes">{getClientNotesSummary(client)}</div>
+                )}
+              </td>
               {showPhone && <td>{client?.contactPhone ?? ''}</td>}
               {sizes.map((s) => {
                 const qty = client ? getMatQuantity(client, s.id, day) : 0
