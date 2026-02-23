@@ -8,6 +8,8 @@ import { useIsMobile } from '@/shared/hooks/useIsMobile'
 import type { ClientFormState } from '../hooks/useClientForm'
 import { MatRowCard } from './MatRowCard'
 import { FrequencyPills } from './FrequencyPills'
+import { AddressAutocomplete } from './AddressAutocomplete'
+import type { GeocodeResult } from '@/shared/lib/geocode'
 
 interface ClientFormProps {
   form: ClientFormState
@@ -15,6 +17,8 @@ interface ClientFormProps {
   coordinates?: { lat: number; lng: number } | null
   onGeocode?: () => void
   geocoding?: boolean
+  geocodeCity?: string
+  onAddressSelect?: (result: GeocodeResult) => void
   wizardStep?: number
   onWizardStepChange?: (step: number) => void
 }
@@ -76,12 +80,16 @@ function BasicSection({
   coordinates,
   onGeocode,
   geocoding,
+  geocodeCity,
+  onAddressSelect,
 }: {
   form: ClientFormState
   mode: 'add' | 'edit'
   coordinates?: { lat: number; lng: number } | null
   onGeocode?: () => void
   geocoding?: boolean
+  geocodeCity?: string
+  onAddressSelect?: (result: GeocodeResult) => void
 }) {
   const idPrefix = mode === 'add' ? 'client' : 'edit-client'
   return (
@@ -116,17 +124,18 @@ function BasicSection({
         <label htmlFor={`${idPrefix}-address`} className={labelClass}>
           Адрес
         </label>
-        <input
+        <AddressAutocomplete
           id={`${idPrefix}-address`}
-          type="text"
           value={form.address}
-          onChange={(e) => form.setAddress(e.target.value)}
+          onChange={form.setAddress}
+          onSelect={onAddressSelect}
+          city={geocodeCity}
           placeholder="Например: Гоголя 180"
           className={inputClass}
         />
         {mode === 'add' && (
           <p className="mt-1 text-sm text-muted-foreground">
-            Координаты определятся автоматически при сохранении
+            Начните вводить адрес — появятся подсказки
           </p>
         )}
       </div>
@@ -447,6 +456,8 @@ export function ClientForm({
   coordinates,
   onGeocode,
   geocoding,
+  geocodeCity,
+  onAddressSelect,
   wizardStep,
   onWizardStepChange,
 }: ClientFormProps) {
@@ -465,6 +476,8 @@ export function ClientForm({
             coordinates={coordinates}
             onGeocode={onGeocode}
             geocoding={geocoding}
+            geocodeCity={geocodeCity}
+            onAddressSelect={onAddressSelect}
           />
         )}
         {wizardStep === 1 && <MatsSection form={form} />}
@@ -481,6 +494,8 @@ export function ClientForm({
         coordinates={coordinates}
         onGeocode={onGeocode}
         geocoding={geocoding}
+        geocodeCity={geocodeCity}
+        onAddressSelect={onAddressSelect}
       />
       <MatsSection form={form} />
       <ScheduleSection form={form} />
